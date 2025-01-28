@@ -1,0 +1,78 @@
+import upper from string
+import insert from table
+global HULL_HUMAN_MIN          = Vector -16, -16, 0
+global HULL_HUMAN_MAX_SQUAT    = Vector 16, 16, 36
+global HULL_HUMAN_MAX_PRONE    = Vector 16, 16, 20
+global STANCE_RISEN, STANCE_SQUAT, STANCE_PRONE = 1, 2, 3
+
+class STANCE extends ACT
+  Immobilizes: true
+  @__inherited: (child) =>
+    STANCE[upper child.__name] = super child
+
+class RISEN extends STANCE
+  Do: =>
+    return if @ply\StanceIs STANCE_RISEN
+    anims =
+      [STANCE_SQUAT]: 'crouch_to_stand'
+      [STANCE_PRONE]: 'proneup_stand'
+    @Spasm sequence: anims[@ply\GetStance!]
+    @ply\SetStance STANCE_RISEN
+    @ply\ResetHull!
+    @ply\SetHoldingDown false
+  Impossible: =>
+    pos = @ply\GetPos!
+    high = if @ply\StanceIs STANCE_SQUAT
+      36
+    elseif @ply\StanceIs STANCE_PRONE
+      56
+    tr = util.TraceEntity {
+      start: pos
+      endpos: pos + Vector(0, 0, high)
+      filter: @ply
+    }, @ply
+
+    return true if tr.Hit
+    return false
+
+class SQUAT extends STANCE
+  Do: =>
+    return if @ply\StanceIs STANCE_SQUAT
+    anims =
+      [STANCE_RISEN]: 'stand_to_crouch'
+      [STANCE_PRONE]: 'proneup_crouch'
+    @Spasm sequence: anims[@ply\GetStance!]
+    @ply\SetStance STANCE_SQUAT
+    @ply\SetHull HULL_HUMAN_MIN, HULL_HUMAN_MAX_SQUAT
+    @ply\SetHoldingDown false
+  Then: =>
+    super!
+    if BIND.controls['ctrl']\IsDown @ply
+      @ply\SetHoldingDown true
+  Impossible: =>
+    if @ply\StanceIs STANCE_PRONE
+      pos = @ply\GetPos!
+      tr = util.TraceEntity {
+        start: pos
+        endpos: pos + Vector(0, 0, 16)
+        filter: @ply
+      }, @ply
+
+      return true if tr.Hit
+      return false
+
+class PRONE extends STANCE
+  Do: =>
+    return if @ply\StanceIs STANCE_PRONE
+    anims =
+      [STANCE_RISEN]: 'pronedown_stand'
+      [STANCE_SQUAT]: 'pronedown_crouch'
+    @Spasm sequence: anims[@ply\GetStance!]
+    @ply\SetStance STANCE_PRONE
+    @ply\SetHull HULL_HUMAN_MIN, HULL_HUMAN_MAX_PRONE
+    @ply\SetHoldingDown false
+  Then: =>
+    super!
+    if BIND.controls['space']\IsDown @ply
+      @ply\SetHoldingDown true
+

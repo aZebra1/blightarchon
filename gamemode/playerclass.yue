@@ -1,0 +1,52 @@
+class Victim extends PLYCLASS
+  WalkSpeed:  80
+  RunSpeed:   160
+
+  Loadout: =>
+    @Player\SetState STATE.IDLE
+    @Player\SetStance STANCE_RISEN
+    timer.Simple 0.1, ->
+      @Player\Give 'hands', true
+      INVENTORY_SLOTTED @Player
+  SetModel: =>
+    @Player\SetModel"models/in/player/everyman.mdl"
+  StartCommand: (cmd) =>
+    if @Player\GetBodyEntity! ~= @Player
+      cmd\ClearMovement!
+    elseif @Player.GetState
+      state = @Player\GetStateTable!
+      if state
+        state\StartCommand @Player, cmd if state.StartCommand
+  DataTables: -- player accessors
+    String:
+      * 'RPName' -- example: SetRPName GetRPName
+    Entity:
+      * 'Ragdoll'
+      * 'StateEntity'
+      * 'Dragging'
+    Bool:
+      * 'IsRagdoll'
+      * 'Watching'
+      * 'HoldingDown'
+      * 'Chatting'
+    Float:
+      * 'Speed'
+      * 'SpeedTarget'
+      * 'StateStart'
+      * 'StateEnd'
+      * 'StateNumber'
+    Int:
+      * 'State'
+      * 'Stance'
+      * 'Caste'
+      * 'Fate'
+    Vector:
+      * 'StateVector'
+    Angle:
+      * 'StateAngles'
+  SetupDataTables: =>
+    for var_type, vars in pairs @DataTables
+      idx = 0
+      for var in *vars
+        @Player\NetworkVar var_type, idx, var
+        idx += 1

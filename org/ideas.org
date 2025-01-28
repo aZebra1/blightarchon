@@ -1,0 +1,41 @@
+#+title: Eclipse Ideas
+
+* Diatribes
+** How To "DISRUPT" Manslaughter
+*** make fighting a painful prospect
+- being hit or injured causes obnoxious visual effects
+- getting shot puts a giant bullethole in your vision
+- fighting of any kind can easily cause permanent damage
+- killing a person, whether justified or not, hurts your heart
+- swinging around melee weapons costs stamina and slows your roll
+- guns should be powerful enough that seeing one is an immediate threat
+*** premeditation >>> weapon quality >>> player skill
+- explosives should be much easier to acquire than guns
+- every single bullet is a resource
+- guns are extremely loud
+- poisons and toxins provide a quiet and easily crafted alternative to guns and bombs
+- you can use a special, cumbersome attack with a blunt weapon to knock someone out
+*** let fights end without a dead body 
+- press M to beg for mercy, making you yell a plead, lose your weapons, and fall to your knees. killing someone who is surrending causes great anguish
+- add practical alternatives to killing, such as knocking out, drugging, and tying up
+- things that normally require a cadaver (organ harvesting, (partial) butchery, robbery) can be done with an incapacitated player
+** Entertaining The Dead
+    ECLIPSE rounds are speculated to last 3-5 hours if not cut short by one-sided (in)competence or by freak chance, which makes joining late/risking an early death a less than enjoyable prospect. To remedy this, options for GHOST ACTIVITIES and DROP-IN ROLES should be considered.
+
+   Those unfortunate enough to die early/join late can, of course, become GHOSTS that can move freely and passively interact with the world around them. HAUNTING as used in IN3 may make a return, but a wider variety of ghostly actions should be added to supplement, such as the ability to HEX a player (which causes them to encounter misfortune wherever they go), appear to certain gifted players and speak to them, or corrupt computers and networks (Ghosts can use the prefix 'snudo' ('supernatural user do') in order to execute horrid magickal commands).
+
+   Ghosts can inhabit DEADBEATS, hopeless broken nobodies who wander around muttering about their "past lives" and begging for bones to fill the holes left by bartering their organs for drugs. Deadbeats spawn with no items, no skills, at least 1 missing organ/body part, an additional quirk/flaw, and vocal damage that leaves them hard to comprehend even to their own kind. Living as a deadbeat should be an agonizingly painful affair, and living players should be encouraged by culture and mechanics to ensure that it remains that way.
+
+   Finally, the dead can become one of a variety of GOONS who exist solely to antagonize those more fortunate than them. What and who a Goon is depends greatly on the state of the round and the game being played, but they are generally short-lived and not good at much besides murder. Their spawning should be mostly restricted to events rather than spawning passively throughout the round.
+* Conditions
+** Medical
+*** Physical
+**** The Suds
+- Minor contagious respiratory illness.
+- Foamy mucus appears in the lungs and is coughed up, creating the highly infectious 'suds'.
+- Causes fatigue, thirst, and occasional choking.
+- Those down with the suds should quit smoking, rest, and cough often to remove suds from the body.
+*** Psychological
+**** Rat Sadness
+- Contagious depression.
+- Originates in rodents.

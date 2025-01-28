@@ -1,0 +1,220 @@
+import random, Rand from math
+import Play from sound
+import insert, remove from table
+import TraceHull, GetSurfaceData from util
+class SHOVE extends ACT
+  force_multiplier: 100
+
+  Do: (fromstate) =>
+    with @ply
+      if not \StanceIs STANCE_RISEN
+        \AlterState STATE.IDLE
+        return
+      sequence, snd, cycle = "range_melee_shove_1hand", nil, .23
+      if fromstate == STATE.PRIMED
+        sequence, snd = "gesture_push", "dysphoria/battle/push.wav"
+      if (CLIENT and IsFirstTimePredicted!) or SERVER
+        @Spasm :sequence
+      @CYCLE cycle, =>
+        if IsFirstTimePredicted! and SERVER
+          Play snd, \GetBonePosition(\LookupBone 'ValveBiped.Bip01_Spine2'), 65, math.random(90,110) if snd
+          targets = \GetTargets!
+          for tr in *targets
+            victim = tr.Entity
+            phys  = victim\GetPhysicsObject!
+            physbone = victim\GetPhysicsObjectNum tr.PhysicsBone
+            aimvector = \GetAimVector!
+            force = aimvector*(victim\IsPlayer! and 512 or 3600)
+            force *= 1.5 if fromstate == STATE.PRIMED
+            if phys\IsValid!
+              victim\DropObject! if victim\IsPlayer!
+              surfprop = util.GetSurfaceData tr.SurfaceProps
+              surfprop or= util.GetSurfaceData 0
+              snd = if fromstate == STATE.PRIMED
+                surfprop.impactHardSound
+              else
+                surfprop.impactSoftSound
+              Play snd, tr.HitPos, 65, math.random(90,110) if snd
+              if victim\IsRagdoll!
+                physbone\ApplyForceCenter force, tr.HitPos
+              else
+                phys\ApplyForceOffset force, tr.HitPos
+              if victim\IsPlayer!
+                if victim\Alive!
+                  rag = victim\GetRagdoll!
+                  if rag and IsValid rag
+                    rag\SetKnockback victim\GetVelocity!, force
+                  else
+                    if math.random(100) <= 10 or victim\Health! <= 40
+                      victim\BecomeRagdoll!
+                    elseif victim\DoingSomething! and victim.Doing.__class.__parent == ACT.STAND
+                      victim\BecomeRagdoll!
+                  if victim\IsPlayer! and rag and IsValid(rag)
+                    victim = rag
+                  if victim\IsRagdoll!
+                    force *= 4
+                    physbone\ApplyForceCenter force, tr.HitPos
+                  elseif IsValid(victim) and IsValid(phys)
+                    phys\ApplyForceOffset force, tr.HitPos
+                  victim\SetVelocity force
+
+class KICK extends ACT
+  Do: (fromstate) =>
+    with @ply
+      if not \StanceIs STANCE_RISEN
+        \AlterState STATE.IDLE
+        return
+      sequence, snd, speed, cycle = 'kick_pistol', 'dysphoria/battle/foot_fire.wav', 1.23, .32
+      if @ply\EyeAngles!.p >= 45
+        sequence, speed, cycle = 'curbstomp', 1, .15
+      if (CLIENT and IsFirstTimePredicted!) or SERVER
+        @Spasm :sequence, :speed
+      @CYCLE cycle, =>
+        if IsFirstTimePredicted! and SERVER
+          bone = \LookupBone'ValveBiped.Bip01_R_Foot'
+          pos = \GetBonePosition(bone)
+          Play snd, pos, 65, math.random(90,110)
+          -- play a hit sound in case we hit the world
+          tr = TraceHull {
+            start: pos
+            endpos: pos + \GetForward! * 10
+            filter: @ply
+            mins: Vector -6, -6, -6
+            maxs: Vector 6, 6, 6
+          }
+          if tr.HitPos and tr.HitWorld
+            surfprop = util.GetSurfaceData tr.SurfaceProps
+            surfprop or= util.GetSurfaceData 0
+            snd = surfprop.impactHardSound
+            Play snd, tr.HitPos, 65, math.random(90,110) if snd
+          targets = \GetTargets \GetForward!
+          for tr in *targets
+            victim = tr.Entity
+            phys = victim\GetPhysicsObject!
+            physbone = victim\GetPhysicsObjectNum tr.PhysicsBone
+            aimvector = \GetAimVector!
+            force = aimvector*(victim\IsPlayer! and 768 or 5400)
+            surfprop = util.GetSurfaceData tr.SurfaceProps
+            surfprop or= util.GetSurfaceData 0
+            snd = surfprop.impactHardSound
+            Play snd, tr.HitPos, 65, math.random(90,110) if snd
+            if phys\IsValid!
+              victim\DropObject! if victim\IsPlayer!
+              dmg = DamageInfo!
+              with dmg
+                \SetDamage math.random 10, 25
+                \SetDamageType DMG_CLUB
+                \SetDamagePosition tr.HitPos
+                \SetInflictor @ply
+                \SetAttacker @ply
+              victim\TakeDamageInfo dmg
+              if victim\IsRagdoll!
+                physbone\ApplyForceCenter force, tr.HitPos
+              else
+                phys\ApplyForceOffset force, tr.HitPos
+              if victim\IsPlayer!
+                if victim\Alive!
+                  rag = victim\GetRagdoll!
+                  if rag and IsValid rag
+                    rag\SetKnockback victim\GetVelocity!, force
+                  else
+                    if math.random(100) <= 10 or victim\Health! <= 40
+                      victim\BecomeRagdoll!
+                    elseif victim\DoingSomething! and victim.Doing.__class.__parent == ACT.STAND
+                      victim\BecomeRagdoll!
+                  if victim\IsPlayer! and rag and IsValid(rag)
+                    victim = rag
+                  if victim\IsRagdoll!
+                    force *= 4
+                    physbone\ApplyForceCenter force, tr.HitPos
+                  elseif IsValid(victim) and IsValid(phys)
+                    phys\ApplyForceOffset force, tr.HitPos
+                  victim\SetVelocity force
+              elseif victim\IsDoor!
+                kicked, busted = victim\DoorKicked @ply, tr.HitPos
+
+class PUNCH extends ACT
+  Immobilizes: false
+  Do: (fromstate) =>
+    with @ply
+      if \StanceIs STANCE_PRONE
+        \AlterState STATE.IDLE
+        return
+      sequence = table.Random {'gesture_punch_l', 'gesture_punch_r'}
+      snd, cycle1, cycle2 = 'WeaponFrag.Throw', .13, .32
+      @fist = if sequence == 'gesture_punch_l' then -1 else 1
+      if (CLIENT and IsFirstTimePredicted!) or SERVER
+        @Spasm :sequence
+      @CYCLE cycle1, =>
+        if IsFirstTimePredicted! and SERVER
+          bone = if @fist == -1 then 'ValveBiped.Bip01_L_Hand' else 'ValveBiped.Bip01_R_Hand'
+          Play snd, \GetBonePosition(\LookupBone bone), math.random(90,110)
+        @punchinIt = CurTime! + .0666
+      @CYCLE cycle2, => @punchinIt = nil
+  FistDetector: =>
+    bone = if @fist == -1 then 'ValveBiped.Bip01_L_Hand' else 'ValveBiped.Bip01_R_Hand'
+    fist = @ply\LookupBone bone
+    pos = @ply\GetBonePosition fist
+    tr = TraceHull
+      start: pos
+      endpos: pos + @ply\GetForward! * 10
+      filter: @ply
+      mins: Vector -6, -6, -6
+      maxs: Vector 6, 6, 6
+    return tr if tr.Hit or tr.HitWorld
+  Think: =>
+    super!
+    if @punchinIt and not @punchedIt
+      if CurTime! >= @punchinIt
+        @punchinIt = CurTime! + 0.023
+        @ply\LagCompensation true
+        tr = @FistDetector!
+        @ply\LagCompensation false
+        if tr
+          with @ply
+            victim = tr.Entity
+            isliving = victim\IsPlayer! or victim\IsNextBot! or victim\IsNPC!
+            phys = victim\GetPhysicsObject!
+            physbone = victim\GetPhysicsObjectNum tr.PhysicsBone
+            aimvector = \GetAimVector!
+            aimvector.z = 0
+            force = aimvector*(victim\IsPlayer! and 512 or 3600)
+            dir = (tr.HitPos - tr.StartPos)\GetNormalized!
+            dir = (victim\GetPos! - @ply\GetPos!)\GetNormalized! if dir\Length! == 0
+            dam = random 5,15
+            force = dir * (dam*23)
+            if phys\IsValid!
+              DropEntityIfHeld victim if SERVER
+              surfprop = GetSurfaceData tr.SurfaceProps
+              unless surfprop
+                surfprop = GetSurfaceData 0
+              snd = surfprop.impactHardSound
+              if IsFirstTimePredicted!
+                Play snd, tr.HitPos, 65, random(90,110)
+              dmg = DamageInfo!
+              with dmg
+                \SetDamage dam
+                \SetDamageForce force
+                \SetDamageType DMG_CLUB
+                \SetDamagePosition tr.HitPos
+                \SetInflictor @ply
+                \SetAttacker @ply
+              if SERVER
+                victim\TakeDamageInfo dmg
+                if victim\IsPlayer!
+                  if victim\Alive!
+                    if (random(100) <= 15 and victim\Health! < 50)
+                      victim\BecomeRagdoll!
+                    elseif victim\DoingSomething! and victim.Doing.__class.__parent == ACT.STAND
+                      victim\BecomeRagdoll!
+                  --elseif IsValid victim\GetRagdollEntity!
+                    --victim\GetRagdollEntity!\SetKnockback victim\GetVelocity!, dmg\GetDamageForce!
+                if victim\IsPlayer! and IsValid victim\GetRagdollEntity!
+                  victim = victim\GetRagdollEntity!
+                if victim\IsRagdoll!
+                  force *= 4
+                  physbone\ApplyForceCenter(force, tr.HitPos)
+                elseif IsValid(victim) and IsValid(phys) and not victim\IsDoor!
+                  phys\ApplyForceOffset(force, tr.HitPos)
+                victim\SetVelocity force unless victim\IsDoor!
+              @punchedIt = true

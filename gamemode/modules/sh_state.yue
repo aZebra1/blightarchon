@@ -1,0 +1,103 @@
+meta = FindMetaTable'Player'
+
+meta[k] = v for k, v in pairs{
+  GetStateTable: => STATE.states[@GetState!]
+  AlterState: (state, seconds, ent, abrupt) =>
+    oldstate = @GetState!
+    if oldstate ~= state and not abrupt
+      STATE.states[oldstate]\Exit @, state
+    @SetState state
+    @SetStateStart CurTime!
+
+    if seconds
+      @SetStateEnd CurTime! + seconds
+    else
+      @SetStateEnd 0
+
+    if ent
+      @SetStateEntity ent
+    else
+      @SetStateEntity NULL
+
+    if oldstate == state
+      STATE.states[state]\Continue @
+    else
+      STATE.states[state]\Enter @, oldstate
+  EndState: (abrupt) =>
+    state = if @KeyDown IN_ATTACK2
+      STATE.PRIMED
+    else
+      STATE.IDLE
+    @AlterState state, nil, nil, abrupt
+  StateIs: (state) => @GetState! == state
+}
+
+import band from bit
+
+class IDLE extends STATE
+  Think: (ply) => ply\AlterState(STATE.PRIMED) if ply\KeyDown IN_ATTACK2
+  StartCommand: (ply, cmd) => cmd\AddKey IN_USE if band(cmd\GetButtons!, IN_ATTACK) > 0
+  CalcMainActivity: (ply, vel) =>
+    dragging = ply\GetDragging!
+    if dragging and IsValid dragging
+      return super ply, vel, ANIMS.deliver_box
+    thing = ply\Wielding!
+    if IsValid(thing) and thing.Animations?.idle
+      return super ply, vel, thing.Animations.idle
+    super ply, vel
+
+class PRIMED extends STATE
+  Think: (ply) => ply\EndState! unless ply\KeyDown IN_ATTACK2
+  CalcMainActivity: (ply, vel) =>
+    thing = ply\Wielding!
+    super ply, vel,
+      if IsValid(thing)
+        if BIND.controls['release_right']\IsDown ply
+          thing.Animations.throw
+        else
+          thing.Animations.prime
+      else
+        ANIMS.fist
+
+class ACTING extends STATE
+  Enter: (ply, oldstate) => ply.Doing\Do(oldstate) if ply.Doing
+  StartCommand: (ply, cmd) =>
+    if ply\DoingSomething! and ply.Doing
+      return ply.Doing\Kill! if ply.Doing\Impossible!
+      with cmd
+        if ply.Doing.Immobilizes
+          \ClearMovement!
+          return true
+      return
+  CalcMainActivity: (ply, vel) =>
+    thing = ply\Wielding!
+    if ply\KeyDown IN_ATTACK2
+      return super ply, vel,
+        if IsValid(thing)
+          if BIND.controls['release_right']\IsDown ply
+            thing.Animations.throw
+          else
+            thing.Animations.prime
+        else
+          ANIMS.fist
+    else
+      return super ply, vel
+
+class State extends MODULE
+  CalcMainActivity: (ply, vel) =>
+    return unless ply.GetState and ply.GetStateTable
+    ply.CalcIdeal = ply.CalcSeqOverride = -1
+    ply.m_bWasOnGround = ply\IsOnGround!
+    ply.m_bWasNoclipping = ply\GetMoveType! == MOVETYPE_NOCLIP and not ply\InVehicle!
+
+    ply\GetStateTable!\CalcMainActivity ply, vel
+    return ply.CalcIdeal, ply.CalcSeqOverride
+
+  UpdateAnimation: (ply, vel, maxSeqGroundSpeed) =>
+    len = vel\Length!
+    rate = 1
+    rate = len * .71 / maxSeqGroundSpeed if len > .2
+    rate = math.min rate, 2
+    rate = math.max rate, .5 if ply\WaterLevel! >= 2
+    rate = .1 if ply\IsOnGround! and len >= 1000
+    ply\SetPlaybackRate rate

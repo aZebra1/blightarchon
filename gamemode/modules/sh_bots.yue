@@ -1,0 +1,132 @@
+seek_weapon = (bot) ->
+  return if IsValid(bot\Wielding!)
+  for thing in *ents.FindByClass"thing/*"
+    continue unless thing\InWorld!
+    continue unless thing\DistanceFrom(bot) <= 256
+    continue unless bot\CanSee thing
+    wishes =
+      * 'thing/junk/rebar'
+      * 'thing/weapon'
+    acceptable = false
+    for cls in *wishes
+      if thing\GetClass!\starts cls
+        acceptable = true
+        break
+    continue unless acceptable
+    bot.Targeting = thing
+    return true
+
+
+class Bots extends MODULE
+  StartCommand: (bot, cmd) =>
+    return unless (bot\IsBot! and bot\Alive!)
+
+    -- clear default movement or actions
+    with cmd
+      \ClearMovement!
+      \ClearButtons!
+
+    if bot\GetIsRagdoll!
+      -- GET UP. highest priority
+      bot.GetUpNow or= CurTime! + math.random(3,8)
+      if CurTime! >= bot.GetUpNow
+        bot.GetUpNow = nil
+        bot\Do ACT.STAND_UP
+      return
+
+    weapon = bot\Wielding!
+
+    if IsValid(bot.Targeting)
+      -- we already have a target. is it an enemy?
+      enemy = bot.Opinions.enemies[bot.Targeting]
+      -- let's look for an item to carry if nobody's bothering us
+      seek_weapon bot unless enemy
+
+    unless IsValid bot.Targeting
+      -- try to find a target
+      -- prioritize weapons
+      unless seek_weapon bot
+        -- weapon search failed. can we find friends?
+        for ply in *player.GetAll!
+          continue unless ply\Alive!
+          continue if ply == bot
+          continue unless bot\CanSee ply
+          bot.Targeting = ply
+    return unless IsValid bot.Targeting
+
+    bot.Opinions or= {friends: {}, enemies: {}}
+
+    friend = enemy = false
+    targ = bot.Targeting
+    if targ\IsPlayer!
+      friend = bot.Opinions.friends[targ]
+      enemy = bot.Opinions.enemies[targ]
+      if (not friend) and (not enemy)
+        -- new person. they are probably a friend
+        bot.Opinions.friends[targ] = true
+        friend = true
+
+    dist_targ = if friend
+      -- respectful distance
+      128
+    else
+      64
+
+    dist_from = bot\DistanceFrom targ
+    -- move towards the targ at the current speed
+    cmd\SetForwardMove bot\GetSpeed! if dist_from >= dist_targ
+
+    local ang
+    -- aim towards the targ
+    if targ\IsPlayer!
+      ang = (targ\GetShootPos! - bot\GetShootPos!)\GetNormalized!\Angle!
+    else
+      ang = (targ\GetPos! - bot\GetShootPos!)\GetNormalized!\Angle!
+
+    cmd\SetViewAngles ang
+    bot\SetEyeAngles ang
+
+    if enemy
+      -- prime for attack
+      cmd\SetButtons IN_ATTACK2
+
+      bot.NextAttack or= CurTime!
+      if CurTime! >= bot.NextAttack and (dist_from <= dist_targ)
+        bot.NextAttack = CurTime! + math.Rand(1, 4)
+        if IsValid(weapon)
+          bot\Do ACT.SWING, weapon
+        else
+          act = ACT.PUNCH
+          act = ACT.SHOVE if math.random(1,5) == 3
+          bot\Do act
+    elseif (targ\GetClass!\starts'thing')
+      bot\Do ACT.PICK_UP, targ
+
+    if targ\IsPlayer!
+      -- forget the target if it is dead
+      unless targ\Alive!
+        bot.Opinions.friends[targ] = false
+        bot.Opinions.enemies[targ] = false
+        bot.Targeting = nil
+    else
+      -- let's stop looking for a weapon if we have one
+      has_weapon = IsValid bot\Wielding!
+      bot.Targeting = nil if has_weapon
+
+    -- don't fuck up other hooks
+    return
+
+  PlayerHurt: (victim, attacker) =>
+    if victim.Opinions
+      victim.Opinions.friends[attacker] = false
+      victim.Opinions.enemies[attacker] = true
+      victim.Targeting = attacker
+    return
+
+  PlayerDeath: (victim, ...) =>
+    if victim.Opinions
+      -- reset opinions
+      victim.Opinions =
+        friends: {}
+        enemies: {}
+    return

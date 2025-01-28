@@ -1,0 +1,182 @@
+import max from math
+
+class Xombokom extends SOUND
+  sound: ["placenta/speech/chatter#{i}.ogg" for i=1,15]
+  pitch: {115, 135}
+  level: SNDLVL_RADIO
+
+class XombokomBroken extends SOUND
+  sound: ["placenta/radiokom#{i}.wav" for i=1,3]
+  pitch: {115, 135}
+  level: SNDLVL_RADIO
+
+class RadioSmack extends SOUND
+  sound: ["ambient/levels/prison/radio_random#{i}.wav" for i=1,15]
+  pitch: {115, 135}
+  level: SNDLVL_RADIO
+
+class Machine extends THING
+  IName: 'machine'
+  Model: 'models/props_interiors/VendingMachineSoda01a.mdl'
+  Spawnable: true
+  SizeClass: SIZE_IMMOBILE
+  Durability: 200
+
+  Radius: 2048
+  Damage: 666
+
+  Detonate: =>
+    pos = @WorldSpaceCenter!
+    util.ScreenShake pos, 25, 150, 1, @Radius
+    with ents.Create 'env_explosion'
+      \SetOwner @GetOwner!
+      \SetPos pos
+      \SetKeyValue 'iMagnitude', @Damage
+      \SetKeyValue 'iRadiusOverride', @Radius
+      \Spawn!
+      \Activate!
+      \Fire 'Explode'
+    @Remove!
+
+  OnTakeDamage: ( dmg ) => -- yeah overwrite it
+    return if dmg\IsDamageType DMG_CRUSH
+    @Durability -= dmg\GetDamage!
+    @Durability = max @Durability, 0
+    @Detonate! if @Durability <= 0
+
+class Radio extends Machine
+  IName: 'livervoice M1'
+  Model: 'models/props_lab/citizenradio.mdl'
+  SetupDataTables: =>
+    super!
+    @AddNetworkVar 'Bool', 'Malfunctioning'
+
+  Radius: 512
+  Damage: 60
+  Element: 'metal/copper'
+
+  NextSpeak = 0
+  Interval = 6
+  IntervalRange = 2
+
+  TalkLines: {
+    "The Kommandant has created over 8000 jobs for the Liverish economy."
+    'New SS initiatives have eradicated the red plague.'
+    "The Kommandant has been working tirelessly to improve the quality of life for all Liverish citizens."
+    "The Kommandant's S.W.I. has improved drinking water quality by 80%."
+    "The Kommandant has reclaimed 20,000 acres of wasteland."
+    "The Kommandant has increased the lifespan of the working livermann by 2 years."
+    "W.A.S.P. has lowered workplace accidents by 50%."
+    "Liver Failure Forever!"
+    "Liver Failure's economy is revitalized!"
+    "Workers remember, Work Always Safely Protocol."
+    "The National Housing Initiative has eradicated homelessness."
+    "SOTLA is watching."
+    "The demoness democracy is dead! Long live the Kommandant!"
+    "We all love our Kommandant."
+    "The SS has cleansed our capital of criminal violence."
+    "The Laboring Livermann's wage provides for food, drink, clothing and comfort."
+    "Tensions rise with Kidneystan's inhumane, kommunist regime."
+    "Under Sotla's watchful eye, the Kommandant leads us to a bright future."
+    "Today's ocular eclipse will make it a day to remember."
+    "Never open computer files from strangers!"
+    "See a hacker? Report a hacker."
+    "An unguarded computer is the hacker's playground!"
+    "Death before democracy!"
+    "Respirators save lives and lungs, do not fear them."
+    "Kommandant's F.A.R.M. program has produced surplus food for the first time in history."
+    "WORK HARDER."
+    "WORK WORK WORK WORK WORK WORK WORK."
+    "DO NOT leave dead corpses unattended. Report them to your nearest Sanitar immediately!"
+    "Respect the respirator! Acknowledge its significance in your survival."
+    "A dead worker is a useless worker."
+    "When you're burning bridges, the fire burns forever."
+    "Our strength shall prevail."
+    "Be kind to each other."
+    "Keep your workspace in good condition or you'll regret it."
+    "You will get what you deserve."
+    "You'll wish that you had done some of the hard things when they were easier to do."
+    "You will be surprised by a loud noise."
+    "You are always busy."
+    "Expect the worst, it's the least you can do."
+    "You should go home."
+    "You will regret that."
+    "Your attention, please! Thank you for your attention."
+    "Respect is not for those who ask for it."
+    "Delay is decay, always leave early for work!"
+    "Maintenance is cheaper than replacement."
+    "D.E.A.D. accidents have fallen by 75% under the SS."
+    "Brush your teeth, or the SS will do it for you with a board of nails."
+    "Enemy machinations will not deter us."
+    "Cleansed cities under the watch of the SS remain plague-free."
+    "W.A.S.P.: Work Always Safely Protocol. Don't sting yourself."
+    "This land or death! Democracy, never again!"
+    "Compliance today means breathing easy tomorrow."
+    "F.E.E.D. has reduced starvation by 40%."
+    "Beware of the consequences."
+    "Report a Bug. Make a Difference."
+    "Hail to the new age! Democracy is obsolete."
+    "The reward for good work is more work."
+    "A broken hand can't hold a hammer."
+    "You're not just a number, you're an important number."
+    "Discretion is Fascism's protection. Keep discourse to a minimum."
+    "Your every action can make or break the regime. Beware!"
+    "Work is the perfect cure for despair."
+    "Failure will never overtake you if your determination to succeed is strong enough."
+    "Under the shadow of the Kommandant, we shine together."
+    "Report suspicious activities! Don't let them compromise our values."
+    "Failure is never an option."
+    "Idle hands are a friend to Kidneystan!"
+    "When my spring began, I wanted only you."
+    "It hurts more, it hurts, it hurts more."
+    "A pure white awakening will open your eyes."
+  }
+
+  OnTakeDamage: ( ... ) =>
+    super ...
+    if IsValid @
+      @EmitSound'RadioSmack'
+      @SetMalfunctioning true
+
+  Think: =>
+    super!
+    return if SERVER
+    @NextSpeak = CurTime! if not @NextSpeak
+    return if @NextSpeak > CurTime!
+    @NextSpeak = CurTime! + math.random( 10, 20 )
+    return if LocalPlayer!\GetPos!\DistToSqr( @GetPos! ) > 512 * 512
+    broken = @GetMalfunctioning!
+    snd = if broken
+      'XombokomBroken'
+    else
+      'Xombokom'
+    for i=1, 🎲(2, 5)
+      timer.Simple i - 1, -> @EmitSound(snd) if IsValid(@)
+    @Talk table.Random( @TalkLines ), broken
+
+  Talk: (line, broken) =>
+    stutters = if broken
+      {'scramble'}
+    else
+      {'upper'}
+    stutter_chance = if broken
+      65
+    else
+      10
+    BUBBLE {
+        text: "#{line}"
+        font: "spleen_chat_small"
+        pos: @GetPos!
+        who: @
+        char: NULL
+        text_color: Color 128, 128, 0
+        vol: 0.5
+        move: Vector 0, 0, 0.025
+        speed: 1
+        lifespan: 9
+        clingy: false
+        auditory: true
+        speech: true
+        :stutters
+        :stutter_chance
+      }

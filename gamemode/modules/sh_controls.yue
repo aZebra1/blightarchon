@@ -1,0 +1,50 @@
+BIND 'ctrl',
+  KEY_LCONTROL, {
+    Press: (ply) =>
+      body = ply\GetBodyEntity!
+      return if body\IsRagdoll!
+      if ply\OnGround!
+        unless ply\DoingSomething!
+          if SERVER or (CLIENT and IsFirstTimePredicted!)
+            unless ply\StanceIs STANCE_SQUAT
+              ply\Do ACT.STANCE_SQUAT
+            else
+              ply\Do ACT.STANCE_RISEN
+  }
+
+BIND 'space',
+  KEY_SPACE, {
+    Press: (ply) =>
+      if ply\Alive! and ply\GetIsRagdoll!
+        rag = ply\GetRagdoll!
+        unless rag\GetVelocity!\Length2D! > 5
+          ply\Do ACT.STAND_UP
+      if ply\OnGround!
+        unless ply\DoingSomething!
+          if SERVER or (CLIENT and IsFirstTimePredicted!)
+            unless ply\StanceIs STANCE_PRONE
+              if ply\StanceIs STANCE_SQUAT
+                ply\Do ACT.STANCE_PRONE
+              else
+                if BIND.controls['shift']\IsDown ply
+                  ply\Do ACT.KICK
+                else
+                  ply\Do ACT.SHOVE
+            else
+              ply\Do ACT.STANCE_RISEN
+  }
+
+BIND 'shift',
+  KEY_LSHIFT, {
+    Press: (ply) =>
+  }
+
+dont_do_these =
+  * "+zoom"
+  * "messagemode"
+  * "messagemode2"
+
+class Controls extends MODULE
+  PlayerBindPress: (ply, bind, down) =>
+    if down
+      return true if bind in dont_do_these

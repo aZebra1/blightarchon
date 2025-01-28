@@ -1,0 +1,22 @@
+global MODULES = {}
+global 💾 = MODULES
+
+global class MODULE
+  @hook_cache: {}
+  @__inherited: (child) =>
+    for k, v in pairs child.__base
+      if isfunction v
+        @hook_cache[k] or= {}
+        @hook_cache[k][child.__name] = v
+    MsgC Color( 0, 255, 0 ), "Module #{child.__name} loaded.\n"
+    💾[child.__name] = child
+
+hook.oldCall or= hook.Call
+
+hook.Call = (name, gm, ...) ->
+  cache = MODULE.hook_cache[name]
+  if cache
+    for i, v in pairs cache
+      a, b, c, d, e, f = v 💾[i], ...
+      return a, b, c, d, e, f unless a == nil
+  return hook.oldCall name, gm, ...

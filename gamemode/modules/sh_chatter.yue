@@ -1,0 +1,399 @@
+local NETMSG_CHATTER, NETMSG_CHAT_SEND, NETMSG_CHAT_RECV
+
+class Speech_Liverish_Deadwood extends SOUND
+  sound: ["dysphoria/vocal/speech/liverish_deadwood#{i}.wav" for i=1,21]
+  pitch: {95, 105}
+  chan: CHAN_VOICE_BASE
+
+GM.StartChat = => true
+
+-- anything in chat_keys will be prevented from running anything bound to them
+chat_keys = {
+  KEY_ENTER
+  KEY_CAPSLOCK
+  KEY_BACKSPACE
+  KEY_SPACE
+  KEY_LSHIFT
+  KEY_RSHIFT
+  KEY_LCONTROL
+  KEY_RCONTROL
+  KEY_LALT
+  KEY_RALT
+  KEY_SPACE
+  KEY_COMMA
+  KEY_PERIOD
+  KEY_APOSTROPHE
+  KEY_SEMICOLON
+  KEY_SLASH
+  KEY_EQUAL
+}
+-- 1-36 are keys 0-9-A-Z
+chat_keys[] = i for i=1,36
+chat_key_array = {}
+chat_key_array[chat_keys[i]] = true for i=1,#chat_keys
+
+class Chatter extends MODULE
+  chatter_color: Color( 0, 200, 0 )
+  chatter_color_default: Color( 0, 200, 0 )
+
+  :chat_keys
+  :chat_key_array
+
+  chat_length_limit: 256
+
+  chat_keys_held: {}
+
+  chat_keys_preheld: {}
+
+  chat_line: ''
+
+  chat_commands: {}
+
+  chat_shifts: {
+    KEY_LSHIFT
+    KEY_RSHIFT
+  }
+
+  chat_command_shortcuts: {
+    [KEY_EQUAL]: "/w" -- +
+    [KEY_1]: "/y" -- !
+    [KEY_8]: "/me" -- *
+  }
+
+  shift_glyphs: {
+    [KEY_1]: "!"
+    [KEY_2]: " at "
+    [KEY_3]: " number "
+    [KEY_4]: " koins "
+    [KEY_5]: " percent "
+    [KEY_6]: " to the power of "
+    [KEY_7]: " and "
+    --[KEY_8] = "*" -- ITALICS AT SOME POINT
+    [KEY_9]: " -- " -- SUPERSCRIPT AT SOME POINT
+    [KEY_0]: " -- " -- ALSO SUPERSCRIPT
+    [KEY_MINUS]: ", " -- UNDERLINING AT SOME POINT
+    [KEY_EQUAL]: " plus "
+    [KEY_SEMICOLON]: "... "
+    [KEY_APOSTROPHE]: "\""
+    [KEY_SLASH]: "?"
+    [KEY_COMMA]: " lesser than "
+    [KEY_PERIOD]: " greater than "
+  }
+
+  swap_glyphs: {
+    [KEY_MINUS]: " minus "
+    [KEY_EQUAL]: " equals "
+    [KEY_SLASH]: " or "
+  }
+
+  audible_ranges:
+    talking: { 450, 150 }
+    yelling: { 1000, 800 }
+    whispering: { 100, 0 }
+
+  prompt_icons:
+    speaking: {
+      solid: Material("skeleton/icons/prompt/chat.png")
+      lines: Material("skeleton/icons/prompt/chat-outline.png")
+    }
+    backspace: {
+      solid: Material("skeleton/icons/prompt/backspace.png")
+      lines: Material("skeleton/icons/prompt/backspace-outline.png")
+    }
+    command: {
+      solid: Material("skeleton/icons/prompt/terminal.png")
+      lines: Material("skeleton/icons/prompt/terminal-outline.png")
+    }
+
+  error_fl: 0
+  jumpy_fl: 0
+
+  caps_lock: false
+
+  PlayerBindPress: (ply, bind, down) =>
+    if ply.GetChatting and ply\GetChatting! and input.LookupBinding bind
+      key = input.GetKeyCode input.LookupBinding bind
+      -- if the key in question is specified in the chat key array, don't let it through
+      return true if @chat_key_array[key]
+
+  HUDPaint: =>
+    @error_fl = math.Approach(@error_fl, 0, 0.03) if @error_fl > 0
+    @jumpy_fl = Lerp FrameTime! * 2, @jumpy_fl, 0
+    x, y = ScrW ! / 2, ScrH! * 0.8
+    -- surface.SetFont"Spleen 8x16"
+    -- surface.SetDrawColor 0, 200, 0
+    c = Color(0,200,0)
+    r = c.r - (255 * @error_fl)
+    g = c.g - (255 * @error_fl)
+    b = c.b - (255 * @error_fl)
+    a = 150 + 50 * math.abs(math.sin(CurTime!))
+    if LocalPlayer!\GetChatting!
+      surface.SetFont "spleen_chat"
+      tw, th = surface.GetTextSize @chat_line
+      icon = if string.len(@chat_line) == 0
+        @prompt_icons.backspace
+      else
+        @prompt_icons.speaking
+      surface.SetMaterial icon.solid
+      surface.SetDrawColor Color(32,32,32,255)
+      mul = 1 + @jumpy_fl
+      surface.DrawTexturedRectRotatedPoint x - tw/2 + math.cos(CurTime!*mul), y + math.sin(CurTime!*mul), 32 + math.sin(CurTime!)*4, 32 + math.sin(CurTime!)*4, 0, 16, 16
+      surface.SetMaterial icon.lines
+      surface.SetDrawColor Color(r,g,b,a)
+      surface.DrawTexturedRectRotatedPoint x - tw/2 + math.Rand(0.666,-0.666)*mul, y + math.Rand(0.666,-0.666)*mul,
+        32 + math.Rand(0.666,-0.666), 32 + math.Rand(0.666,-0.666),
+        0,
+        16, 16
+      draw.DrawTextShadow @chat_line, "spleen_chat", x, y, Color(r,g,b,a), Color(0,0,0), TEXT_ALIGN_CENTER
+
+  ToggleChat: (toggled, keyed) =>
+    snd = "dysphoria/ui/chatter_#{toggled and "enable" or "disable"}.ogg"
+    LocalPlayer!\EmitSound snd, 75, math.random(95, 105), 0.4
+    @chat_keys_preheld = {}
+    for key in *@chat_keys
+      @chat_keys_preheld[key] = true if input.IsButtonDown key
+    @caps_lock = false
+    if keyed
+      net.Start"NETMSG_CHATTER"
+      net.WriteBool toggled
+      net.SendToServer!
+
+  ToggleCapsLock: =>
+    snd = if @caps_lock
+      "unlock"
+    else
+      "lock"
+    LocalPlayer!\EmitSound "dysphoria/ui/chatter_caps#{snd}.ogg", 75, math.random(95, 105), 0.4
+    @caps_lock = not @caps_lock
+
+  StringHasCommand: (str) =>
+    tab = @chat_commands
+    table.sort tab, (a, b) -> string.len( a[1] ) > string.len( b[1] )
+    if str
+      first = string.Explode(" ", str)[1]
+      return first, tab[first] if tab[first]
+    return false
+
+  ChatInput: (add) =>
+    new = @chat_line
+    if #add > 1
+      firstchar = string.sub add, 1, 1
+      -- if firstchar of the added text is a space but our cursor is already after a space, we can just snip the one we've got
+      add = string.sub(add, 2) if string.sub( new, -1, -1 ) == " "
+    new = "#{new}#{add}"
+    if #new > @chat_length_limit
+      @ChatError!
+      return
+    pitch = 75 + ( #new / 5 )
+    LocalPlayer!\EmitSound "dysphoria/ui/chatter_type.ogg", 75, pitch, 0.4
+    @jumpy_fl += 0.666
+    @chat_line = new
+    -- COMMAND LOGIC GOES HERE
+
+  ChatBackspace: =>
+    if #@chat_line == 0
+      if @chat_command
+        @ChatClearCommand!
+      elseif not @chat_keys_held[KEY_BACKSPACE]
+        @ToggleChat false, true
+      return
+    new = string.sub @chat_line, 1, #@chat_line - 1
+    pitch = 75 + ( #new / 5 )
+    LocalPlayer!\EmitSound "dysphoria/ui/chatter_delete.ogg", 75, pitch, 0.4
+    @chat_line = new
+
+  ChatEnter: =>
+    -- NETMSG_CHATTER\SendToServer false
+    if #@chat_line > 0
+      nchat = @chat_line
+      nchat = "#{@chat_command} #{nchat}" if @chat_command
+      net.Start"NETMSG_CHAT_SEND"
+      net.WriteString nchat
+      net.SendToServer!
+      @OnChat LocalPlayer!, nchat
+    else
+      @ToggleChat false, true
+      return
+    @chat_line = ""
+    @chat_command = ""
+    @chatter_color = @chatter_color_default
+
+  ChatClear: (close=true) =>
+    @chat_line = ""
+    @chat_command = nil
+    @chatter_color = @chatter_color_default
+    @ToggleChat false, true if close
+
+  ChatClearCommand: =>
+    @chatter_color = @chatter_color_default
+    @chat_command = nil
+    LocalPlayer!\EmitSound "dysphoria/ui/chatter_delete.ogg", 75, 100, 0.4
+
+  ChatError: =>
+    LocalPlayer!\EmitSound "dysphoria/ui/chatter_limit.ogg", 75, math.random(95, 105), 0.4
+    @error_fl = 1
+
+  OnChat: (ply, text, inclself) =>
+    cc, cctable = @StringHasCommand text
+    if cctable
+      if cctable.admin and not ply\IsAdmin!
+        return
+      f = string.Trim( string.sub( text, string.len(cc) + 1) )
+      ret = cctable.func ply, f
+      -- if ret
+        -- gotta find out wtf this does
+        -- @next_chat_text = text
+    else
+      @ChatLocal ply, text, inclself
+
+  -- for knowing where a speech bubble should appear
+  GetChatLocation: (ply) =>
+    rag = ply\GetRagdoll!
+    if rag and IsValid(rag)
+      head_id = rag\LookupBone"ValveBiped.Bip01_Head1"
+      if head_id
+        head_pos, head_ang = rag\GetBonePosition head_id
+        head_pos = head_pos + head_ang\Forward! * 8
+        head_pos = head_pos + head_ang\Right! * 4
+        return head_pos
+    return ply\EyePos! + ply\GetAimVector! * 12
+
+  ChatLocal: (ply, arg, inclself) =>
+    return if string.len(arg) == 0
+    return unless ply\Alive!
+    if SERVER
+      rc, rm = unpack @audible_ranges.talking
+      rf = ply\GetRF rc, rm, inclself
+      net.Start"NETMSG_CHAT_RECV"
+      net.WriteEntity ply
+      net.WriteString arg
+      net.Send rf
+      sequence = table.Random GESTURES.speak
+      if (CLIENT and IsFirstTimePredicted!) or SERVER
+        ply\Spasm :sequence
+        ply\EmitSound"Speech_Liverish_Deadwood"
+    else
+      BUBBLE {
+        text: "#{arg}"
+        font: "spleen_chat"
+        pos: @GetChatLocation ply
+        char: ply
+        vol: 0.5
+        move: Vector 0, 0, 0.025
+        speed: 2.5
+        lifespan: 14
+        clingy: true
+      }
+
+  Think: =>
+    return unless CLIENT
+    ply = LocalPlayer!
+    if ply.GetChatting and ply\GetChatting!
+      return if gui.IsConsoleVisible! or gui.IsGameUIVisible!
+      shift = false
+      for key in *@chat_keys
+        if (not @chat_keys_preheld[key]) and input.IsButtonDown(key)
+          if key in @chat_shifts
+            shift = true
+            continue
+          if (not @chat_keys_held[key]) or CurTime! >= @chat_keys_held[key]
+            switch key
+              when KEY_ENTER
+                if string.sub(@chat_line, -1, -1) == "/"
+                  @ChatClear!
+                else
+                  @ChatEnter!
+              when KEY_SPACE
+                -- eliminate extra spaces
+                if (#@chat_line == 0) or (string.sub( @chat_line, -1, -1 ) == " ")
+                  if #@chat_line == 0
+                    @ChatClear!
+                  else
+                    @ChatError!
+                else
+                  @ChatInput" "
+              when KEY_BACKSPACE
+                if (#@chat_line == 0) and (@chat_command)
+                  @ChatClearCommand!
+                else
+                  @ChatBackspace!
+              when KEY_CAPSLOCK
+                @ToggleCapsLock!
+              else
+                if shift and ( @chat_command_shortcuts[key] or @shift_glyphs[key] )
+                  local glyph
+                  if @shift_glyphs[key] and ( #@chat_line > 0 or not @chat_command_shortcuts[key] )
+                    glyph = @shift_glyphs[key]
+                    glyph = string.upper glyph if @caps_lock
+                  if (not glyph) and #@chat_line == 0 and @chat_command_shortcuts[key]
+                    glyph = "#{@chat_command_shortcuts[key]} "
+                  if glyph
+                    @ChatInput glyph
+                  else
+                    @ChatError!
+                elseif @swap_glyphs[key] and ( key ~= KEY_SLASH or #@chat_line > 0)
+                  glyph = @swap_glyphs[key]
+                  glyph = string.upper glyph if shift or @caps_lock
+                  if (not shift) and (key == KEY_SLASH)
+                    @ChatClear!
+                    return
+                  @ChatInput glyph
+                else
+                  glyph = input.GetKeyName key
+                  if #glyph == 1
+                    glyph = string.upper glyph if shift or @caps_lock
+                    @ChatInput glyph
+            if not @chat_keys_held[key]
+              @chat_keys_held[key] = CurTime! + 0.5
+            elseif CurTime! >= @chat_keys_held[key]
+              @chat_keys_held[key] = CurTime! + 0.02
+        elseif @chat_keys_held[key]
+          @chat_keys_held[key] = nil
+        elseif @chat_keys_preheld[key] and not input.IsButtonDown(key)
+          @chat_keys_preheld[key] = nil
+    elseif #table.GetKeys(@chat_keys_held) > 0
+      @chat_keys_held = {}
+    return
+
+
+BIND 'toggle_chat',
+  KEY_Y, {
+    Press: (ply) =>
+      if ply.GetChatting and not ply\GetChatting!
+        if SERVER
+          ply\SetChatting true
+          net.Start"NETMSG_CHATTER"
+          net.WriteBool true
+          net.Send ply
+  }
+
+
+if SERVER
+  util.AddNetworkString netmsg for netmsg in *{"NETMSG_CHATTER", "NETMSG_CHAT_RECV", "NETMSG_CHAT_SEND"}
+
+  net.Receive "NETMSG_CHATTER", (len, ply) ->
+    toggled = net.ReadBool!
+    ply\SetChatting toggled
+
+  net.Receive "NETMSG_CHAT_SEND", (len, ply) ->
+    msg = net.ReadString!
+    ply\SetChatting false
+    ply.last_chat or= 0
+    return if CurTime! - ply.last_chat < 0.05
+    ply.last_chat = CurTime!
+    return if string.len( msg ) > Chatter.chat_length_limit
+    Chatter\OnChat ply, msg
+elseif CLIENT
+  net.Receive "NETMSG_CHATTER", (len) ->
+    toggled = net.ReadBool!
+    Chatter\ToggleChat toggled
+
+  net.Receive "NETMSG_CHAT_RECV", (len) ->
+    who = net.ReadEntity!
+    str = net.ReadString!
+    cc = net.ReadString!
+    if #cc > 0 and Chatter.chat_commands[cc]
+      com = Chatter.chat_commands[cc]
+      return if com.admin and not LocalPlayer!\IsAdmin!
+    else
+      Chatter\OnChat who, str

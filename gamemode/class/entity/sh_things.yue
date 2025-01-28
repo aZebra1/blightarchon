@@ -1,0 +1,312 @@
+import random from math
+import Empty from table
+import TraceHull, TraceLine, GetSurfaceData from util
+
+GM[k] = v for k, v in pairs {
+  CanInteract: (ply, ent) =>
+    return ent\CanInteract ply if ent.CanInteract
+    return true
+  ItemAllowMove: (ply, item, inv, slot) =>
+    return false unless hook.Run "CanInteract", ply, item
+    old_inv = item\GetInventoryEntity!
+    return false if IsValid(old_inv) and not hook.Run "InventoryCanRemove", ply, old_inv, item
+    return false if IsValid(inv) and not hook.Run "InventoryCanAccept", ply, inv, item, slot
+    return true
+}
+
+meta = FindMetaTable"Player"
+meta[k] = v for k, v in pairs {
+  Wielding: =>
+    inv = @GetInventory!
+    return inv\GetItem SLOT_HAND if IsValid(inv) and inv.GetItem
+  WieldingOffhand: =>
+    inv = @GetInventory!
+    return inv\GetItem SLOT_OFFHAND if IsValid(inv) and inv.GetItem
+  BeltItems: =>
+    inv = @GetInventory!
+    return {} unless IsValid inv
+    items = [inv\GetItem(slot) for slot in *{SLOT_BELT_L, SLOT_BELT_R} when IsValid(inv\GetItem(slot))]
+    return items
+  TraceItem: (item, pos, high) =>
+    start = @GetViewOrigin!
+    mins, maxs = item\GetRotatedAABB(item\OBBMins!, item\OBBMaxs!)
+    if high
+      pos = pos - Vector(0,0, mins.z)
+    tr = TraceHull {
+      :start
+      endpos: pos
+      filter: @GetTraceFilter!
+      :mins
+      :maxs
+    }
+    return tr
+  Release: (item) =>
+    return unless IsValid item
+    item\AlignToOwner!
+    tr = @TraceItem item, item\WorldSpaceCenter!
+    item\MoveToWorld item\GetPos!, item\GetAngles!
+}
+
+emeta = FindMetaTable"Entity"
+emeta[k] = v for k, v in pairs {
+  GetInventory: => @GetNWEntity"ThingInventory"
+  HasInventory: => IsValid @GetInventory!
+}
+
+global class THING extends ENTITY
+  Base: "base_anim"
+  Type: "anim"
+  @__entity: "thing"
+  Spawnable: true
+
+  SetupDataTables: =>
+    @_NetworkVars =
+      String: 0
+      Bool:   0
+      Float:  0
+      Int:    0
+      Vector: 0
+      Angle:  0
+      Entity: 0
+    @AddNetworkVar "Entity", "InventoryEntity"
+    @AddNetworkVar "Int", "InventorySlot"
+    @AddNetworkVar "Int", "Durability"
+    @AddNetworkVar "String", "Element"
+  AddNetworkVar: (var_type, name, extended) =>
+    index = assert @_NetworkVars[var_type], "#{@GetClass!} attempt to register unknown network var type #{var_type}"
+    max = switch var_type
+      when "String"
+        3
+      else
+        31
+    if index >= max
+      error"Network var limit exceeded for #{var_type}"
+    @NetworkVar var_type, index, name, extended
+    @_NetworkVars[var_type] = index + 1
+
+  Name: "thing"
+  Model: Model"models/props_junk/PopCan01a.mdl"
+  Description: "Wow! I can pick it up and throw it!"
+  GetDescription: => @Description
+  Durability: 50
+
+  ProcessIName: (text=@GetClass!) => -- should only run on client
+    el = @GetElement?!
+    if el and el ~= "" and ELEMENT.registered[el]
+      element = ELEMENT.registered[@GetElement!].IName
+      text = "#{element} #{text}"
+    return text
+
+  TargetInfo: (witness) =>
+    info = {}
+    info[] =
+      font: "spleen_label"
+      color: COLOR_BGREEN
+      text: 💾.Inspect\Inspect( witness, @ ) or @GetClass!
+    pos = @GetPos!
+    pos.z += 15
+    return info, pos
+
+  OnTakeDamage: ( dmg ) =>
+    return if CLIENT
+    return if dmg\IsDamageType( DMG_CRUSH ) and not ( @Attributes and @Attributes["shatters"] )
+    if dmg\GetDamageType! == DMG_BURN and @Flamability and @Flamability > 0
+      @Ignite @Flamability/10, @Flamability/5
+
+    return if @GetHolder!\IsValid! -- otherwise attacking someone would usually attack their weapon too
+    @SetDurability math.max( @GetDurability! - dmg\GetDamage!, 0 )
+    @Break! if @GetDurability! <= 0
+
+  Break: (hit_ent) =>
+    if @Attributes and @Attributes["shatters"]
+      effectData = EffectData!
+      pos = @GetPos!
+      with effectData
+        \SetStart pos
+        \SetOrigin pos
+        \SetScale 8
+      util.Effect "GlassImpact", effectData, true, true
+      @EmitSound "placenta/weapons/bottle_break.wav"
+
+      if IsValid hit_ent
+        dmg = DamageInfo!
+        with dmg
+          \SetAttacker @
+          \SetDamage @SizeClass * 25
+          \SetDamageType DMG_SLASH
+        hit_ent\TakeDamageInfo dmg
+    @Remove!
+
+  Animations:
+    prime: ANIMS.something
+    throw: ANIMS.throwing
+
+  HandOffset:
+    Pos: Vector!
+    Ang: Angle!
+  BeltOffset:
+    Pos: Vector!
+    Ang: Angle!
+
+  HolsterSequence: "wos_aoc_sword_holster"
+  UnholsterSequence: "draw_melee"
+
+  ImpactSound: "popcan.impacthard"
+
+  CanInteract: (ply) =>
+    -- if ply\DoingSomething!
+    --   return @ == ply.Doing.thing
+    return true
+  OnPrimaryInteract: (tr, ply, hands) =>
+    ent = tr.Entity
+    if IsValid(ent) --and ent\IsPlayer!
+      @UsedOnOther ply, ent if @UsedOnOther
+      return true
+  OnInteract: =>
+  AttackEnabled: true
+  AttackAct: ACT.SWING
+  AttackDamage: 5
+  AttackDamageType: DMG_CLUB
+  AttackDelay: .8
+  AttackRange: 50
+  AttackSound:
+    Swing: "WeaponFrag.Throw"
+    Hit: "physics/cardboard/cardboard_box_impact_soft1.wav"
+  AttackSequence:
+    * "melee_1h_overhead"
+    * "melee_1h_right"
+
+  SizeClass: SIZE_TINY
+  Mass: 1
+  ThrowVelocity: 1000
+  PlaceAngle: Angle!
+  PlaceAngle2: Angle!
+
+  Initialize: =>
+    @SetModel @Model
+    if SERVER
+      @PhysicsInit SOLID_VPHYSICS
+      @SetMoveType MOVETYPE_VPHYSICS
+      @SetUseType SIMPLE_USE
+      @TouchList = {}
+      @GetPhysicsObject!\SetMass @Mass
+      @SetCollisionGroup COLLISION_GROUP_WEAPON if @SizeClass <= SIZE_SMALL
+      @SetDurability @Durability
+    @PhysWake!
+    @SetColor @Color if @Color
+    @SetMaterial @Material if @Material
+    @VisibleState = true
+    💾.Elements\Assign @, @Element if @Element
+    @OnSpawned!
+
+  OnSpawned: => true -- i'm just returning true because i'm scared it might not work if it returns nothing
+
+  CanBeMoved: => true
+  MoveTo: (ply, inv, slot, force) =>
+    unless force
+      ok = hook.Run "ItemAllowMove", ply, @, inv, slot
+      return false unless ok
+    old_inv = @GetInventoryEntity!
+    old_inv\RemoveItem @ if IsValid(old_inv)
+    inv\AddItem @, slot
+  MoveToWorld: (pos, ang, force) =>
+    old_inv = @GetInventoryEntity!
+    old_inv\RemoveItem @ if IsValid(old_inv)
+    @AddToWorld pos, ang
+  AddToWorld: (pos, ang) =>
+    @SetCollisionGroup COLLISION_GROUP_WEAPON
+    @CreateTouchList! if SERVER and @SizeClass > SIZE_SMALL
+    @SetParent NULL
+    @SetInventoryEntity NULL
+    if SERVER
+      @SetPos pos
+      @SetAngles ang
+      @GetPhysicsObject!\EnableMotion true
+      @PhysWake!
+    @UpdateVisible!
+
+  Think: =>
+    if IsValid(@GetHolder!)
+      @AlignToOwner!
+    --TODO document what this actually does
+    @RemoveEFlags 61440 if CLIENT and @InWorld! and @IsEFlagSet 61440
+    @UpdateTouchList! if SERVER
+    --@UpdateVisible!
+
+  GetAlignmentOffset: (holder) =>
+    if holder\IsPlayer!
+      inv = holder\GetInventory!
+      if @ in {holder\BeltItems!}
+        switch @
+          when inv\GetSlot(SLOT_BELT_L)
+            return @BeltLeftOffset
+          when inv\GetSlot(SLOT_BELT_R)
+            return @BeltRightOffset
+      else
+        return @HandOffset
+
+  AlignToOwner: =>
+    holder = @GetHolder!
+    return unless IsValid holder
+    pos, ang = holder\GetInventoryPosition @GetInventorySlot!
+    -- TODO changes GetHandOffset to GetInventoryOffset so it can work with multiple slots
+    offset = @GetAlignmentOffset holder
+    if offset and offset.Pos
+      pos, ang = LocalToWorld offset.Pos, offset.Ang, pos, ang
+    @SetPos pos
+    @SetAngles ang
+  GetHolder: =>
+    inv = @GetInventoryEntity!
+    return inv\GetParent! if IsValid(inv)
+    return NULL
+
+  InHand: => IsValid(@GetInventoryEntity!) and @GetInventorySlot! == SLOT_HAND
+  InOffhand: => IsValid(@GetInventoryEntity!) and @GetInventorySlot! == SLOT_OFFHAND
+  InInventory: => IsValid(@GetInventoryEntity!) and not (@GetInventorySlot! in {SLOT_HAND, SLOT_OFFHAND, SLOT_BELT_L, SLOT_BELT_R})
+  InWorld: => not IsValid @GetInventoryEntity!
+
+  StartTouch: (ent) => if SERVER then @TouchList[ent] = true
+  EndTouch: (ent) => if SERVER then @TouchList[ent] = nil
+  CreateTouchList: =>
+    if SERVER
+      Empty @TouchList
+      @TriggerActive = true
+      @SetTrigger true
+  UpdateTouchList: =>
+    return if not @TriggerActive or table.Count(@TouchList) > 0
+    @TriggerActive = false
+    @SetTrigger false
+    @SetCollisionGroup COLLISION_GROUP_NONE
+
+  PhysicsCollide: (data, physobj) =>
+    if data.DeltaTime > .2 and data.Speed > 30
+      @EmitSound @ImpactSound
+      @SetCollisionGroup COLLISION_GROUP_WEAPON if @SizeClass <= SIZE_SMALL
+
+    if data.DeltaTime > .2 and data.Speed > 120
+      if @Attributes and @Attributes["shatters"]
+        @Break data.HitEntity or NULL
+
+  UpdateVisible: =>
+    visible = not @InInventory!
+    if visible ~= @VisibleState
+      @OnVisibleChanged visible
+      @VisibleState = visible
+  GetVisible: => @VisibleState
+  OnVisibleChanged: (visible) =>
+
+  DrawCustomOpaque: (flags) => if CLIENT then @DrawModel!
+  DrawCustomTranslucent: (flags) => if CLIENT then @DrawModel!
+  Draw: (flags) =>
+    if CLIENT
+      return if @InInventory!
+      @AlignToOwner! if @InHand! or @InOffhand!
+      @SetupBones!
+      @DrawCustomOpaque flags
+  DrawTranslucent: (flags) =>
+    if CLIENT
+      return if @InInventory!
+      @AlignToOwner! if @InHand! or @InOffhand!
+      @SetupBones!
+      @DrawCustomTranslucent flags
+

@@ -1,0 +1,31 @@
+import Create, Register, GetControlTable from vgui
+import lower, Left from string
+global class VGUI
+  @registered: {}
+  @elements: {}
+
+  @Scale: (value) -> math.max(value * (ScrH! / 1080), 1)
+
+  @__inherited: (child) =>
+    with getmetatable child
+      .__call = (parent, ...) =>
+        panel = Create @__barcode, parent
+        panel.__class = @
+        panel[k] = v for k, v in pairs(@__base) when Left(k, 2) ~= "__"
+        @.__init panel, ...
+        return panel
+    fields = {k,v for k,v in pairs(child.__base) when Left(k, 2) ~= "__"}
+    fields.__name = child.__name
+    base = fields.Base or @__barcode
+    fields.Base = nil
+    child.__barcode = "#{@__barcode and @__barcode .. '/' or ''}#{lower child.__name}"
+    Register child.__barcode, fields, base
+    @registered[child.__name] = child
+    MsgC Color(0, 200, 0), "+VGUI: #{child.__name}\n"
+
+  width: 320
+  height: 200
+
+  new: (x=0, y=0, w=@width, h=@height) =>
+    @SetPos x, y
+    VGUI.elements[] = @

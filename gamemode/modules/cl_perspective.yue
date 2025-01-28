@@ -1,0 +1,93 @@
+import Clamp from math
+class Perspective extends MODULE
+  -- Many of these were ported from Alchemy.
+  ViewOffsets:
+    up:         0
+    forward:    3
+    forward2:   0
+    leftright:  0
+
+  SmoothFactor: 0.1
+  RollFactor:   0.1
+  ZNear:        0.4
+  VForward:     Vector 0, 0, 0
+  FrameTime:    1
+  EyeAngles:    Angle 0, 180, 0
+  CurAngles:    nil
+  CurPos:       nil
+  ViewTable:    {}
+  FinalOffset:  Vector 0, 0, 0
+  Attachment:   0
+  FOV:          110
+
+  -- End variables from Alchemy.
+
+  FirstPersonView: (ply, pos, ang, fov) =>
+    rag = ply\GetRagdoll!
+    if rag and rag\IsValid!
+      return @Attachment.Pos, @Attachment.Ang
+    @VForward = ply\GetAimVector!
+    @FrameTime = FrameTime!
+    @EyeAngles = ply\EyeAngles!
+    ox, oy, oz, orl = 0, 0, 0, 0 -- PUT OFFSETS HERE
+    with @ViewOffsets
+      .leftright  = Lerp @FrameTime * 6, .leftright, ox
+      .forward    = Lerp @FrameTime * 4, .forward, oy
+      .up         = Lerp @FrameTime * 4, .up, oz
+    @RollFactor = Lerp Clamp( @FrameTime * 15, 0, 1 ), @RollFactor, orl
+    with @FinalOffset
+      .x = @VForward.x * ( @ViewOffsets.forward + @ViewOffsets.forward2 )
+      .y = @VForward.y * ( @ViewOffsets.forward + @ViewOffsets.forward2 )
+      .z = @ViewOffsets.up
+    @FinalOffset = @FinalOffset + ply\GetRight! * @ViewOffsets.leftright
+    ang = ang + (Angle 0, 0, @Attachment.Ang.r * @RollFactor)
+    pos = @Attachment.Pos
+    pos = pos + @FinalOffset + ply\GetForward! * 2
+    tr = util.TraceLine
+      start:  @Attachment.Pos
+      endpos: pos
+      filter: ply
+    pos = tr.HitPos
+    return pos, ang
+
+  bones =
+    * "ValveBiped.Bip01_Head1"
+    * "ValveBiped.Bip01_Neck1"
+
+  CalcView: (ply, pos, ang, fov) =>
+    if DEVCAM
+      body = ply\GetBodyEntity!
+      for bone in *bones
+        bone = body\LookupBone bone
+        if bone
+          body\ManipulateBoneScale bone, Vector(1,1,1)
+      @ViewTable =
+        origin: DEVCAM.pos
+        angles: DEVCAM.ang
+        fov:    @FOV
+        znear:  Clamp( @ZNear, 0.1, 1 )
+        drawviewer: true
+    else
+      body = ply\GetBodyEntity!
+      for bone in *bones
+        shrink, not_shrink = Vector(0,0,0), Vector(1,1,1)
+        val = shrink
+        if body\GetClass! == "prop_ragdoll" and not ply\Alive!
+          val = not_shrink
+        bone = body\LookupBone bone
+        if bone
+          body\ManipulateBoneScale bone, val
+      @Attachment = body\GetAttachment(body\LookupAttachment"eyes")
+      ePos, eAng = @FirstPersonView ply, pos, ang, fov
+      @CurPos = ePos
+      @CurAngles = LerpAngle Clamp( @FrameTime * (65 * @SmoothFactor), 0, 1 ), @CurAngles or ang, eAng
+      fov_target = 110
+      @FOV = Lerp 0.01, @FOV, fov_target
+      @ViewTable =
+        origin: @CurPos
+        angles: @CurAngles + ply\GetViewPunchAngles!
+        fov:    @FOV
+        znear:  Clamp( @ZNear, 0.1, 1 )
+        drawviewer: true
+
+    return @ViewTable

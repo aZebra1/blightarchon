@@ -1,0 +1,15 @@
+import random from math
+
+class SHOOT extends ACT
+  new: (@ply, @weapon) => super @ply
+  Immobilizes: false
+  Impossible: => true unless IsValid(@weapon) and @ply\Wielding! == @weapon and @weapon.AttackEnabled
+  Do: (fromstate) =>
+    mag = @weapon\GetMagazine!
+    if IsValid(mag) and mag\GetRounds! > 0
+      sequence = @weapon.AttackSequence
+      sequence = sequence[random #sequence] if istable sequence
+      if (CLIENT and IsFirstTimePredicted!) or SERVER
+        @Spasm slot: GESTURE_SLOT_ATTACK_AND_RELOAD, :sequence
+      @weapon\Shoot! if IsFirstTimePredicted!
+    @Kill!

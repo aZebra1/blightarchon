@@ -1,0 +1,196 @@
+--[[
+attributes are used to define what stuff a specific thing can be made of. ie fabric for clothes, metallic for smithing
+this isn't supposed to be overly-restrictive, but is supposed to enforce some belivability;
+you can't melt wood into a sword or make a table out of fabric
+
+attributes:
+* "solid" -- can be used as a solid object
+* "metallic"
+* "woody"
+* "stony"
+* "plastic"
+* "moldable" -- can be 'melted' and shaped in machines
+* "brittle" -- can break in machines, and if used as tools
+* "shatters" -- when durability reaches 0, shatters and damages things dependant on sharp damage
+]]
+
+global class ELEMENT
+  @registered: {}
+  @__inherited: (child) =>
+    child.__barcode = "#{@__barcode and @__barcode .. '/' or ''}#{string.lower child.__name}"
+    @registered[child.__barcode] = child
+  SharpDamageMult: 1
+  BluntDamageMult: 1
+  DelayMult: 1
+  Flamability: 0 -- 0-100
+  DurabilityMult: 1
+  Attributes:
+
+  Material: ""
+  Color: ""
+
+  ThrowMult: 1
+
+class Bone extends ELEMENT
+  IName: 'bone'
+  Flamability: 0
+  DurabilityMult: 0.5
+  SharpDamageMult: 0.8
+  BluntDamageMult: 0.9
+  ThrowMult: 1.2
+  Attributes:
+    * 'solid'
+    * 'brittle'
+  Material: 'models/gibs/hgibs/spine'--'models/gibs/hgibs/rib'
+
+class Wood extends ELEMENT
+  IName: 'wood'
+  Flamability: 100
+  DurabilityMult: 0.7
+  SharpDamageMult: 0.3
+  BluntDamageMult: 0.9
+  ThrowMult: 1.5
+  Attributes:
+    * 'solid'
+    * 'woody'
+  Material: 'models/gibs/woodgibs/woodgibs01'
+
+class Stone extends ELEMENT
+  IName: 'stone'
+  Flamability: 0
+  DurabilityMult: 3
+  SharpDamageMult: 0.6
+  BluntDamageMult: 1
+  DelayMult: 1.4
+  ThrowMult: 0.75
+  Attributes:
+    * 'solid'
+    * 'stony'
+  Material: 'models/props_canal/rock_riverbed01a'
+  ImpactSounds:
+    [SIZE_TINY]: 'physics/concrete/rock_impact_soft1.wav'
+    [SIZE_SMALL]: 'physics/concrete/concrete_impact_soft1.wav'
+    [SIZE_MEDIUM]: 'physics/concrete/concrete_impact_hard2.wav'
+    [SIZE_LARGE]: 'physics/concrete/concrete_impact_hard1.wav'
+    [SIZE_HUGE]: 'physics/concrete/concrete_block_impact_hard3.wav'
+    [SIZE_IMMOBILE]: 'physics/concrete/concrete_block_impact_hard3.wav'
+  AttackSounds:
+    [SIZE_TINY]: 'physics/concrete/rock_impact_hard6.wav'
+    [SIZE_SMALL]: 'physics/concrete/rock_impact_hard3.wav'
+    [SIZE_MEDIUM]: 'physics/concrete/rock_impact_hard1.wav'
+    [SIZE_LARGE]: 'physics/concrete/concrete_block_impact_hard3.wav'
+    [SIZE_HUGE]: 'physics/concrete/concrete_block_impact_hard2.wav'
+    [SIZE_IMMOBILE]: 'physics/concrete/boulder_impact_hard3.wav'
+
+class Concrete extends Stone
+  IName: 'concrete'
+  DurabilityMult: 4
+  SharpDamageMult: 0.4
+  ThrowMult: 0.5
+  Material: 'models/props_debris/concretedebris_chunk01'
+
+class Glass extends ELEMENT
+  IName: 'glass'
+  Flamability: 0
+  DurabilityMult: 0.05
+  SharpDamageMult: 1.5
+  BluntDamageMult: 1.1
+  Attributes:
+    * 'solid'
+    * 'brittle'
+    * 'shatters'
+  Material: 'models/props_lab/suitcase_glass'
+
+class Metal extends ELEMENT -- default metal. unspecific
+  IName: 'metal'
+  Flamability: 0
+  DurabilityMult: 1.5
+  Attributes:
+    * 'metallic'
+    * 'solid'
+  ImpactSounds:
+    [SIZE_TINY]: 'popcan.impacthard'
+    [SIZE_SMALL]: 'physics/metal/metal_grenade_impact_hard2.wav'
+    [SIZE_MEDIUM]: 'physics/metal/metal_box_impact_soft3.wav'
+    [SIZE_LARGE]: 'physics/metal/metal_canister_impact_soft1.wav'
+    [SIZE_HUGE]: 'physics/metal/metal_barrel_impact_soft3.wav'
+    [SIZE_IMMOBILE]: 'physics/metal/metal_barrel_impact_soft3.wav'
+  AttackSounds:
+    [SIZE_TINY]: 'physics/metal/paintcan_impact_hard1.wav'
+    [SIZE_SMALL]: 'physics/metal/metal_solid_impact_soft3.wav'
+    [SIZE_MEDIUM]: ''
+    [SIZE_LARGE]: 'physics/metal/metal_canister_impact_hard3.wav'
+    [SIZE_HUGE]: 'physics/metal/metal_sheet_impact_hard6.wav'
+    [SIZE_IMMOBILE]: 'physics/metal/metal_sheet_impact_hard6.wav'
+
+-- any metal smelted unskilled is considered 'scrap', most roundstart tools will be made of it
+class Scrap extends Metal
+  IName: 'scrap'
+  DurabilityMult: 0.9
+  SharpDamageMult: 0.7
+  BluntDamageMult: 0.9
+  Material: 'models/props_canal/canal_bridge_railing_01b'
+
+class Copper extends Metal
+  IName: 'copper'
+  DurabilityMult: 0.6
+  SharpDamageMult: 0.8
+  BluntDamageMult: 0.8
+  DelayMult: 1
+  ThrowMult: 1
+  Material: 'models/props_pipes/pipemetal001a'
+
+class Tin extends Metal -- weak as fuck, easy to get, eat your beans
+  IName: 'tin'
+  DurabilityMult: 0.2
+  SharpDamageMult: 0.4
+  BluntDamageMult: 0.6
+  DelayMult: 1
+  ThrowMult: 1.5
+  Material: 'models/props_wasteland/fence_sheet01'
+
+class Bronze extends Metal -- the easiest 'good' metal to get
+  IName: 'bronze'
+  DurabilityMult: 1.5
+  SharpDamageMult: 1
+  BluntDamageMult: 1
+  DelayMult: 1
+  ThrowMult: 1
+  Material: 'models/props_wasteland/grainelevator01'
+
+class Iron extends Metal -- very heavy. best used for making machinery, which most other metals will not stand for.
+  IName: 'iron'
+  DurabilityMult: 2.5
+  SharpDamageMult: 1.2
+  BluntDamageMult: 1.2
+  DelayMult: 0.7
+  Material: 'models/props_canal/metalwall005b'
+
+class Steel extends Metal -- rare, expensive, state of the art
+  IName: 'steel'
+  DurabilityMult: 10
+  SharpDamageMult: 1.5
+  BluntDamageMult: 1.5
+  DelayMult: 1
+  ThrowMult: 0.6
+  Material: 'models/props_combine/Combine_Citadel001'
+
+class Pewter extends Metal
+  IName: 'pewter'
+  DurabilityMult: 0.25
+  SharpDamageMult: 0.4
+  BluntDamageMult: 0.6
+  DelayMult: 1
+  ThrowMult: 1
+
+class Lead extends Metal
+  IName: 'lead'
+  DurabilityMult: 0.2
+  SharpDamageMult: 0.5
+  BluntDamageMult: 0.6
+  DelayMult: 0.5
+  ThrowMult: 0.5
+  -- Material:
+
+    --I WILL KILL
+  -- DO NOT SAVE THIS FILE. OPEN IN #DEV WINDOW

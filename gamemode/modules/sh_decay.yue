@@ -1,0 +1,151 @@
+global DECAYSTAGE_FRESH = 0
+global DECAYSTAGE_BLOAT = 1
+global DECAYSTAGE_ACTIVE = 2 -- active decay
+global DECAYSTAGE_ADVANCED = 3 -- advanced decay
+global DECAYSTAGE_REMAINS = 4 -- dry remains
+global DECAYSTAGE_CREMATED = 5 -- cremated remains
+
+global DECAY_TIME = 3
+global DECAY_POINTS_TO_PROGRESS = 15
+
+SwapRagdollModels = (ent, mdl, mat="") ->
+  new = ents.Create "prop_ragdoll"
+  with new
+    \SetPos ent\GetPos!
+    \SetAngles ent\GetAngles!
+    \SetModel mdl
+    \SetMaterial mat
+    .corpse = true
+    .cuts_of_meat = ent.cuts_of_meat
+    .decay_stage = ent.decay_stage -- these are applied to the corpse before it changes
+    \SetNWIng "decay_stage", .decay_stage
+    .decay_points = ent.decay_points -- so we don't have to worry about them here
+    .decay_start = ent.decay_start
+    .decay_end = ent.decay_end
+    \Spawn!
+    \Activate!
+
+  num = new\GetPhysicsObjectCount! - 1
+  ve = ent\GetVelocity!
+  new\Fire "disablemotion"
+  for i = 0, num
+    bone = new\GetPhysicsObjectNum i
+    if IsValid bone
+      bp, ba = ent\GetBonePosition new\TranslatePhysBoneToBone(i)
+      if bp and ba
+        bone\SetPos bp
+        bone\SetAngles ba
+
+  new\Fire "enablemotion", "", 0.5
+  ent\Remove!
+
+class Decay extends MODULE
+  stages:
+    [DECAYSTAGE_FRESH]:
+      name: "fresh body"
+      on_set: (rag) ->
+      yield:
+        * 'thing/food/meat/human'
+        * 'thing/food/meat/human'
+        * 'thing/food/bandage'
+    [DECAYSTAGE_BLOAT]:
+      name: "bloated body"
+      on_set: (rag) ->
+        rag\SetColor Color( 250, 0, 250 )
+      sound: "CorpseRotBloat"
+      yield:
+        * 'thing/food/meat/human'
+      yield_rotten: true
+    [DECAYSTAGE_ACTIVE]:
+      name: "maggot-infesed body"
+      on_set: (rag) ->
+        rag\SetMaterial "models/zombie_fast_players/fast_zombie_sheet"
+        rag\SetColor Color( 75, 200, 75 )
+      sound: "CorpseRotActive"
+      yield:
+        * 'thing/food/meat/human'
+      yield_rotten: true
+      miasma_color: Color 20, 80, 20
+    [DECAYSTAGE_ADVANCED]:
+      name: "horrifically revolting caracass"
+      on_set: (rag) ->
+        rag\SetColor Color( 255, 255, 255 )
+        rag\SetBodygroup 0, 2 unless rag.Headless
+        rag\SetMaterial "models/skeleton/skeleton_decomp"
+      sound: "CorpseRotAdvanced"
+      yield:
+        * 'thing/food/meat/human'
+      yield_rotten: true
+      miasma_color: Color 100, 40, 115
+    [DECAYSTAGE_REMAINS]:
+      name: "skeletal remains"
+      on_set: (rag) ->
+        rag\SetBodygroup 0, 4 unless rag.Headless
+        rag\SetBodygroup 7, 4
+        rag\SetMaterial "models/skeleton/skeleton_decomp"
+        rag\SetCollisionGroup COLLISION_GROUP_WEAPON
+      yield:
+        * 'thing/junk/bone'
+      yield_rotten: true
+    [DECAYSTAGE_CREMATED]:
+      on_set: (rag) ->
+        rag\SetMaterial ""
+        rag\SetBodygroup 0, 4 unless rag.Headless
+        rag\SetBodygroup 7, 4
+
+      yield:
+        * 'thing/food/meat/char'
+      yield_rotten: false
+
+  Think: (ply) =>
+    for _, rag in ipairs ents.FindByClass("prop_ragdoll")
+      with rag
+        continue unless .corpse
+        if .decay_stage == DECAYSTAGE_REMAINS or .decay_stage == DECAYSTAGE_CREMATED and not .no_bleed
+          continue
+
+        if .decay_end <= CurTime!
+          \EmitSound "Flies" if .decay_stage > DECAYSTAGE_FRESH
+          if @stages[.decay_stage] and @stages[.decay_stage].sound
+            \EmitSound @stages[.decay_stage].sound
+          .decay_points += 1
+          .decay_start = CurTime!
+          .decay_end = .decay_start + math.Round( DECAY_TIME * math.random(0.7, 1.3) )
+
+          if @stages[.decay_stage].miasma_color
+            col = @stages[.decay_stage].miasma_color
+            edata = EffectData!
+            with edata
+              \SetOrigin rag\GetPos!
+              \SetScale 10 + ( rag.decay_points / 2 )
+              \SetColor col.r, col.g, col.r --FIXME doesn't work. color remains the one set in the effect class
+            miasmas = 🎲(2,5)
+            for i = 1, miasmas
+              edata\SetStart Vector(🎲(-27, 27), 🎲(-27, 27), 0)
+              util.Effect "miasma", edata
+
+          if .decay_points > DECAY_POINTS_TO_PROGRESS
+            .decay_points = 0
+            .decay_stage += 1
+            @stages[.decay_stage].on_set rag
+          \SetNWInt "decay_stage", .decay_stage
+
+class Flies extends SOUND
+  sound: ["ambient/creatures/flies#{i}.wav" for i=1,5]
+  level: SNDLVL_NORM
+
+class CorpseRotBloat extends SOUND
+  sound: ["npc/barnacle/barnacle_digesting#{i}.wav" for i=1,2]
+  level: SNDLVL_50dB
+
+class CorpseRotActive extends SOUND
+  sound: ["npc/barnacle/barnacle_tongue_pull#{i}.wav" for i=1,3]
+  level: SNDLVL_50dB
+
+class CorpseRotAdvanced extends SOUND
+  sound: ["npc/barnacle/barnacle_crunch#{i}.wav" for i=1,2]
+  level: SNDLVL_50dB
+
+class FoodRot extends SOUND
+  sound: ["weapons/bugbait/bugbait_squeeze#{i}.wav" for i=1,3]
+  level: SNDLVL_50dB

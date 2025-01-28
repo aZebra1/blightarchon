@@ -1,0 +1,69 @@
+class SWITCH_HAND extends ACT
+  new: (@ply) => super @ply
+  Immobilizes: false
+  Impossible: => true unless (IsValid(@ply\Wielding!) or IsValid(@ply\WieldingOffhand!))
+  Do: (fromstate) =>
+    sequence, snd, cycle_start, cycle_switch = 'reload_dual', 'PickupThing', .7, .8
+    if (CLIENT and IsFirstTimePredicted!) or SERVER
+      @Spasm :sequence, start: cycle_start
+    @CYCLE cycle_switch, =>
+      if SERVER
+        w, w_off = @ply\Wielding!, @ply\WieldingOffhand!
+        if IsValid(w)
+          if IsValid(w_off)
+            w_off\MoveToWorld w_off\GetPos!, w_off\GetAngles!
+            timer.Simple 0.1, ->
+              w_off\MoveTo @ply, @ply\GetInventory!, SLOT_HAND
+          w\MoveTo @ply, @ply\GetInventory!, SLOT_OFFHAND
+        if IsValid(w_off)
+          w_off\MoveTo @ply, @ply\GetInventory!, SLOT_HAND
+      @Kill!
+
+class UNLOAD extends ACT
+  new: (@ply) => super @ply
+  Immobilizes: false
+  Impossible: =>
+    wielding = @ply\Wielding!
+    return true unless IsValid(wielding) and wielding.GetMagazine and IsValid(wielding\GetMagazine!)
+  Do: (fromstate) =>
+    sequence, cycle_start, cycle_unload = 'reload_dual', .7, .8
+    if (CLIENT and IsFirstTimePredicted!) or SERVER
+      @Spasm :sequence, start: cycle_start
+    @CYCLE cycle_unload, =>
+      if SERVER
+        wielding, wielding_off = @ply\Wielding!, @ply\WieldingOffhand!
+        mag = wielding\GetMagazine!
+        return unless IsValid(mag)
+        if IsValid(wielding_off)
+          p, a = wielding\GetInventoryPosition!
+          mag\MoveToWorld p, a
+        else
+          mag\MoveTo @ply, @ply\GetInventory!, SLOT_OFFHAND
+      @Kill!
+
+class COMBINE extends ACT
+  new: (@ply) => super @ply
+  Immobilizes: false
+  Impossible: =>
+    wielding, wielding_off = @ply\Wielding!, @ply\WieldingOffhand!
+    return true unless IsValid(wielding) and IsValid(wielding_off)
+  Do: (fromstate) =>
+    sequence, cycle_start, cycle_combine = 'reload_dual', .7, .8
+    if (CLIENT and IsFirstTimePredicted!) or SERVER
+      @Spasm :sequence, start: cycle_start
+    @CYCLE cycle_combine, =>
+      if SERVER
+        wielding, wielding_off = @ply\Wielding!, @ply\WieldingOffhand!
+        return unless IsValid(wielding) and IsValid(wielding_off)
+        -- ADD A POSSIBLE SEPARATE FUNCTION FOR COMBININGS HERE
+        -- first let's find out if UsedOnOther exists on our things
+          -- if it returns true, then we do not attempt to go further
+        if wielding_off.UsedOnOther
+          -- our offhand item has a use
+          if wielding_off\UsedOnOther @ply, wielding
+            return @Kill!
+        -- if we got here, our offhand item cannot be used on other stuff
+        if wielding.UsedOnOther
+          -- our primary item has a use
+          if wielding\UsedOnOther @ply, wielding_off
+            return @Kill!

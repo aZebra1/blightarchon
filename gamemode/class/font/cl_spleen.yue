@@ -1,0 +1,11 @@
+class Spleen_Label extends FONT
+  font: 'Spleen 8x16'
+  size: 16
+
+class Spleen_Chat extends FONT
+  font: 'Spleen 8x16'
+  size: 32
+
+class Spleen_Chat_Small extends FONT
+  font: 'Spleen 8x16'
+  size: 16

@@ -1,0 +1,42 @@
+
+#+TITLE: Agenda of Eclipse
+#+AUTHOR: Sotla
+#+LAST_EDIT: <2024-11-22 Fri 23:36 EST>
+
+What do we need to do next?
+* TODO [0%] [0/2] Check it out
+DEADLINE: <2024-11-24 Sun> SCHEDULED: <2024-11-23 Sat>
+It's been a while since we looked at the game. We should make sure
+everything still runs, and detect what's broken.
+- [ ] Detect :: Log any issues we notice. What feels bad, what's broken.
+- [ ] Fuck Around :: Try and break things that might be a problem
+  later.
+* TODO [0%] [0/4] Refile ~TODO.org~
+DEADLINE: <2024-11-30 Sat> SCHEDULED: <2024-11-24 Sun>
+Our previous ~TODO.org~ was a huge mess. It should be cannibalized and
+reorganized into something better. It should be recognized that this
+is not the fault of anyone in particular, as we are all still new to
+this technology.
+- [ ] Move it :: Actually refile the items from one place to the
+  other.
+- [ ] Prioritize it :: By using =org-priority= we can establish how
+  important certain items are. We definitely need to use this feature
+  and keep track of what's most important.
+- [ ] Schedule it :: By using =org-schedule= we can establish when we
+  want to start on things. This will generate a view for the
+  =org-agenda= that lets us keep a look at what we want to do.
+- [ ] Deadlines? :: After scheduling +everything+ enough things, we
+  should try to set goals for when we /need/ things to be done. Keep
+  in mind that scheduling something means "this is when we want to
+  start working on this" and deadlining something means "this is when
+  we want this to be ready".
+* TODO Finish Previously 'In Progress' Features
+DEADLINE: <2024-11-27 Wed> SCHEDULED: <2024-11-24 Sun>
+- [ ] (De)Combining :: Add the ability to craft items together and
+  change unloading firearms from ~MOUSE_RIGHT~ + ~KEY_R~ to a
+  Decombine function.
+- [ ] Thing Inventories :: Things with inventories that can hold other
+  things, not just values. Technically guns can already hold
+  magazines, but we should figure it out for other use cases.
+- [ ] Cooking :: Its perceived simplicity has taunted us for too
+  long. We should pick up where Linked left off with the soup pot.

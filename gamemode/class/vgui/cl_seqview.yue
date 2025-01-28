@@ -1,0 +1,42 @@
+import LFrame, LButton, LListView, LTextEntry, LLabel, LNumSlider from VGUI.registered
+import round from math
+class Seqview extends LFrame
+  Title: 'Seqview'
+  Width: 320
+  Height: 280
+  IsMenu: true
+
+  new: (x, y) =>
+    super x, y
+    if @@instance
+      @@instance\Remove! if IsValid @@instance
+      @@instance = nil
+    @@instance = @
+    timer.Simple 0.05, -> @SetSize @Width, @Height
+    local search, seqlist
+    with search = LTextEntry @
+      \Dock TOP
+      .OnKeyCode = (code) =>
+        super code
+        seqlist\UpdateList search\GetText!
+    with seqlist = LListView @
+      \Dock FILL
+      \SetMultiSelect false
+      \AddColumn "Sequence"
+      .UpdateList = (txt) =>
+        return unless txt
+        -- first, remove all lines
+        for i=#seqlist\GetLines!, 1
+          print i
+          seqlist\RemoveLine i
+        seqs = LocalPlayer!\GetSequenceList!
+        txt = txt\trim!\lower!
+        print txt, "yeah"
+        for seq in *seqs
+          seqlist\AddLine seq if seq\find txt
+
+      \AddLine v for v in *LocalPlayer!\GetSequenceList!
+
+      .OnRowSelected = (idx, panel) =>
+        LocalPlayer!\Spasm sequence: panel\GetColumnText 1
+    @MakePopup!

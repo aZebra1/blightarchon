@@ -1,0 +1,85 @@
+global class STATUS
+  @effects: {}
+  @indices: {}
+  @active: {}
+
+  name:             "undefined"
+  uniqueID:         "undefined"
+  icon:             "undefined"
+  default:          0
+  minimum:          0
+  minimum_display:  1
+  maximum:          4
+  colors:
+    [4]: Color 200, 0, 0
+    [3]: Color 150, 46, 7
+    [2]: Color 129, 67, 11
+    [1]: Color 107, 88, 14
+    [0]: Color 85, 109, 18
+    [-1]: Color 64, 130, 22
+    [-2]: Color 42, 152, 25
+    [-3]: Color 21, 173, 29
+    [-4]: Color 0, 194, 33
+
+  Overflow: (ply, char) =>
+
+  @__inherited: (child) =>
+    child.index = table.Count(@effects) + 1
+    child.uniqueID = string.lower child.__name
+
+    @effects[child.uniqueID] = child
+    @indices[child.index] = child
+
+    alias_name = "#{child.uniqueID\sub(1, 1)\upper!}#{child.uniqueID\sub 2}"
+    meta = FindMetaTable'Player'
+
+    meta["Status#{alias_name}"] = =>
+      return 0 if @["Status#{alias_name}Val"] == nil
+      return false if @["Status#{alias_name}Val"] == false
+      return @["Status#{alias_name}Val"]
+
+    meta["SetStatus#{alias_name}"] = (val, force) =>
+      return if val == nil
+      if SERVER
+        return if @["Status#{alias_name}Val"] == val and not force
+        @["Status#{alias_name}Val"] = val
+        if child.private
+          with net
+            .Start"nSetStatus#{alias_name}"
+            .WriteInt val, 4
+            .Send @
+        else
+          with net
+            .Start"nSetStatus#{alias_name}"
+            .WriteEntity @
+            .WriteInt val, 4
+            .Broadcast!
+      else
+        -- we're going to ATTEMPT to predict this
+        @["Status#{alias_name}"] = val
+
+    if SERVER
+      util.AddNetworkString"nSetStatus#{alias_name}"
+    else
+      net.Receive "nSetStatus#{alias_name}", (len) ->
+        if child.private
+          val = net.ReadInt 4
+          LocalPlayer!["Status#{alias_name}Val"] = val
+        else
+          ply = net.ReadEntity!
+          val = net.ReadInt 4
+          ply["Status#{alias_name}Val"] = val
+
+  @FindByName: (status) =>
+    status = status\lower!
+    local uniqueID
+    for k, v in pairs @effects
+      if status\find v.name\lower!
+        uniqueID = k
+        break
+
+    return uniqueID
+
+  @Get: (uniqueID) => @effects[uniqueID] or nil
+
+  @NameToUniqueID: (name) => string.gsub( name, " ", "_" )\lower!

@@ -1,0 +1,49 @@
+import max from math
+class Screenspace extends MODULE
+  BlendSets:
+    HPPD:
+      src_blend: BLEND_DST_COLOR
+      dst_blend: BLEND_DST_ALPHA
+      blend_fnc: BLENDFUNC_ADD
+      rate: 8
+      passes: -> max(1, 1 + LocalPlayer!\Status(STATUS_FATIGUE)*2)
+      textures: {}
+
+  BlendOverlay: (set, mul=1) =>
+    import OverrideAlphaWriteEnable, OverrideDepthEnable, OverrideBlend, SetMaterial, DrawScreenQuadEx from render
+    import floor, sin, cos from math
+    OverrideAlphaWriteEnable true, true
+    OverrideDepthEnable true, false
+    OverrideBlend true, set.src_blend, set.dst_blend, set.blend_fnc, BLEND_ONE, BLEND_ZERO, BLENDFUNC_ADD
+    passes = set.passes
+    passes = passes! if isfunction passes
+    for i = 1, passes
+      idx = (floor( (CurTime! * 1 + (passes/5) ) * set.rate ) % #set.textures) + 1
+      SetMaterial set.textures[idx]
+      x = ScrW! * -0.15 + ScrW! * 0.1 * sin( CurTime! * (i/10) * mul)
+      y = ScrH! * -0.15 + ScrH! * 0.1 * cos( CurTime! * (i/10) * mul)
+      DrawScreenQuadEx x, y, ScrW! * 1.5, ScrH! * 1.5
+    OverrideBlend false
+    OverrideAlphaWriteEnable false
+    OverrideDepthEnable false
+
+  RenderScreenspaceEffects: =>
+    import sin, abs from math
+    tab =
+      ["$pp_colour_addr"]: 0
+      ["$pp_colour_addg"]: 0
+      ["$pp_colour_addb"]: 0
+      ["$pp_colour_brightness"]: -0.02
+      ["$pp_colour_contrast"]: 0.6 + (abs(sin(CurTime! * 0.166)) * 0.5)
+      ["$pp_colour_colour"]: 1.8 + abs(sin(CurTime! * 0.5))
+      ["$pp_colour_mulr"]: 1.5 + abs(sin(CurTime! * 0.789))
+      ["$pp_colour_mulg"]: 0.5
+      ["$pp_colour_mulb"]: 0.5
+
+    @BlendOverlay @BlendSets.HPPD
+    DrawColorModify tab
+
+-- I don't know why I have to do it like this, but weird shit happens if I don't.
+for i = 1, 8
+  mat = Material"dysphoria/blends/colornoise/a#{i}.png"
+  table.insert Screenspace.BlendSets.HPPD.textures, mat

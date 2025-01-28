@@ -1,0 +1,251 @@
+class Junk extends THING
+  IName: 'junk'
+  Spawnable: true
+
+class Boot extends Junk
+  IName: 'loathesome boot'
+  Model: Model'models/props_junk/Shoe001a.mdl'
+  ImpactSound: 'physics/rubber/rubber_tire_impact_soft3.wav'
+
+class Bone extends Junk
+  IName: 'scrap'
+  Model: Model'models/Gibs/HGIBS_scapula.mdl'
+  Element: 'bone'
+  ImpactSound: Sound'physics/plastic/plastic_barrel_impact_soft3.wav'
+  RuinedResult: 'thing/junk/bone/broken'
+
+class Broken extends Bone
+  IName: 'broken scrap'
+
+class Book extends Junk
+  IName: 'book'
+  Model: Model'models/props_lab/binderredlabel.mdl'
+  ImpactSound: Sound'physics/cardboard/cardboard_box_impact_soft1.wav'
+
+class Pot extends Junk
+  IName: 'pot'
+  Model: Model'models/props_interiors/pot02a.mdl'
+  ImpactSound: Sound'physics/concrete/rock_impact_hard5.wav'
+
+  AttackEnabled: true
+  AttackDamage: 10
+  AttackDamageType: DMG_CLUB
+  AttackDelay: 0.5
+  AttackRange: 50
+  AttackSound:
+    Swing: 'WeaponFrag.Throw'
+    Hit: Sound'physics/concrete/rock_impact_hard5.wav'
+  AttackSequence:
+    * 'melee_1h_overhead'
+    * 'melee_1h_right'
+
+class Chunk extends Junk
+  IName: 'chunk'
+  Model: Model'models/props_junk/rock001a.mdl'
+  Element: 'stone'
+
+  AttackEnabled: true
+  AttackDamage: 15
+  AttackDamageType: DMG_CLUB
+  AttackDelay: 1
+  AttackRange: 50
+  AttackSound:
+    Swing: 'WeaponFrag.Throw'
+  AttackSequence:
+    * 'melee_1h_overhead'
+    * 'melee_1h_right'
+
+class Rebar extends Junk
+  IName: 'rebar'
+  Model: Model'models/props_debris/rebar002a_32.mdl'
+  Element: 'metal/iron'
+
+  HandOffset:
+    Pos: Vector 1, 1, 8
+    Ang: Angle!
+  BeltOffset:
+    Pos: Vector -9, 8, 7
+    Ang: Angle -90, 30, 0
+
+  ImpactSound: Sound'physics/metal/metal_grenade_impact_soft1.wav'
+
+  SizeClass: SIZE_LARGE
+
+  Animations:
+    prime: ANIMS.melee_2hand
+    throw: ANIMS.throwing
+
+  AttackEnabled: true
+  AttackDamage: 35
+  AttackDamageType: DMG_CLUB
+  AttackDelay: 1.5
+  AttackRange: 70
+  AttackSound:
+    Swing: 'WeaponFrag.Throw'
+    Hit: Sound'physics/concrete/concrete_block_impact_hard1.wav'
+  AttackSequence:
+    * 'melee_2h_left'
+    * 'melee_2h_overhead'
+
+  ThrowVelocity: 200
+
+  PlaceAngle: Angle 90, 0, 0
+
+class Clean extends Rebar
+  Model: Model'models/props_debris/rebar001a_32.mdl'
+
+  AttackDamage: 20
+  AttackDelay: 1
+
+  ThrowVelocity: 400
+
+class Double extends Rebar
+  Model: Model'models/props_debris/rebar003a_32.mdl'
+
+class Huge extends Rebar
+  Model: Model'models/props_debris/rebar003c_64.mdl'
+
+  HandOffset:
+    Pos: Vector 1, 3, 20
+
+  AttackDamage: 60
+  AttackDelay: 3
+
+class Wood extends Junk
+  IName: 'plank'
+  Model: Model'models/props_debris/wood_chunk06f.mdl'
+  Element: 'wood'
+  ImpactSound: Sound'physics/wood/wood_furniture_impact_soft3.wav'
+
+  HandOffset:
+    Pos: Vector 1, 1, 12
+    Ang: Angle 0, 90, 0
+
+  SizeClass: SIZE_LARGE
+
+  Animations:
+    prime: ANIMS.melee_2hand
+    throw: ANIMS.throwing
+
+  AttackEnabled: true
+  AttackDamage: 25
+  AttackDamageType: DMG_CLUB
+  AttackDelay: 1.2
+  AttackRange: 75
+  AttackSound:
+    Swing: 'WeaponFrag.Throw'
+    Hit: Sound'physics/wood/wood_plank_impact_hard1.wav'
+  AttackSequence:
+    * 'melee_2h_left'
+    * 'melee_2h_overhead'
+
+  ThrowVelocity: 400
+
+  PlaceAngle: Angle 90, 0, 0
+
+class Thin extends Wood
+  IName: 'wood'
+  Model: Model'models/props_debris/wood_board02a.mdl'
+
+class Med extends Wood
+  Model: Model'models/props_debris/wood_board04a.mdl'
+
+class Wide extends Wood
+  Model: Model'models/props_debris/wood_board06a.mdl'
+
+class Cinderblock extends Chunk
+  IName: 'cinderblock'
+  Model: Model'models/props_debris/concrete_cynderblock001.mdl'
+  Element: 'stone/concrete'
+  HandOffset:
+    Pos: Vector 0, -2, 3
+    Ang: Angle 90, 0, 0
+
+class Wand extends Clean
+  IName: 'wand of transumutation'
+
+  Elements:
+    * 'metal/copper'
+    * 'metal/bronze'
+    * 'metal/iron'
+    * 'metal/steel'
+    * 'metal/tin'
+    * 'metal/scrap'
+    * 'bone'
+    * 'wood'
+    * 'stone'
+    * 'stone/concrete'
+    * 'glass'
+
+  UsedOnOther: (ply, ent) =>
+    return unless ent.Element
+    💾.Elements\Assign ent, table.Random @Elements
+    @EmitSound "garrysmod/save_load4.wav", 50 if SERVER
+
+class Can extends Junk
+  IName: 'can'
+  Model: Model'models/props_junk/PopCan01a.mdl'
+  Element: 'tin'
+  ImpactSound: Sound'physics/metal/metal_grenade_impact_soft1.wav'
+
+  HandOffset:
+    Pos: Vector 2, 0, 0
+    Ang: Angle 0, 0, 0
+
+  SizeClass: SIZE_SMALL
+
+class Rusty extends Can
+  Model: Model'models/props_junk/garbage_metalcan001a.mdl'
+
+  HandOffset:
+    Pos: Vector 1, 0, 0
+    Ang: Angle 0, 0, 0
+
+class Large extends Can
+  Model: Model'models/props_junk/garbage_metalcan002a.mdl'
+
+  HandOffset:
+    Pos: Vector 0, 0, 0
+    Ang: Angle 0, 0, 0
+
+class Bottle extends Junk
+  IName: 'bottle'
+  Model: Model'models/props_junk/GlassBottle01a.mdl'
+  Element: 'glass'
+  ImpactSound: Sound'physics/glass/glass_bottle_impact_hard1.wav'
+
+  HandOffset:
+    Pos: Vector 0, 0, 0
+    Ang: Angle 0, 0, 0
+
+  SizeClass: SIZE_SMALL
+
+class Jug extends Bottle
+  IName: 'jug'
+  Model: Model'models/props_junk/glassjug01.mdl'
+
+  HandOffset:
+    Pos: Vector 1, 1, -9
+    Ang: Angle 0, 0, 0
+
+class Beer extends Bottle
+  Model: Model'models/props_junk/garbage_glassbottle003a.mdl'
+
+  HandOffset:
+    Pos: Vector 0, 0, 0
+    Ang: Angle 0, 0, 0
+
+class Brown extends Bottle
+  Model: Model'models/props_junk/garbage_glassbottle001a.mdl'
+
+  HandOffset:
+    Pos: Vector 0, 0, 0
+    Ang: Angle 0, 0, 0
+
+class Bag extends Brown
+  IName: 'bagged bottle'
+  Model: Model'models/props_junk/garbage_glassbottle002a.mdl'
+
+  HandOffset:
+    Pos: Vector 1, 1, 1
+    Ang: Angle 0, 0, 0

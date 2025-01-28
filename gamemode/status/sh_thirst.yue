@@ -1,0 +1,20 @@
+class Thirst extends STATUS
+  desc: "Life drains away."
+  icon: Material"skeleton/icons/status/thirst.png"
+  interval: 300
+  increase: 1
+
+  Overflow: (ply) => ply\Kill!
+
+  Think: (ply) =>
+    return unless SERVER
+    return unless ply\Alive!
+    ply.StatusTicks or= {}
+    ply.StatusTicks[@index] = CurTime! + @interval unless ply.StatusTicks[@index]
+    if CurTime! >= ply.StatusTicks[@index]
+      ply.StatusTicks[@index] = CurTime! + @interval
+      amt = @increase
+      amt = -2 * @increase if ply\WaterLevel! > 0
+      ply\AddStatus @index, amt
+
+global STATUS_THIRST = Thirst.index

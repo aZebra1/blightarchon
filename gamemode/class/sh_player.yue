@@ -1,0 +1,31 @@
+import TranslatePlayerModel, TranslatePlayerHands, TranslateToPlayerModelName, RunClass, RegisterClass, SetPlayerClass, GetPlayerClass, GetPlayerClasses from player_manager
+
+meta = FindMetaTable'Player'
+meta[k] = v for k, v in pairs {
+  RunClass: (fn, ...) =>
+    cls = @ClassTable!
+    if cls and cls[fn]
+      RunClass @, fn, ...
+  ClassName: => GetPlayerClass @
+  ClassTable: => GetPlayerClasses![@ClassName!]
+}
+
+id = "eclipse_plyclass"
+hook.Add 'StartCommand', id, (ply, cmd) -> ply\RunClass 'StartCommand', cmd
+hook.Add 'PlayerPostThink', id, (ply) -> ply\RunClass 'Think'
+if CLIENT
+    hook.Add 'PrePlayerDraw', id, (ply, flags) -> ply\RunClass 'PrePlayerDraw', flags
+    hook.Add 'PostPlayerDraw', id, (ply, flags) -> ply\RunClass 'PostPlayerDraw', flags
+    hook.Add 'HUDPaint', id, -> LocalPlayer!\RunClass 'HUDPaint'
+    hook.Add 'HUDDrawTargetID', id, -> LocalPlayer!\RunClass 'HUDDrawTargetID'
+    hook.Add 'PostDrawOpaqueRenderables', id, -> LocalPlayer!\RunClass 'PostDrawOpaqueRenderables'
+    hook.Add 'InputMouseApply', id, (...) -> LocalPlayer!\RunClass 'InputMouseApply', ...
+else
+    hook.Add 'PostPlayerDeath', id, (ply) -> ply\RunClass 'PostPlayerDeath'
+    hook.Add 'SetupPlayerVisibility', id, (ply, viewEntity) ->
+        AddOriginToPVS viewEntity\WorldSpaceCenter! if IsValid viewEntity
+        ply\RunClass 'SetupPlayerVisibility', viewEntity
+
+global class PLYCLASS
+  @__inherited: (child) =>
+    RegisterClass string.lower(child.__name), child.__base, child.baseclass or "player_default"

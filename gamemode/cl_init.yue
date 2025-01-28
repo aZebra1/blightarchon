@@ -1,0 +1,71 @@
+-- Store our things which have been included already. This is so we don't load them twice.
+included = {}
+
+sh_luas = {
+  'shared'
+  -- Code within `stdlib` was harvested from other projects by smarter people.
+  -- They are as follows, to the best of my memory:
+    -- Flux     ©️ TeslaCloud Studios
+  'stdlib/'
+  'extension'
+  'animtable'
+  'class/'
+  'class/act/'
+  -- Things need to load before the other entity classes.
+  'class/entity/sh_things'
+  'class/entity/'
+  'class/entity/stack/'
+  'class/effect/'
+  'class/weapon/'
+  'class/caste/'
+  'class/fate/'
+  'modules/'
+  'playerclass'
+  'status/'
+}
+
+cl_luas = {
+  'stdlib/'
+  'class/cl_font'
+  'class/cl_bubble'
+  'class/font/'
+  'class/cl_vgui'
+  'modules/'
+  'class/vgui/'
+}
+
+for sh_lua in *sh_luas
+  ending = string.sub sh_lua, -1
+  if ending == "/"
+    -- Loading a directory.
+    files = file.Find "eclipse/gamemode/#{sh_lua}*.lua", "LUA"
+    for f in *files
+      -- Only load files beginning with `sh_`.
+      continue unless string.sub(f, 1, 3) == "sh_"
+      path = "#{sh_lua}#{f}"
+      continue if path in included
+      included[] = path
+      include path
+  else
+    path = "#{sh_lua}.lua"
+    continue if path in included
+    included[] = path
+    include path
+
+for cl_lua in *cl_luas
+  ending = string.sub cl_lua, -1
+  if ending == "/"
+    -- Loading a directory.
+    files = file.Find "eclipse/gamemode/#{cl_lua}*.lua", "LUA"
+    for f in *files
+      -- Only load files beginning with `cl_`.
+      continue unless string.sub(f, 1, 3) == "cl_"
+      path = "#{cl_lua}#{f}"
+      continue if path in included
+      included[] = path
+      include path
+  else
+    path = "#{cl_lua}.lua"
+    continue if path in included
+    included[] = path
+    include path

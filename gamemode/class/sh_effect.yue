@@ -1,0 +1,12 @@
+import Create from ents
+import Register from effects
+import lower, Left from string
+import TraceLine from util
+global class FX
+  @registered: {}
+  @__inherited: (child) =>
+    fields = {k,v for k,v in pairs(child.__base) when Left(k, 2) != "__"}
+    child.__barcode = "#{@__barcode and @__barcode .. '/' or ''}#{lower(rawget(child, '__entity') or child.__name)}"
+    Register fields, child.__barcode if CLIENT
+    MsgC Color(0, 200, 0), "+EFFECT: #{child.__barcode}\n"
+    @registered[child.__barcode] = child

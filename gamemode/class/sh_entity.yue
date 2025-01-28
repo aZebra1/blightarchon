@@ -1,0 +1,31 @@
+import Create from ents
+import Register from scripted_ents
+import lower, Left from string
+import TraceLine from util
+global class ENTITY
+  @registered: {}
+  @__inherited: (child) =>
+    with getmetatable child
+      .__call = (...) =>
+        ent = Create @__barcode
+        ent.__class = ent.BaseClass
+        @.__init ent, ...
+        ent
+    fields = {k,v for k,v in pairs(child.__base) when Left(k, 2) != "__"}
+    fields.Base or= @__barcode
+    fields.Spawnable or= @Spawnable
+    fields.Category or= @Category
+    child.__barcode = "#{@__barcode and @__barcode .. '/' or ''}#{lower(rawget(child, '__entity') or child.__name)}"
+    Register fields, child.__barcode
+    MsgC Color(0, 200, 0), "+ENTITY: #{child.__barcode}\n"
+    @registered[child.__barcode] = child
+  @create: (name, ...) =>
+    return unless @registered[name]
+    @registered[name] ...
+  new: (where) =>
+    if isvector where
+      @SetPos where
+    elseif isentity(where) and where\IsPlayer!
+      @SetPos where\GetEyeTrace!.HitPos
+    @Spawn!
+    @Activate!

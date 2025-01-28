@@ -1,0 +1,58 @@
+BIND "behold", KEY_B,
+  Press: (ply) =>
+    if CLIENT
+      return unless not ply.NextInspect or ply.NextInspect < CurTime!
+      ply.NextInspect = CurTime! + 0.5
+      tr = ply\GetInteractTrace 248
+      ent = tr.Entity
+      return unless tr.Entity\IsValid!
+      txt = 💾.Inspect\Inspect ply, ent
+      💾.Inspect\MakeBubble ply, ent, txt
+
+class Inspect extends MODULE
+  Inspect: (ply, ent) =>
+    text = ent\GetClass!
+    if ent.IName
+      text = ent.IName
+
+    text = ent\ProcessIName? text or text
+
+    if text == ent\GetClass!
+      switch ent\GetClass!
+        when 'prop_ragdoll'
+          who = ent\GetNWEntity'Player'
+          text = 'fresh body...'
+
+          if who and (IsValid who) and who\IsPlayer! and who\Alive!
+            text ..= "... alive"
+          else
+            text = 💾.Decay.stages[ent\GetNWInt "decay_stage", DECAYSTAGE_FRESH].name
+            text..= "... asleep forever"
+        when 'prop_physics'
+          text = 'trash'
+    if ent\IsPlayer! and ent\Alive!
+      text = ent\Nick!
+
+    ele = ent.Element
+    if ele and ele.IName
+      text = "#{ele.IName} #{text}"
+    return text
+
+  MakeBubble: (ply, ent, txt) =>
+    pos = ent\GetPos!
+    pos = ent\WorldSpaceCenter! if ent\IsPlayer! and ent\Alive!
+
+    BUBBLE {
+        text: "#{txt}"
+        font: "spleen_chat"
+        pos: pos
+        char: NULL
+        text_color: Color 128, 128, 128
+        vol: 0.5
+        move: Vector 0, 0, 0.025
+        speed: 0.5
+        lifespan: 6
+        clingy: false
+        auditory: false
+        speech: false
+      }

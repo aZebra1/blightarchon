@@ -1,0 +1,91 @@
+if SERVER
+  util.AddNetworkString netstr for netstr in *{
+    'dev_sp',
+    'dev_rs',
+    'dev_rs_confirm',
+    'dev_chmap',
+    'dev_chmap_confirm'
+  }
+  net.Receive "dev_sp", (len, ply) ->
+    return unless ply\IsAdmin!
+    barcode = net.ReadString!
+    cls = ENTITY.registered[barcode]
+    return unless cls and cls.Spawnable
+    -- run the constructor function on the class
+    -- for ENTITY this accepts a `where` argument,
+    -- in which case if it's a player the spawn position is where they're looking
+    cls ply
+  net.Receive "dev_rs", (len, ply) ->
+    return unless ply\IsAdmin!
+    if (not ply.restart_expiry) or ply.restart_expiry < CurTime!
+      ply.restart_expiry = CurTime! + 5
+      net.Start"dev_rs_confirm"
+      net.Send ply
+    else
+      RunConsoleCommand "changelevel", game.GetMap!
+  net.Receive "dev_chmap", (len, ply) ->
+    return unless ply\IsAdmin!
+    map = net.ReadString!
+    if (not ply.chmap_expiry) or ply.chmap_expiry < CurTime!
+      ply.chmap_expiry = CurTime! + 5
+      net.Start"dev_chmap_confirm"
+      net.WriteString map
+      net.Send ply
+    else
+      RunConsoleCommand "changelevel", map
+else
+  net.Receive "dev_rs_confirm", (len) -> MsgC Color(255,0,0), "You have entered the command to restart the server.\n", Color(172,0,0), "If you're sure you want to do this, input the same command within five seconds.\n"
+  net.Receive "dev_chmap_confirm", (len) ->
+    map = net.ReadString!
+    MsgC Color(255,0,0), "You have entered the command to change the map to ", Color(0,200,0), "#{map}.\n", Color(172,0,0), "If you're sure you want to do this, input the same command within five seconds.\n"
+
+spawn_callback = (ply, cmd, args, argstr) ->
+  if CLIENT
+    unless ply\IsAdmin!
+      MsgC Color(200, 0, 0), "You're too curious for your own good. This incident will be reported.\n" if CLIENT
+      return
+
+    cls = ENTITY.registered[argstr]
+    unless cls
+      MsgC Color(200, 0, 0), "No ENTITY class registered named #{argstr}.\n" if CLIENT
+      return
+    elseif not cls.Spawnable
+      MsgC Color(200, 0, 0), "ENTITY '#{argstr}' is not spawnable." if CLIENT
+      return
+
+    net.Start"dev_sp"
+    net.WriteString argstr
+    net.SendToServer!
+
+spawn_autocomplete = (cmd, input) ->
+  keys = [key for key, cls in pairs ENTITY.registered when cls.Spawnable]
+  options = {}
+  input = input\Trim!\lower!
+  for key in *keys
+    options[] = key if key\lower!\find input
+  return ["sp #{key}" for key in *options]
+
+concommand.Add 'sp', spawn_callback, spawn_autocomplete
+
+restart_callback = (ply, cmd, args, argstr) ->
+  if CLIENT
+    unless ply\IsAdmin!
+      MsgC Color(200, 0, 0), "You're too curious for your own good. This incident will be reported.\n" if CLIENT
+      return
+
+    net.Start"dev_rs"
+    net.SendToServer!
+
+concommand.Add 'rs', restart_callback
+
+chmap_callback = (ply, cmd, args, argstr) ->
+  if CLIENT
+    unless ply\IsAdmin!
+      MsgC Color(200, 0, 0), "You're too curious for your own good. This incident will be reported.\n" if CLIENT
+      return
+
+    net.Start"dev_chmap"
+    net.WriteString argstr
+    net.SendToServer!
+
+concommand.Add 'chmap', chmap_callback

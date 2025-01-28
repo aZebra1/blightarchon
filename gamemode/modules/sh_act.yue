@@ -1,0 +1,29 @@
+meta = FindMetaTable'Player'
+
+meta[k] = v for k, v in pairs{
+  DoingSomething: => @GetState! == STATE.ACTING
+  Do: (act, ...) =>
+    return if @DoingSomething!
+    return if not @Alive!
+    act = ACT.acts[act] if isnumber(act)
+    return if @GetIsRagdoll! and not act.RagdollAct
+    if act.Immobilizes
+      len2d = @GetVelocity!\Length2D!
+      len2d *= 1.02 -- just because speedlerp makes this a bit weird
+      if len2d >= TUMBLE_OUCH - 50
+        @BecomeRagdoll! if SERVER
+        return
+    @Doing = act @, ...
+    return if @Doing\Impossible!
+    @AlterState STATE.ACTING
+    -- picked up by hands:Think -> STATE_ACTING's Think which is predicted
+}
+
+class Act extends MODULE
+  InputMouseApply: (cmd, x, y, ang) =>
+    return if math.abs(x) + math.abs(y) <= 0
+    ply = LocalPlayer!
+    if (ply\DoingSomething! and ply.Doing?.Immobilizes) or ply.GettingUp
+      cmd\SetMouseX 0
+      cmd\SetMouseY 0
+      return true

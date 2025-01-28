@@ -1,0 +1,31 @@
+class Poison extends STATUS
+  desc: "It will be the death of you."
+  icon: Material"skeleton/icons/status/poison.png"
+  interval: 10
+  damage: 15
+
+  Overflow: (ply) => ply\TakeDamage @damage
+
+  Think: (ply) =>
+    return unless SERVER
+    return unless ply\Alive!
+    ply.StatusTicks or= {}
+    ply.StatusTicks[@index] = CurTime! + @interval unless ply.StatusTicks[@index]
+    if CurTime! >= ply.StatusTicks[@index]
+      ply.StatusTicks[@index] = CurTime! + @interval
+      active = ply\Status(@index) > 0
+      active = false if ply\WaterLevel! > 0
+
+      if active
+        with dmg = DamageInfo!
+          \SetDamageType DMG_ACID
+          \SetDamage @damage
+          \SetAttacker ply
+          \SetInflictor ply
+          ply\TakeDamageInfo dmg
+          ply\AddStatus @index, -1
+      else
+        ply\AddStatus @index, ply\WaterLevel!
+
+
+global STATUS_POISON = Poison.index

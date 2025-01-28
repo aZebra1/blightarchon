@@ -1,0 +1,14 @@
+global FATES = {}
+global class FATE
+  @__inherited: (child) =>
+    FATES[] = child
+    child.index = #FATES
+
+  name: ""
+  desc: "A specific position of a person within their caste."
+
+meta = FindMetaTable'Player'
+meta[k] = v for k, v in pairs {
+  Fate: => @GetFate!
+  FateTable: => FATES[@Fate!]
+}

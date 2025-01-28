@@ -1,0 +1,79 @@
+class HUD extends MODULE
+  @dont_draw =
+    * 'CHudAmmo'
+    * 'CHudSecondaryAmmo'
+    * 'CHudHealth'
+    * 'CHudBattery'
+    * 'CHudCrosshair'
+    * 'CHudWeapon'
+    * 'CHudWeaponSelection'
+    * 'CHudZoom'
+    * 'CHudDamageIndicator'
+    * 'CHudGeiger'
+    * 'CHudChat'
+    * 'CHudHistoryResource'
+
+  HUDShouldDraw: (name) => return false if name in @dont_draw
+
+  HUDItemPickedUp: => false
+  HUDDrawPickupHistory: => false
+
+  meters:
+    speed:
+      open:     false
+      x:        0
+      pct_curr: 0
+      pct_targ: 0
+
+  DrawSpeedMeter: =>
+    ply = LocalPlayer!
+    speed = ply\GetVelocity!\Length2D!
+    rag = ply\GetRagdoll!
+    if not (rag and IsValid rag) and (ply\KeyDown(IN_SPEED) or speed > SPEED_WALK*1.1)
+      @meters.speed.x = Lerp 0.03, @meters.speed.x, 20
+      target = ply\GetSpeedTarget!
+      @meters.speed.pct_curr = math.min 1, Lerp(FrameTime! * 5, @meters.speed.pct_curr, speed / SPEED_SPRINT)
+      @meters.speed.pct_targ = Lerp FrameTime! * 5, @meters.speed.pct_targ, target / SPEED_SPRINT
+      @meters.speed.open = true unless @meters.speed.open
+    else
+      @meters.speed.x = Lerp 0.03, @meters.speed.x, -20
+      @meters.speed.pct_curr = Lerp 0.1, @meters.speed.pct_curr, 0
+      @meters.speed.pct_targ = Lerp 0.1, @meters.speed.pct_targ, 0
+      @meters.speed.open = false if @meters.speed.open
+
+    y = ScrH! * 0.5
+    if @meters.speed.x > 0
+      dark = 0.35 + math.abs(math.sin(CurTime!) / 4)
+      draw.NoTexture!
+      surface.SetDrawColor ColorAlpha COLOR_BLACK, 255
+      draw.DrawArc @meters.speed.x, y, 20, 0, 360
+      surface.SetDrawColor Darken COLOR_YELLOW, dark
+      draw.DrawRing @meters.speed.x, y, 20, 6, 0, math.floor(360*@meters.speed.pct_targ)
+      surface.SetDrawColor Darken COLOR_RED, dark
+      draw.DrawRing @meters.speed.x, y, 20, 4, 0, math.max(1, math.floor(360 * @meters.speed.pct_curr))
+
+    return
+
+  DrawInventory: =>
+    ply = LocalPlayer!
+    return unless IsValid ply
+    wielding, wielding_off = ply\Wielding!, ply\WieldingOffhand!
+    if IsValid wielding
+      name = 💾.Inspect\Inspect( ply, wielding ) or wielding\ProcessIName!
+      surface.SetFont'spleen_label'
+      w, h = surface.GetTextSize name
+      draw.DrawTextShadow name, "spleen_label", ScrW! - 20, ScrH! - h - 20, COLOR_WHITE, COLOR_BLACK, TEXT_ALIGN_RIGHT
+    if IsValid wielding_off
+      name = 💾.Inspect\Inspect( ply, wielding_off ) or wielding_off\ProcessIName!
+      surface.SetFont'spleen_label'
+      w, h = surface.GetTextSize name
+      draw.DrawTextShadow name, "spleen_label", 20, ScrH! - h - 20, COLOR_WHITE, COLOR_BLACK, TEXT_ALIGN_LEFT
+
+  HUDDrawTargetID: => false
+
+  HUDPaint: =>
+    hook.Run "PaintWorldTips"
+    BUBBLE?\Draw!
+    @DrawSpeedMeter!
+    @DrawInventory!
+    return

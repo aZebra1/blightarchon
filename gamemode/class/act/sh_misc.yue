@@ -1,0 +1,34 @@
+-- this is for checking which animation to play when getting up
+rag_orientation = (rag) ->
+  return unless rag and IsValid rag
+  -- roughly center of the chest
+  chest_id = rag\LookupBone"ValveBiped.Bip01_Spine1"
+  chest_pos, chest_ang = rag\GetBonePosition chest_id
+  result_pos = chest_pos + chest_ang\Forward! * 8
+  -- if chest is facing up, use this anim (slumped to standing)
+  return "wos_mma_standup_front01" if result_pos.y > chest_pos.y
+  -- if chest is facing down, use this anim (face-down to standing)
+  return "wos_mma_standup_back01"
+  --TODO When we have attributes, characters with very high FUCKEDUP will use the 'wos_mma_kipup' instead of 'wos_mma_standup_back01'
+
+class STAND_UP extends ACT
+  RagdollAct: true
+  Immobilizes: true
+  Do: (fromstate) =>
+    @GettingUp = true
+    return unless SERVER
+    rag = @ply\GetRagdoll!
+    with @ply
+      \SetNoTarget false
+      \SetNotSolid false
+      \DrawWorldModel true
+      \DrawViewModel true
+      -- set move type here
+      \UnSpectate!
+    sequence = rag_orientation rag
+    @ply\RestoreFromRagdoll!
+    @Spasm :sequence, slot: GESTURE_SLOT_JUMP, SS: true
+  Then: =>
+    super!
+    @ply.GettingUp = false
+    @ply\Unstuck! if @ply\Stuck!

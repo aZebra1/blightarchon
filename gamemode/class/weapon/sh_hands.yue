@@ -1,0 +1,62 @@
+class Hands extends WEAPON
+  Primary:
+    ClipSize: -1
+    DefaultClip: -1
+    Automatic: false
+    Ammo: ""
+    Damage: 0
+    Delay: 0
+  WorldModel: ''
+  SetupDataTables: =>
+    @NetworkVar 'Float', 0, 'NextInteraction'
+    @NetworkVar 'Float', 1, 'LastThrow'
+    @NetworkVar 'Bool', 0, 'Throw'
+    @NetworkVar 'Bool', 1, 'Raised'
+  Think: =>
+    ply = @GetOwner!
+    ply\GetStateTable!\Think ply
+    ply.Doing\Think! if ply.Doing
+    thing = ply\Wielding!
+    if CLIENT and IsValid thing
+      return if true --???
+      @RenderGroup = thing\GetRenderGroup!
+      @WorldModel = thing\GetModel!
+  PrimaryAttack: =>
+    ply = @GetOwner!
+    thing = ply\Wielding!
+    tr = ply\GetInteractTrace!
+    ent = tr.Entity
+    controls =
+      * ctrl: "release_right"
+        what: thing
+      * ctrl: "release_left"
+        what: ply\WieldingOffhand!
+    for c in *controls
+      if IsValid(c.what) and BIND.controls[c.ctrl]\IsDown ply
+        return if ply\StateIs STATE.PRIMED
+          ply\Do ACT.THROW, c.what
+        else
+          ply\Do ACT.PLACE, c.what
+    if IsValid thing
+      if ply\StateIs STATE.PRIMED
+        if thing.AttackAct and thing.AttackEnabled
+          @SetNextPrimaryFire CurTime! + thing.AttackDelay if thing.AttackDelay
+          return ply\Do thing.AttackAct, thing
+      if thing\OnPrimaryInteract tr, ply, @
+        return
+      ent\OnActUpon ply, @, thing if IsValid(ent) and ent.OnActUpon
+    else
+      return if ply\StateIs STATE.PRIMED
+        ply\Do ACT.PUNCH
+        return
+      return unless IsValid ent
+      return ent\ActUpon ply, @ if ent.ActUpon
+      return if ent\IsPlayer!
+      ply\Do ACT.PICK_UP, ent
+  SecondaryAttack: =>
+  HeldItemChanged: (old, new) =>
+    old\SetPredictable false if CLIENT and IsValid old
+    new\SetPredictable true if CLIENT and IsValid new
+
+meta = FindMetaTable'Player'
+meta.GetHands = => @GetWeapon'hands'

@@ -1,0 +1,71 @@
+table[k] = v for k, v in pairs {
+  FlipKeyValues: (tbl) -> {v,k for k,v in pairs tbl}
+}
+
+eye_off_vec, eye_off_ang = Vector(0,0,30), Angle(20,0,0)
+
+import TraceLine from util
+
+emeta = FindMetaTable'Entity'
+emeta[k] = v for k, v in pairs {
+  DistanceFrom: (pos) =>
+    pos = pos\GetPos! if isentity pos
+    return @GetPos!\Distance pos
+  DistanceFromSqr: (pos) =>
+    pos = pos\GetPos! if isentity pos
+    return @GetPos!\DistToSqr pos
+  GetBoneTransformation: (bone) =>
+    pos, ang = @GetBonePosition bone
+    if (not pos) or pos\IsZero! or pos == @GetPos!
+      matrix = @GetBoneMatrix bone
+      if matrix and ismatrix matrix
+        bone_tab = {
+          Pos: matrix\GetTranslation!
+          Ang: matrix\GetAngles!
+        }
+        return bone_tab
+    bone_tab =
+      Pos: pos
+      Ang: ang
+    return bone_tab
+  GetAttachmentPoint: (pointtype) =>
+    switch pointtype
+      when 'hand'
+        lookup = @LookupAttachment'anim_attachment_RH'
+        if lookup == 0
+          bone = @LookupBone'ValveBiped.Bip01_R_Hand'
+          unless isnumber bone
+            attach_tab = {
+              Pos: @WorldSpaceCenter!
+              Ang: @GetForward!\Angle!
+            }
+            return attach_tab
+          return @GetBoneTransformation bone
+        return @GetAttachment lookup
+      when 'eyes'
+        lookup = @LookupAttachment'eyes'
+        if lookup == 0
+          attach_tab = {
+            Pos: @WorldSpaceCenter + eye_off_vec
+            Ang: @GetForward!\Angle! + eye_off_ang
+          }
+          return attach_tab
+        return @GetAttachment lookup
+  CanSee: (ent) =>
+    return unless IsValid ent
+    tr = TraceLine {
+      start: @GetAttachmentPoint'eyes'.Pos
+      endpos: ent\WorldSpaceCenter!
+      filter: @
+    }
+    return tr.Fractioon == 1.0 or tr.Entity == ent
+  AttemptBoneScale: (name, scale, networking) =>
+    id = @LookupBone name
+    @ManipulateBoneScale id, scale, networking if id
+  IsDoor: =>
+    switch @GetClass!
+      when "prop_door_rotating", "func_door_rotating", "func_door"
+        return true
+      else
+        return false
+}

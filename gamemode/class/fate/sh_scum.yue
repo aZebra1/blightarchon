@@ -1,0 +1,61 @@
+global FATE_SCUM_LABOR, FATE_SCUM_KEEPER, FATE_SCUM_STITCHER, FATE_SCUM_DEADBEAT, FATE_SCUM_PSYCHER, FATE_SCUM_FOREMAN, FATE_SCUM_COOK
+class SCUM extends FATE
+  caste: CASTE_SCUM
+
+class Laborer extends SCUM
+  name: "Laborer"
+  desc: [[The red blood cells of Liver Failure.
+Those responsible for heavy lifting, operation of industrial equipment, and general manual labor.
+They are the backbone of the operation, and the most numerous civilian.]]
+
+FATE_SCUM_LABOR = Laborer.index
+
+class Keeper extends SCUM
+  name: "Keeper"
+  desc: [[The owners of shops and other places of sale in Liver Failure.
+Those responsible for the distribution of goods in the civilian market.
+They are the most common species of small business owner.]]
+
+FATE_SCUM_KEEPER = Keeper.index
+
+class Stitcher extends SCUM
+  name: "Stitcher"
+  desc: [[The civilian medical amateurs of Liver Failure.
+Those responsible for the treatment of minor injuries and illnesses.
+They are not necessarily officially equipped or trained, but more likely available to civilians.]]
+
+FATE_SCUM_STITCHER = Stitcher.index
+
+class Psycher extends SCUM
+  name: "Psycher"
+  desc: [[The chemists and botanists of Liver Failure.
+Those responsible for the creation of drugs and other substances, sometimes medically relevant ones.
+They are not necessarily responsible for the distribution of their not necessarily legal products.]]
+
+FATE_SCUM_PSYCHER = Psycher.index
+
+class Deadbeat extends SCUM
+  name: "Deadbeat"
+  desc: [[The unemployed of Liver Failure.
+Those responsible for nothing good, in the eyes of the government.
+They are not predictable; opportunism doesn't equal trustworthiness.]]
+
+FATE_SCUM_DEADBEAT = Deadbeat.index
+
+class Foreman extends SCUM
+  name: "Foreman"
+  desc: [[The overseer of the proletariat in Liver Failure.
+He supervises the laborers' work and keeps them coordinated and safe.
+Equipped with a screamer and a legal mandate to snitch.]]
+
+FATE_SCUM_FOREMAN = Foreman.index
+
+class Cook extends SCUM
+  name: "Cook"
+  desc: [[Knows how to kill, cut up, and cook food.
+Filling, resourceful, and sometimes even palatable.
+A deeply important role, yet often forgotten.]]
+
+FATE_SCUM_COOK = Cook.index
+
+CASTES[CASTE_SCUM].fates = {FATE_SCUM_LABOR, FATE_SCUM_KEEPER, FATE_SCUM_STITCHER, FATE_SCUM_DEADBEAT, FATE_SCUM_PSYCHER, FATE_SCUM_FOREMAN, FATE_SCUM_COOK}

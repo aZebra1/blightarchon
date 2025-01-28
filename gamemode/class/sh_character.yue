@@ -1,0 +1,11 @@
+global CHARACTERS
+CHARACTERS or= {}
+
+global class CHAR
+  @next_id: 0
+  new: (@name) =>
+    CHARACTERS[@@next_id] = @
+    @@next_id += 1
+
+  name: ""
+  adjs: {}

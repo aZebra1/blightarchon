@@ -1,0 +1,178 @@
+import random from math
+import Empty from table
+import TraceHull, TraceLine, GetSurfaceData from util
+
+class PICK_UP extends ACT
+  new: (@ply, @thing) => super @ply
+  Immobilizes: false
+  Impossible: =>
+    if IsValid(@thing) and @ply\DistanceFrom(@thing) <= 82*1.15
+      cls = @thing\GetClass!
+      if cls\starts'thing' or cls == "prop_ragdoll"
+        return false
+    return true
+  Do: (fromstate) =>
+    sequence, snd, cycle = 'g_lookatthis', 'PickupThing', .23
+    if @ply\EyeAngles!.p >= 45
+      sequence, cycle = 'pickup_generic_offhand', .5
+    @Spasm :sequence, SS: true
+    @CYCLE cycle, =>
+      with @thing
+        \EmitSound snd if SERVER
+        cls = \GetClass!
+        if cls\starts'thing'
+          \MoveTo @ply, @ply\GetInventory!, SLOT_HAND if SERVER
+        elseif cls == "prop_ragdoll"
+          @ply\PickupObject @thing if SERVER
+          @thing.DraggedBy = @ply
+          @ply\SetDragging @thing
+      @Kill!
+
+class DROP extends ACT
+  new: (@ply, @thing) => super @ply
+  Immobilizes: false
+  Impossible: => true unless IsValid(@thing) and @thing in {@ply\Wielding!, @ply\WieldingOffhand!}
+  Do: (fromstate) => @ply\Release @thing
+
+class PLACE extends ACT
+  new: (@ply, @thing, @alt) => super @ply
+  Immobilizes: false
+  Impossible: => true unless IsValid(@thing) and @thing in {@ply\Wielding!, @ply\WieldingOffhand!}
+  Do: (fromstate) =>
+    ang = if @alt then @thing.PlaceAngle2 else @thing.PlaceAngle
+    sequence, cycle, speed = 'range_slam', .23, 1
+    --if @ply\EyeAngles!.p >= 23
+    --    anim = 'g_palm_out_r'
+    if (CLIENT and IsFirstTimePredicted!) or SERVER
+      @Spasm :sequence, :speed
+    @CYCLE cycle, =>
+      if SERVER
+        @thing\SetAngles Angle(0, @ply\GetAngles!.y, 0) + ang
+        tr = @ply\TraceItem @thing, @ply\GetInteractTrace!.HitPos
+        @thing\MoveToWorld tr.HitPos, @thing\GetAngles!
+        start = @thing\GetPos!
+        endpos = start - Vector(0,0,3)
+        tr = TraceLine
+          :start
+          :endpos
+          filter: @thing
+        unless tr.Hit
+          tr = TraceLine
+            :start
+            endpos: start
+        surfprop = GetSurfaceData tr.SurfaceProps
+        surfprop or= GetSurfaceData 0
+        snd = surfprop.impactSoftSound
+        @thing\EmitSound snd
+      @Kill!
+
+class THROW extends ACT
+  new: (@ply, @thing, @mult=1) => super @ply
+  Immobilizes: false
+  Impossible: => true unless IsValid(@thing) and @thing in {@ply\Wielding!, @ply\WieldingOffhand!}
+  Do: (fromstate) =>
+    sequence = switch @thing
+      when @ply\Wielding!
+        "gesture_throw_grenade"
+      when @ply\WieldingOffhand!
+        "gesture_item_throw"
+    cycles = switch sequence
+      when "gesture_throw_grenade"
+        { start:  0, throw: .25 }
+      when "gesture_item_throw"
+        { start: .45, throw: .65 }
+    if (CLIENT and IsFirstTimePredicted!) or SERVER
+      @Spasm :sequence, start: cycles.start
+    @CYCLE cycles.throw, =>
+      if IsFirstTimePredicted! and SERVER
+        @ply\Release @thing
+        @thing\EmitSound 'ThrowThing'
+        vel = @thing.ThrowVelocity
+        @thing\SetCollisionGroup COLLISION_GROUP_PLAYER
+        phys = @thing\GetPhysicsObject!
+        phys\SetVelocity @ply\GetVelocity! + (@ply\GetForward! + Vector(0, 0, .1)) * @thing.ThrowVelocity * @mult
+        phys\AddAngleVelocity Vector(vel, math.random(-vel, vel), 0) unless @thing.SizeClass == SIZE_HUGE
+
+class ThrowThing extends SOUND
+  sound: ["dysphoria/whoosh/arm#{i}.ogg" for i=1,30]
+  pitch: {70, 90}
+
+class PickupThing extends SOUND
+  sound: ["dysphoria/pickup#{i}.ogg" for i=1,5]
+
+class HolsterThing extends SOUND
+  sound: ["dysphoria/weapons/wield_gun#{i}.ogg" for i=1,3]
+
+class HOLSTER extends ACT
+  new: (@ply, @thing, @islot) =>
+    super @ply
+  Immobilizes: false
+  Impossible: =>
+    return true unless IsValid(@ply\GetInventory!)
+    return true if IsValid(@ply\GetInventory!\GetSlot @islot)
+    return false
+  Do: (fromstate) =>
+    sequence, snd, cycle = @thing.HolsterSequence or 'weapon_holster_gesture', @thing.HolsterSound or 'HolsterThing', .45
+    @Spasm :sequence, SS: true
+    @CYCLE cycle, =>
+      with @thing
+        \EmitSound snd if SERVER
+        cls = \GetClass!
+        if cls\starts'thing'
+          \MoveTo @ply, @ply\GetInventory!, @islot if SERVER
+      @Kill!
+
+BIND 'item_holster_left',
+  KEY_G, {
+    Press: (ply) =>
+      if SERVER
+        wielding = ply\Wielding!
+        belted = ply\GetInventory!\GetSlot(SLOT_BELT_L)
+        if IsValid wielding
+          ply\Do ACT.HOLSTER, wielding, SLOT_BELT_L
+        elseif IsValid belted
+          ply\Do ACT.UNHOLSTER, belted
+  }
+BIND 'item_holster_right',
+  KEY_H, {
+    Press: (ply) =>
+      if SERVER
+        wielding = ply\Wielding!
+        belted = ply\GetInventory!\GetSlot(SLOT_BELT_R)
+        if IsValid wielding
+          ply\Do ACT.HOLSTER, wielding, SLOT_BELT_R
+        elseif IsValid belted
+          ply\Do ACT.UNHOLSTER, belted
+  }
+
+for pocket=1,4
+  BIND "item_holster_pocket#{pocket}",
+    _G["KEY_#{pocket}"], {
+      Press: (ply) =>
+        if SERVER
+          slot = _G["SLOT_POCKET#{pocket}"]
+          wielding = ply\Wielding!
+          pocketed = ply\GetInventory!\GetSlot(slot)
+          if IsValid wielding
+            ply\Do ACT.HOLSTER, wielding, slot
+          elseif IsValid pocketed
+            ply\Do ACT.UNHOLSTER, pocketed
+    }
+
+class UNHOLSTER extends ACT
+  new: (@ply, @thing) => super @ply
+  Immobilizes: false
+  Impossible: =>
+    return true unless IsValid(@ply\GetInventory!)
+    return true if IsValid(@ply\Wielding!)
+    return false
+  Do: (fromstate) =>
+    sequence, snd, cycle = @thing.UnholsterSequence or 'UNHOLSTER_Pistol', @thing.UnholsterSound or 'HolsterThing', .33
+    @Spasm :sequence, SS: true
+    @CYCLE cycle, =>
+      with @thing
+        \EmitSound snd if SERVER
+        cls = \GetClass!
+        if cls\starts'thing'
+          \MoveTo @ply, @ply\GetInventory!, SLOT_HAND if SERVER
+      @Kill!

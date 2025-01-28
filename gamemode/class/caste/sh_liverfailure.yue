@@ -1,0 +1,22 @@
+global CASTE_SCUM, CASTE_SANITAR, CASTE_OVERLORD
+
+class Scum extends CASTE
+  name: "Scum"
+  desc: "Everyone beneath the state. May or may not be legally considered people."
+  color: Color(128, 64, 64)
+
+CASTE_SCUM = Scum.index
+
+class Sanitar extends CASTE
+  name: "Sanitar Squad"
+  desc: "Originally assembled as a corpse disposal unit, the Sanitar Squad now functions as the Kommandant's fascist police force and personal guard."
+  color: Color(0, 196, 0)
+
+CASTE_SANITAR = Sanitar.index
+
+class Overlord extends CASTE
+  name: "Overlords"
+  desc: "The decisive ruling class of the city; the Kommandant and his colleagues."
+  color: Color(196, 0, 0)
+
+CASTE_OVERLORD = Overlord.index

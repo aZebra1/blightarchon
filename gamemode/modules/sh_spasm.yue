@@ -1,0 +1,56 @@
+import ReadEntity, WriteEntity,
+    ReadString, WriteString,
+    ReadUInt, WriteUInt,
+    ReadFloat, WriteFloat from net
+
+class NETMSG_SPASM extends NETMSG
+  @Write: (ply, sequence, slot=GESTURE_SLOT_CUSTOM, speed=1, start=0) =>
+    WriteEntity ply
+    WriteUInt sequence, 16
+    WriteUInt slot, 3
+    WriteUInt speed, 3
+    WriteFloat start
+  @Read: => ReadEntity!, ReadUInt(16), ReadUInt(3), ReadUInt(3), ReadFloat!
+  @Callback: (ply, who, sequence, slot, speed, start) =>
+    return unless IsValid who
+    return if who\IsDormant!
+    who\Spasm {
+      :sequence
+      :slot
+      :speed
+      :start
+    }
+
+global SEQUENCE_LOOKUP = {}
+hook.Add 'PostLoadAnimations', 'eclipse', -> SEQUENCE_LOOKUP = {}
+
+meta = FindMetaTable'Player'
+meta[k] = v for k, v in pairs{
+  FindSequence: (act) =>
+    return SEQUENCE_LOOKUP[act] if SEQUENCE_LOOKUP[act]
+    seq = @LookupSequence act
+    SEQUENCE_LOOKUP[act] = seq if seq > -1
+    return seq
+  Spasm: (choreo) =>
+    import SS from choreo
+    slot = choreo.slot or GESTURE_SLOT_CUSTOM
+    sequence = choreo.sequence
+    start = choreo.start or 0
+    speed = choreo.speed or 1
+    sequence = switch type(sequence)
+      when 'table'
+        table.Random sequence
+      -- when 'number'
+      --   @SelectWeightedSequence sequence
+      when 'string'
+        @FindSequence sequence
+    if SERVER
+      if SS
+        NETMSG_SPASM\Broadcast @, sequence, slot, speed, start
+      else
+        NETMSG_SPASM\SendOmit @, @, sequence, slot, speed, start
+    sequence = @FindSequence sequence if isstring(sequence)
+    @AddVCDSequenceToGestureSlot slot, sequence, start, not loop
+    @SetLayerPlaybackRate slot, speed if isnumber(speed)
+    return sequence, slot
+}

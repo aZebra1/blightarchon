@@ -1,0 +1,225 @@
+meta = FindMetaTable'Player'
+
+meta[k] = v for k, v in pairs {
+  InitializeBody: =>
+    @Body or= {}
+
+    segments = {"torso", "legs"}
+    for s in *segments
+      with segment = ents.Create"bonemerge"
+        \SetModel"models/in/player/every#{s}.mdl"
+        \SetParent @
+        \Spawn!
+        @Body[s]\Remove! if @Body[s] -- remove whatever exists here first, if anything
+        @Body[s] = segment
+
+    -- null bodygroups
+    @SetBodygroup i, 0 for i=1, 9
+
+    -- set hands
+    @SetBodygroup @FindBodygroupByName"hands", 1
+
+  GetViewOrigin: =>
+    local pos
+    local ang
+    ent = @GetBodyEntity!
+    return unless IsValid ent
+    head = ent\LookupBone'ValveBiped.Bip01_Head1'
+    if head
+      ent\SetupBones! if CLIENT
+      matrix = ent\GetBoneMatrix head
+      pos, ang = LocalToWorld Vector(5,-5,0), Angle(0,-90,-90), matrix\GetTranslation!, matrix\GetAngles!
+      ang = ent\EyeAngles! unless ent\IsRagdoll!
+      trace = util.TraceLine {
+        start: @EyePos!
+        endpos: pos
+        filter: @GetTraceFilter!
+        mins: Vector -3, -3, -3
+        maxs: Vector 3, 3, 3
+        collisiongroup: COLLISION_GROUP_PLAYER_MOVEMENT
+      }
+      pos = trace.HitPos
+    return pos, ang
+
+  GetTraceFilter: => 
+    filter = {@, @GetBodyEntity!, @Wielding!, @WieldingOffhand!, ...@BeltItems!}
+    filter[] = @GetInventory!\GetSlot pocket for pocket in *{SLOT_POCKET1, SLOT_POCKET2, SLOT_POCKET3, SLOT_POCKET4}
+    return filter
+
+  GetInteractTrace: (range=82) =>
+    if CLIENT
+      frame = FrameNumber!
+      return @InteractTrace if @LastInteractTrace == frame
+      @LastInteractTrace = frame
+    vo, va = @GetViewOrigin!
+    @InteractTrace = util.TraceHull {
+      start: vo
+      endpos: vo + va\Forward! * range
+      mins: Vector -5, -5, -5
+      maxs: Vector 5, 5, 5
+      filter: @GetTraceFilter!
+    }
+    return @InteractTrace
+
+  GetHandPosition: =>
+    index = @LookupAttachment 'anim_attachment_RH'
+    if att := @GetAttachment index
+      return att.Pos, att.Ang
+
+  GetRF: (maxd, muffled, inclself) =>
+    rf = {}
+    body_ours = @GetBodyEntity!
+    head_ours = body_ours\GetHeadPos!
+    for ply in *player.GetAll!
+      body_theirs = ply\GetBodyEntity!
+      head_theirs = body_theirs\GetHeadPos!
+      if (body_theirs ~= body_ours) or inclself
+        dist = maxd
+        if maxd ~= muffled and not body_theirs\CanHear body_ours
+          dist = muffled
+        rf[] = ply if head_theirs\Distance(head_ours) < dist
+    return rf
+
+  CanSee: (ent) => hook.Run 'CanSeePos', @EyePos!, ent\EyePos!, { @, ent }
+
+  LookingAt: (ent) =>
+    if @CanSee ent
+      local tpos
+      if ent\IsPlayer!
+        tpos = ent\EyePos!
+      else
+        tpos = ent\GetPos!
+      return @LookingInDirection tpos
+
+  LookingInDirection: (pos, pct=0.95) =>
+    diff = pos - @GetShootPos!
+    match = @GetAimVector\Dot(diff) / diff\Length!
+    return match >= pct
+
+  CanHear: (ent) =>
+    tr = util.TraceLine {
+      start: @GetHeadPos!
+      endpos: ent\GetHeadPos!
+      filter: @
+      mask: MASK_SOLID
+    }
+    e = tr.Entity
+    if IsValid(e) and ((e\EntIndex! == ent\EntIndex!) or (e.GetRagdoll or e\GetClass! == "prop_ragdoll" and e == ent\GetRagdoll!))
+      return true
+    else
+      return false
+
+  -- hit detection
+  GetTargets: (dir=@GetAimVector!, range=@BoundingRadius!, addfilter, fatness=.75, exclude, compensate) =>
+    traces = {}
+    filter = @GetTraceFilter exclude
+    if addfilter then
+      filter[] = x for x in *addfilter
+    uncompstart = @WorldSpaceCenter!
+    if compensate
+      @LagCompensation true
+    start = @WorldSpaceCenter!
+    trace = {
+      :start
+      endpos: start + dir * range
+      mins: @OBBMins! * fatness
+      maxs: @OBBMaxs! * fatness
+      :filter
+      mask: MASK_SHOT
+    }
+    for i=1,20
+      tr = util.TraceHull trace
+      ent = tr.Entity
+      if IsValid ent
+        traces[] = tr
+        trace.filter[] = ent
+    for i=1,20
+      tr = util.TraceLine trace
+      ent = tr.Entity
+      if IsValid ent
+        traces[] = tr
+        trace.filter[] = ent
+    if compensate
+      @LagCompensation false
+    return traces
+
+}
+
+class Player extends MODULE
+  CanSeePos: (pos1, pos2, filter) =>
+    tr = util.TraceLine {
+      start: pos1
+      endpos: pos2
+      :filter
+      mask: MASK_SOLID + CONTENTS_WINDOW + CONTENTS_GRATE
+    }
+    return true if tr.Fraction == 1.0
+    return false
+
+  -- setting player class
+  PlayerInitialSpawn: (ply) =>
+    player_manager.SetPlayerClass ply, "victim"
+    return
+
+  PlayerSpray: => true
+
+  -- drawing the player
+
+  PrePlayerDraw: (ply) =>
+    return true if ply\GetWatching!
+
+    rag = ply\GetRagdoll!
+    if rag and rag\IsValid!
+      -- for v in *rag\GetChildren!
+        -- v\DrawModel! if v\GetClass! == "bonemerge"
+      return true
+
+    -- draw spectral players here
+
+    return
+
+  drawing_bonemerge = false
+
+  PostPlayerDraw: (ply) =>
+    unless drawing_bonemerge
+      drawing_bonemerge = true
+
+      for v in *ply\GetChildren!
+        v\DrawModel! if v\GetClass! == "bonemerge"
+
+      drawing_bonemerge = false
+      render.SetBlend 1
+
+  -- disabling voice
+
+  PlayerCanHearPlayersVoice: (ply, other) => false
+  PlayerStartVoice: (ply) => true
+
+BIND "cough", KEY_K,
+  Press: (ply) =>
+    if SERVER
+      ply\Do ACT.COUGH
+
+class Cough extends SOUND
+  sound: ["ambient/voices/cough#{i}.wav" for i=1,4]
+  -- level: SNDLVL_60dB
+
+class COUGH extends ACT
+  Immobilizes: false
+  Do: (fromstate) =>
+    with @ply
+      return unless \StanceIs STANCE_RISEN
+      sequence = 'a_g_headinhds'
+      snd, cycle1 = "ambient/voices/cough" .. math.random(1, 4) .. ".wav", .43
+      if (CLIENT and IsFirstTimePredicted!) or SERVER
+        @Spasm :sequence
+      @CYCLE cycle1, =>
+        if IsFirstTimePredicted! and SERVER
+          bone = 'ValveBiped.Bip01_Head1'
+          \EmitSound'Cough'
+          -- Play snd, \GetBonePosition(\LookupBone bone), math.random(90,110)
+
+GM.DoPlayerDeath = =>
+
+GM.PlayerDeathSound = =>
+  return true -- no flatlining

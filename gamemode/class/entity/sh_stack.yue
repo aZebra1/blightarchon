@@ -1,0 +1,38 @@
+THING.STACK = class STACK extends THING
+  SetupDataTables: =>
+    super!
+    @AddNetworkVar 'Int', 'Amount'
+
+  AddAmount: (added) =>
+    new = math.min @GetAmount! + added, @Maximum
+    new = math.max 0, new
+    if new <= 0
+      @Remove!
+    @SetAmount new
+
+  Maximum: 10
+  SpawnWith: { 1, 10 } -- can be a table of min/max numbers, or one number
+
+  OnSpawned: =>
+    start_amount = @SpawnWith
+    if istable @SpawnWith
+      start_amount = math.random( @SpawnWith[1], @SpawnWith[2] )
+    @SetAmount start_amount
+
+  UsedOnOther: (ply, ent) =>
+    return if CLIENT
+    return unless ent\GetClass! == @GetClass!
+    return if ent\GetAmount! == ent.Maximum
+    current_amt = @GetAmount!
+    other_amt = ent\GetAmount!
+    amt = math.min current_amt, ent.Maximum - other_amt
+    unless ply\IsHolding(@) and ply\IsHolding(ent)
+      ply\Spasm sequence: 'gesture_item_give', SS: true
+    ent\AddAmount amt
+    @AddAmount -amt
+    return true
+
+  ProcessIName: (...) =>
+    text = super ...
+    text ..= ", #{@GetAmount!}/#{@Maximum}"
+    return text

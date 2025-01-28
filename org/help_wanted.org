@@ -1,0 +1,17 @@
+
+#+TITLE: HELP WANTED
+#+AUTHOR: Sotla
+#+LAST_EDIT: <2024-11-22 Fri 22:15 EST>
+
+We're looking for fresh bodies we can sacrifice to our greater cause.
+
+* Contract?
+We are willing and happy to introduce more people to our effort, but
+this does not mean surrender of our wishes and control of our project.
+
+Consider the following terms and take them seriously. We'll start with
+some definitions.
+
+- We :: The /primary/ creators and developers of the project. Mostly
+  *Amanita*.
+- You :: Not /we/.

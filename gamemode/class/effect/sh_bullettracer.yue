@@ -1,0 +1,40 @@
+tracer = Material"trails/smoke"
+tracer2 = Material"trails/smoke"
+width = 2.45
+width2 = 2.3
+
+class BulletTracer extends FX
+  Init: (data) =>
+    with data
+      @pos = \GetStart!
+      @pos_end = \GetOrigin!
+      @weapon_ent = \GetEntity!
+      @attachment = \GetAttachment!
+
+    @pos_start = @GetTracerShootPos @pos, @weapon_ent, @attachment
+    @SetRenderBoundsWS @pos_start, @pos_end
+
+    -- this is unused?
+    @dir = ( @pos_end - @pos_start )\GetNormalized!
+    @dist = @pos_start\Distance @pos_end
+
+    @lifetime = 0.4 * 1/2
+    @lifetime2 = 0.1 * 1/2
+    @dietime = CurTime! + @lifetime
+    @dietime2 = CurTime! + @lifetime2
+
+  Think: =>
+    return false if CurTime! > @dietime
+    return true
+
+  Render: =>
+    r, g, b = 255, 220, 120
+
+    v = ( @dietime - CurTime! ) / @lifetime
+    v2 = ( @dietime2 - CurTime! ) / @lifetime2
+
+    render.SetMaterial tracer
+    render.DrawBeam @pos_start, @pos_end, (v * width)*2/2, 0, @dist/10, Color( 90, 90, 90, v * 160 )
+
+    render.SetMaterial tracer2
+    render.DrawBeam @pos_start, @pos_end, (v2 * width2)*2/3, 0, @dist/10, Color( r, g, b, (v2 * 95) * 1/2 )

@@ -1,0 +1,71 @@
+import clamp from math
+class Target extends MODULE
+  target_info: {}
+  target_cur: {}
+  target_old: {}
+
+  Think: =>
+    @TargetThink!
+    return
+
+  HUDPaint: =>
+    @DrawTargetInfo!
+    return
+
+  DrawTargetInfo: =>
+    for k, target in pairs @target_info
+      import entity from target
+      if IsValid entity
+        target.alpha = if @target_cur == entity
+          clamp target.alpha + 250 * FrameTime!, 0, 255
+        else
+          clamp target.alpha - 200 * FrameTime!, 0, 255
+
+        info, pos = {}, target.last_look_pos + Vector(0, 0, 6)
+        if entity.TargetInfo
+          info, pos = entity\TargetInfo LocalPlayer!
+        elseif entity\IsDoor!
+          info, pos = @TargetInfoDoor entity
+
+        if info and (#info > 0)
+          pos = pos\ToScreen!
+          for line in *info
+            font = line.font or 'Spleen_Label'
+            draw.DrawTextShadow line.text, font,
+              pos.x, pos.y,
+              ColorAlpha(line.color or COLOR_WHITE, target.alpha),
+              ColorAlpha(COLOR_BLACK, target.alpha),
+              TEXT_ALIGN_CENTER, 2
+            surface.SetFont font
+            w, h = surface.GetTextSize line.text
+            pos.y += h + 2
+      @target_info[k] = nil if target.alpha <= 0 or not IsValid(entity)
+
+  TargetThink: =>
+    ply = LocalPlayer!
+    return unless IsValid ply
+    start = ply\EyePos!
+    trace =
+      :start
+      endpos: start + ply\GetAimVector! * 128
+      filter: ply
+    tr = util.TraceLine trace
+    ent = tr.Entity
+    if IsValid(ent) and ent.TargetInfo
+      if (@target_cur ~= @target_old) or not IsValid(@target_cur)
+        @target_old = @target_cur
+        @target_cur = ent
+        new_info =
+          entity: @target_cur
+          last_look: CurTime!
+          alpha: 0
+        @target_info[@target_cur\EntIndex!] = new_info
+      info = @target_info[@target_cur\EntIndex!]
+      if info
+        info.last_look = CurTime!
+        info.last_look_pos = tr.HitPos
+    else
+      @target_old = @target_cur
+      @target_cur = nil
+
+  TargetInfoDoor: (door) =>

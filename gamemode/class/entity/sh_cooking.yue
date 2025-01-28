@@ -1,0 +1,76 @@
+SLOT_SOUP_1 = 1
+SLOT_SOUP_2 = 2
+SLOT_SOUP_3 = 3
+SLOT_SOUP_4 = 4
+
+class Soup extends THING
+  IName: 'soup pot'
+  Model: 'models/props_c17/metalPot001a.mdl'
+  Element: 'metal/iron'
+  Durability: 100
+  AcceptsFood: true
+  BowlScoopable: true
+  MaxSlots: 4
+  Initialize: =>
+    super!
+    INVENTORY @ if SERVER
+
+  SetupDataTables: =>
+    super!
+    @AddNetworkVar 'Bool', 'Rotten'
+    @AddNetworkVar 'String', 'SoupName'
+
+  GetFull: =>
+    for i = 1, @MaxSlots
+      return false if not @GetInventory!\HasItem i
+    return true
+
+  GetFree: =>
+    for i = 1, @MaxSlots
+      return i if not @GetInventory!\HasItem i
+
+  AddFood: (food) => @GetInventory!\AddItem food, @GetFree!
+
+  GetInventoryPosition: => @GetPos!, @GetAngles!
+
+  Empty: => -- when the bowl spills or is eaten
+    @Hunger = 0 -- use negative numbers to satisfy a status
+    @Fatigue = 0
+    @Poison = 0
+    @Thirst = 0
+    @HealthAdd = 0 -- temp until we get a new health system
+
+    @SetColor Color(255, 255, 255) -- just resetting these
+
+    @SetSoupName ''
+
+  Used: (ply) =>
+    return if CLIENT
+    @Brew!
+
+  Brew: =>
+    return unless @GetFull!
+    @Hunger = 0
+    @Fatigue = 0
+    @Poison = 0
+    @Thirst = 0
+
+    for i = 1, @MaxSlots -- 1-4
+      food = @GetInventory!\GetItem i
+      @Hunger += food.Hunger -- reminder that these values will be negative, for 'good' effects on statues
+      @Poison += math.max(0, food.Poison - 1)
+      @Fatigue += food.Fatigue
+      @Thirst += food.Thirst - 1
+      food\Remove!
+
+    @SetSoupName 'soup'
+
+  ProcessIName: (...) =>
+    text = super ...
+    if @GetSoupName != ''
+      text ..= " of #{@GetSoupName!}"
+    return text
+
+
+
+

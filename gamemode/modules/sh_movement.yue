@@ -1,0 +1,99 @@
+global MOVING_WALK  = 1
+global MOVING_RUN   = 2
+
+global SPEED_CREEP  = 50
+global SPEED_WALK   = 100
+global SPEED_RUN    = 200
+global SPEED_SPRINT = 400
+
+hull =
+  mins: Vector -13, -13, 8
+  maxs: Vector 13, 13, 72
+
+class Movement extends MODULE
+  GetSpeedTarget: (ply, mv) =>
+    if ply\StanceIs(STANCE_SQUAT) or ply\StanceIs(STANCE_PRONE)
+      return SPEED_CREEP + (SPEED_WALK - SPEED_CREEP) / 2
+    elseif not mv\KeyDown IN_FORWARD
+      return SPEED_WALK
+    else
+      if (not mv\KeyDown IN_SPEED) and ply\GetSpeed! < SPEED_WALK * 1.3
+        return SPEED_WALK
+
+      target = ply\GetSpeedTarget!
+
+      if target < SPEED_CREEP
+        ply\SetSpeedTarget SPEED_CREEP
+        target = SPEED_CREEP
+      elseif target > SPEED_SPRINT
+        ply\SetSpeedTarget SPEED_SPRINT
+        target = SPEED_SPRINT
+
+      return target
+
+  SetupMove: (ply, mv, cmd) =>
+    mv\SetButtons bit.band mv\GetButtons!, bit.bnot(IN_JUMP + IN_DUCK)
+    import min, max from math
+    return true if (not IsFirstTimePredicted!) or (not ply.GetSpeed) or (not ply\Alive!) or ply\GetMoveType! == MOVETYPE_NOCLIP
+    speeding = mv\KeyDown(IN_FORWARD) and (mv\KeyDown(IN_SPEED) or ply\GetSpeed! >= SPEED_WALK * 1.3)
+    speedlerp = 0.01
+    tumbled = ply\TumbleCheck hull, 1, ply\GetAngles!
+    target = @GetSpeedTarget ply, mv
+    if target < SPEED_WALK and (ply\GetVelocity!\Length2D! < SPEED_RUN/1.5)
+      speedlerp = 0.5
+    else
+      ply.Moving = speeding and MOVING_RUN or MOVING_WALK
+      speedlerp = speeding and 0.01 or 0.03
+      if tumbled.Hit
+        target = SPEED_WALK
+        speedlerp = 0.1
+
+    speed = Lerp speedlerp, ply\GetSpeed!, target
+    ply\SetSpeed speed
+    ply.Moving = MOVING_WALK if ply.Moving ~= MOVING_WALK and speed < SPEED_WALK * 1.3
+    -- mouse-wheel based speed control
+    if mv\KeyDown IN_SPEED
+      wheel = cmd\GetMouseWheel!
+      if wheel ~= 0
+        newtarg = math.Clamp ply\GetSpeedTarget! + wheel * 25, SPEED_CREEP, SPEED_SPRINT
+        ply\SetSpeedTarget newtarg
+        if CLIENT
+          snd = if wheel < 0
+            "hl1/fvox/fuzz.wav"
+          else
+            "hl1/fvox/buzz.wav"
+
+          ply\EmitSound snd,
+            75,
+            75 + (50 * (ply\GetSpeedTarget! / SPEED_SPRINT)),
+            0.1
+
+    mv\SetForwardSpeed speed if (not speeding) and speed > SPEED_RUN / 1.5 and ply\IsOnGround!
+    ply\SetRunSpeed speed
+    ply\SetWalkSpeed speed
+    len2d = ply\GetVelocity!\Length2D!
+    len2d *= 1.02 -- just because speedlerp makes this a bit weird
+    rag = ply\GetRagdoll!
+    if len2d >= TUMBLE_SOFT and (not rag or not rag\IsValid!)
+      if (not ply.NextTumble) or CurTime! >= ply.NextTumble
+        -- these are in this particular order so that chest/head bumps always process before tripping over stuff
+        if not ply\BumpChest len2d
+          if not ply\BumpHead len2d
+            ply\BumpLegs len2d
+    return true
+
+  PlayerSpawn: (ply) =>
+    with ply
+      \SetSpeed SPEED_WALK
+      \SetSpeedTarget SPEED_WALK
+      .Moving = MOVING_WALK
+    return -- CRITICALLY IMPORTANT: without this, all other playerspawn hooks WILL BREAK
+
+  TranslateActivity: (ply, act) =>
+    oact = act
+    switch act
+      when ACT_MP_RUN
+        vel = ply\GetVelocity!
+        if vel\Length2D! >= SPEED_RUN * 1.5
+          act = ACT_HL2MP_RUN_FAST
+    return act if act ~= oact

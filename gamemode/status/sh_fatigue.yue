@@ -1,0 +1,40 @@
+class Fatigue extends STATUS
+  desc: "Fate will run its course; you will be dust."
+  icon: Material"skeleton/icons/status/fatigue.png"
+  interval: 1
+
+  Overflow: (ply) => ply\BecomeRagdoll!
+
+  Think: (ply) =>
+    return unless SERVER
+    return unless ply\Alive!
+    ply.StatusTicks or= {}
+    ply.StatusTicks[@index] = CurTime! + @interval unless ply.StatusTicks[@index]
+    ply.StatusBuildup or= {}
+    ply.StatusBuildup[@index] = 0 unless ply.StatusBuildup[@index]
+    import Clamp from math
+    if CurTime! >= ply.StatusTicks[@index]
+      ply.StatusTicks[@index] = CurTime! + @interval
+      speed_target = ply\GetSpeedTarget!
+      local amt
+      if ply\GetIsRagdoll!
+        amt = -8
+      else
+        vel = ply\GetVelocity!
+        if vel\Length2D! < 100
+          amt = -5
+        else
+          amt = speed_target / 100
+	  amt = 0 if (amt > 0 and amt < 5)
+	  amt += ply\WaterLevel! * 2
+      ply.StatusBuildup[@index] = Clamp(ply.StatusBuildup[@index] + amt, 0, 100)
+      final = ply.StatusBuildup[@index]
+      if final >= 100 or final <= 0
+        if final >= 100
+          ply\AddStatus @index, 1
+          ply.StatusBuildup[@index] = 20
+        else
+          ply\AddStatus @index, -1
+          ply.StatusBuildup[@index] = 99
+
+global STATUS_FATIGUE = Fatigue.index

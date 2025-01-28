@@ -1,0 +1,82 @@
+#+title: Awkward Controls
+#+author: Corpse 1
+:setup:
+#+SETUPFILE: setup-org-theme.org
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="death.css" />
+#+HTML_HEAD: <meta content="Eclipse: Awkward controls" property="og:title" />
+#+HTML_HEAD: <meta content="HELP! OH GOD HELP! HOW DO I PLAY THIS GAME" property="og:description" />
+#+HTML_HEAD: <meta content="https://death.town/~corpse/controls.html" property="og:url" />
+#+HTML_HEAD: <meta content="https://death.town/~corpse/images/sotla.png" property="og:image" />
+#+HTML_HEAD: <meta content="#FF0000" data-react-helmet="true" name="theme-color" />
+#+OPTIONS: author:nil date:nil timestamp:nil num:nil toc:nil
+:end:
+
+The Eclipse features a vast array of controls designed to offer freedom in action to the player. While these controls may seem complicated, they were not made by an ape.
+
+The Eclipse's controls are deliberately strange (and obtuse, to a degree) in order to defamiliarize Garry's Mod players with the gameplay mechanics.
+
+[[file:./index.html][TAKE ME BACK]]
+* COORDINATION
+- ~MOUSE_X~ / ~MOUSE_Y~: Turn your head.
+- ~KEY_W~ / ~KEY_A~ / ~KEY_S~ / ~KEY_D~: Forward/left/back/right.
+  - + ~SHIFT~: Alter movement speed.
+- ~SHIFT~ + ~MOUSE_WHEEL~: While holding shift, adjusts your speed.
+- ~KEY_B~: Behold the thing you're looking at. Works on things, bodies and players.
+
+* POSTURE
+- Press ~CTRL~: Toggle crouch.
+  - Press ~KEY_SPACE~ while crouching: Toggle prone.
+  - Hold ~KEY_SPACE~ while crouching: Prone until release.
+- Hold ~CTRL~: Crouch until release.
+  - ~KEY_SPACE~ interacts the same way.
+- ~KEY_T~: Tumble.
+
+* THINGS AND STUFF
+- ~MOUSE_LEFT~ without held item: Pick things up.
+- ~MOUSE_LEFT~ with held item: Use on somebody or something else.
+- ~MOUSE_MIDDLE~ with held item: Use by itself.
+  - Eating something.
+  - Pulling the pin on a grenade.
+  - Injecting yourself with a syringe full of dangerous drugs.
+- ~KEY_C~ with two held items: Combine.
+  - Pouring soup from a pot to a bowl.
+  - Putting a magazine in a gun.
+  - Shoving a rock on the end of a rebar club.
+- ~KEY_C~ with one held item: Decombine.
+  - Removing a magazine from a gun
+  - Taking a pill out of a bottle.
+  - Removing the charge from a bomb.
+** WHIPPING IT OUT
+- ~KEY_H~ with held item: Holster.
+- ~KEY_H~ without held item: Unholster.
+- ~KEY_X~ ~KEY_1~ to ~KEY_4~ with held item in right hand: Put item in right hand into pocket.
+- ~KEY_X~ + ~KEY_1~ to ~KEY_4~ without held item in right hand: Put item from right hand into pocket.
+- ~KEY_Z~ + ~KEY_1~ to ~KEY_4~ with held item in left hand: Put item in left hand into pocket.
+~ ~KEY_z~ + ~KEY_1~ to ~KEY_4~ without held item in left hand: Put item from left hand into pocket
+** LETTING GO
+- ~KEY_X~: Drop item from your primary hand.
+- Hold ~KEY_X~ + ~MOUSE_LEFT~: Place item from your primary hand on your crosshair.
+- Hold ~KEY_C~ + ~MOUSE_LEFT~: Throw item from your primary hand.
+- ~KEY_R~: Swap held items between hands.
+- ~KEY_Z~: Drop item from your offhand.
+- Hold ~KEY_Z~ + ~MOUSE_LEFT~: Place item from your offhand on your crosshair.
+- Hold ~KEY_X~ + ~MOUSE_LEFT~: Throw item from your offhand.
+
+* FRIENDLY INTERACTION
+- Hold ~MOUSE_RIGHT~: Prime for attack.
+  - + ~MOUSE_LEFT~: Swing your fists/weapon.
+- ~KEY_SPACE~: Shove with one hand.
+  - + ~MOUSE_RIGHT~: Shove with both hands.
+- ~SHIFT~ + ~KEY_SPACE~: Kick.
+  - While looking down: Stomp.
+
+* COMMUNICATION
+- ~KEY_Y~: Open chatter.
+** WHILE THE CHATTER IS OPEN
+- ~KEY_A~ to ~KEY_Z~: Input characters.
+- ~KEY_BACKSPACE~: Delete ending character.
+  - With no text: Close chatter.
+- ~KEY_ENTER~: Speak your words.
+  - With no text: Close chatter.
+- ~KEY_CAPSLOCK~: Toggle caps lock.
+  - Because of how the chatter is rendered, which allows you to use your mouse while it's open, it is not possible for the game to detect the status of Caps Lock on the user's keyboard.

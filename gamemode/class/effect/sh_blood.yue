@@ -1,0 +1,38 @@
+blood_materials = [Material"decals/blood#{i}" for i=1,8]
+
+drip_sounds = ["dysphoria/gore/blood/drip#{i}.wav" for i=1,8]
+
+randscale =
+  min: 0.55
+  max: 1.25
+
+class BloodSpray extends FX
+  Init: (data) =>
+    pos = data\GetOrigin!
+    mag = data\GetMagnitude!
+    speed = data\GetStart!
+    ang = data\GetNormal!
+    scale = data\GetScale!
+
+    emitter = ParticleEmitter pos
+
+    for i=1,1
+      with particle = emitter\Add "particle/particle_noisesphere", pos
+        \SetVelocity (((ang * 5) * i) * 5) + (speed) + Vector(math.random(-4, 4), math.random(-4, 4), math.random(-4, 4))
+        \SetDieTime 1
+        \SetStartAlpha 255
+        \SetEndAlpha 0
+        \SetStartSize scale * .5
+        \SetEndSize scale * math.random(2,3)
+        \SetRoll math.Rand -10, 10
+        \SetRollDelta math.Rand -0.2, 0.2
+        \SetColor 64, 0, 0
+        \SetGravity Vector 0, 0, -50
+        \SetCollide true
+        \SetAirResistance 90
+        \SetBounce 1
+
+    emitter\Finish!
+
+  Think: => false
+  Render: =>

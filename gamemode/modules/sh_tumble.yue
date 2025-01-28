@@ -1,0 +1,263 @@
+global TUMBLE_SOFT  = 100
+global TUMBLE_OUCH  = 200
+global TUMBLE_HARD  = 400
+
+meta = FindMetaTable'Player'
+
+eyevec = Vector(0, 0, 64)
+chestvec = Vector(0, 0, 32)
+bounds =
+  hull:
+    mins: Vector -13, -13, 8
+    maxs: Vector 13, 13, 72
+  head:
+    attach: 'eyes'
+    mins: Vector -5, -4, -3.5
+    maxs: Vector 5, 4, 3.5
+  chest:
+    mins: Vector -12, -12, 34
+    maxs: Vector 10, 10, 64
+    reach: 20
+  legs:
+    mins: Vector -12, -12, 6
+    maxs: Vector 12, 12, 32
+    reach: 20
+  collapse:
+    attach: 'waist'
+    offsetR: -10
+    offsetF: 4
+    mins: Vector -8, -8, -13
+    maxs: Vector 10, 10, 13
+  collapse_head:
+    attach: 'eyes'
+    mins: Vector -5, -5, -5
+    maxs: Vector 5, 5, 5
+  hand_right:
+    attach: 'anim_attachment_RH'
+    mins: Vector -2, -2, -2
+    maxs: Vector 2, 2, 2
+
+meta[k] = v for k, v in pairs{
+  TumbleCheck: (bound=bounds.chest, mul=1, dir) =>
+    attach = bound.attach
+    attach = @GetAttachment @LookupAttachment attach if attach
+    pos = if attach
+      attach.Pos
+    else
+      @GetPos!
+    if attach
+      pos += attach.Ang\Up! * bound.offsetU if bound.offsetU
+      pos += attach.Ang\Right! * bound.offsetR if bound.offsetR
+      pos += attach.Ang\Forward! * bound.offsetF if bound.offsetF
+    reach = bound.reach
+    reach = 20 unless reach
+    reach *= mul
+    unless dir
+      vel = @GetVelocity!
+      velF = vel\Angle!\Forward!
+      if (velF * reach)\Length2D! < 16
+        velF = if attach
+          attach.Ang\Forward!
+        else
+          @GetAngles!\Forward!
+      dir = velF
+    elseif isangle dir
+      dir = dir\Forward!
+    import abs, ceil from math
+    import mins, maxs from bound
+    dir.z = 0 if abs(ceil dir.x) == 0 and abs(ceil dir.y) == 0
+    tr = util.TraceHull{
+      start: pos
+      endpos: pos + (dir * reach)
+      mask: MASK_PLAYERSOLID
+      :mins
+      :maxs
+      filter: @GetTraceFilter!
+    }
+    return tr
+
+  BumpChest: (speed) =>
+    tumbled = @TumbleCheck bounds.chest, 1.05
+    if tumbled.Hit
+      tumbled.HitPos.z += 12 if tumbled.HitNormal.x ~= 0
+      if speed >= TUMBLE_OUCH
+        @Bodyslam tumbled, speed
+        @NextTumble = CurTime! + 0.1
+        return true
+      else
+        @Nudge tumbled, speed
+
+  BumpHead: (speed) =>
+    tumbled = @TumbleCheck bounds.head, .975
+    if tumbled.Hit
+      tumbled.HitPos.z += 12 if tumbled.HitNormal.x ~= 0
+      if speed >= TUMBLE_OUCH
+        @Headbutt tumbled, speed
+        @NextTumble = CurTime! + 0.1
+        return true
+
+  BumpLegs: (speed) =>
+    tumbled = @TumbleCheck bounds.legs, 1
+    if tumbled.Hit
+      tumbled.HitPos.z += 12 if tumbled.HitNormal.x ~= 0
+      if speed >= TUMBLE_OUCH
+        @TripOver tumbled, speed
+        @NextTumble = CurTime! + 0.1
+        return true
+
+  Nudge: (tumbled, speed) =>
+    return unless IsFirstTimePredicted!
+    return unless SERVER
+    if tumbled.HitWorld
+      @NextNudgeAV = CurTime! unless @NextNudgeAV
+      if CurTime! >= @NextNudgeAV
+        if speed >= TUMBLE_SOFT * 1.2
+          @EmitSound "Flesh.ImpactSoft", 75, 90
+          -- VOCALIZE PAIN HERE
+          -- PLAY FLINCH ANIMATION HERE
+          @NextNudgeAV = CurTime! + 1
+      @SetSpeed SPEED_WALK if SERVER
+    elseif tumbled.Entity and tumbled.Entity\IsValid! and tumbled.Entity\IsPlayer!
+      vec = (tumbled.StartPos - tumbled.HitPos)\GetNormalized! * -1 * 20
+      -- REIMPLEMENT: nudging people getting up to make them fall over
+      with tumbled.Entity
+        \SetVelocity vec
+        .NextPushSound = CurTime! unless .NextPushSound
+        if CurTime! >= .NextPushSound
+          \EmitSound "Flesh.ImpactSoft", 75, 90
+          .NextPushSound = CurTime! + math.Rand 0.2, 0.4
+
+  Bodyslam: (tumbled, speed) =>
+    return unless IsFirstTimePredicted!
+    return unless SERVER
+    import min from math
+    force = Vector 0, 0, 0
+    force = (tumbled.StartPos - tumbled.HitPos)\GetNormal! * speed/2 unless tumbled.HitWorld
+    force.z = 0
+    @EmitSound"NPC_BaseZombie.Swat"
+    @SetSpeed min @GetSpeedTarget!, SPEED_WALK if SERVER
+    -- do damage based on the speed of impact
+    crashpct = speed / TUMBLE_HARD
+    with dmg = DamageInfo!
+      \SetDamage 10 * crashpct
+      \SetAttacker @
+      \SetDamageType DMG_FALL
+      \SetDamagePosition tumbled.StartPos
+      \SetDamageForce force
+      -- TARGETED HITBOX CODE GOES HERE
+      @TakeDamageInfo dmg
+      -- PLAY FLINCH ANIMATION HERE
+      dont_fall = false
+      if tumbled.Entity and tumbled.Entity\IsValid!
+        weapon = @Wielding!
+        if @StateIs(STATE.PRIMED)
+          if IsValid(weapon)
+            dont_fall = weapon.CanCharge or false
+          else
+            -- fists can charge
+            dont_fall = true
+        -- if tumbled.Entity\IsPlayer!
+          -- dont_fall = if @HasTrait"strong" (WE GOTTA REIMPLEMENT TRAITS)
+      @BecomeRagdoll dmg if crashpct > 0.75 and not dont_fall
+    if tumbled.Entity and tumbled.Entity\IsValid!
+      if tumbled.Entity\IsPlayer!
+        tply = tumbled.Entity
+        force\Mul -1
+        with dmg = DamageInfo!
+          \SetDamage 15 * crashpct
+          \SetAttacker @
+          \SetDamageType DMG_FALL
+          \SetDamagePosition tumbled.HitPos
+          \SetDamageForce force
+          -- TARGETED HITBOX CODE GOES HERE
+          tply\TakeDamageInfo dmg
+          -- PLAY FLINCH ANIMATION HERE
+          tply\BecomeRagdoll dmg if crashpct > 0.6
+        tply\SetSpeed min tply\GetSpeedTarget!, SPEED_WALK
+    return true
+
+  Headbutt: (tumbled, speed) =>
+    return unless IsFirstTimePredicted!
+    return unless SERVER
+    import min from math
+    force = Vector 0, 0, 0
+    force = (tumbled.StartPos - tumbled.HitPos)\GetNormal! * speed/2 unless tumbled.HitWorld
+    @EmitSound"Flesh.ImpactHard"
+    @SetSpeed min @GetSpeedTarget!, SPEED_WALK if SERVER
+    -- do damage based on the speed of impact
+    crashpct = speed / TUMBLE_HARD
+    -- @AddStatus STATUS_PAIN, ( 20 * crashpct ) -- add immediate pain for head injuries
+    with dmg = DamageInfo!
+      \SetDamage 10 * crashpct
+      \SetAttacker @
+      \SetDamageType DMG_FALL
+      \SetDamagePosition tumbled.StartPos
+      \SetDamageForce force
+      -- TARGETED HITBOX CODE GOES HERE
+      @TakeDamageInfo dmg
+      -- PLAY FLINCH ANIMATION HERE
+      @SetDSP math.random(35, 37) if crashpct >= 0.5
+      dont_fall = false
+      if tumbled.Entity and tumbled.Entity\IsValid!
+        if tumbled.Entity\IsPlayer!
+          dont_fall = true -- if @HasTrait"strong"
+      @BecomeRagdoll dmg if crashpct > 0.75 and not dont_fall
+    if tumbled.Entity and tumbled.Entity\IsValid!
+      if tumbled.Entity\IsPlayer!
+        tply = tumbled.Entity
+        force\Mul -1
+        with dmg = DamageInfo!
+          \SetDamage 20 * crashpct
+          \SetAttacker @
+          \SetDamageType DMG_FALL
+          \SetDamagePosition tumbled.HitPos
+          \SetDamageForce force
+          -- TARGETED HITBOX CODE GOES HERE
+          tumbled.Entity\TakeDamageInfo dmg
+          -- PLAY FLINCH ANIMATION HERE
+          force_to_fall = 0.6
+          -- force_to_fall = 0.4 if tply\HasTrait"weak"
+          tply\BecomeRagdoll dmg if crashpct > force_to_fall
+        tply\SetSpeed min tply\GetSpeedTarget!, SPEED_WALK
+    return true
+
+  TripOver: (tumbled, speed) =>
+    return unless IsFirstTimePredicted!
+    return unless SERVER
+    import min from math
+    -- first make sure we're not tripping on stairs or small steps
+    stepz = @GetStepSize!
+    spos = @GetPos! + Vector 0, 0, stepz
+    tr = util.TraceHull{
+      start: spos
+      endpos: spos + @GetAngles!\Forward! * 32
+      filter: @
+      mins: Vector -1, -12, 0
+      maxs: Vector 1, 12, 1
+    }
+    -- let us WALK for fuck's sake
+    return false unless tr.Hit
+    -- make 'em fly over
+    force = (tumbled.StartPos - tumbled.HitPos)\GetNormal! * speed
+    force\Mul -0.75
+    force.z = 0
+    @EmitSound"NPC_BaseZombie.Swat"
+    @SetSpeed min @GetSpeedTarget!, SPEED_WALK if SERVER
+    -- do damage based on the speed of impact
+    crashpct = speed / TUMBLE_HARD
+    -- TARGETED HITBOX CODE GOES HERE
+    -- HIT BOTH LEGS
+    with dmg = DamageInfo!
+      \SetDamage 8 * crashpct
+      \SetAttacker @
+      \SetDamageType DMG_FALL
+      \SetDamagePosition tumbled.StartPos
+      \SetDamageForce force
+      @TakeDamageInfo dmg
+    -- fall over no matter what, asshole
+    @BecomeRagdoll dmg
+    return true
+}
+
+class Tumble extends MODULE
+

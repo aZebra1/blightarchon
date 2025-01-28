@@ -1,0 +1,221 @@
+meta = FindMetaTable'Player'
+
+meta[k] = v for k, v in pairs{
+  GetBodyEntity: =>
+    rag = @GetRagdoll!
+    return rag if rag and rag\IsValid! and not ( rag.corpse and @Alive! )
+    return @
+
+  GetHeadPos: =>
+    head = @LookupBone'ValveBiped.Bip01_Head1'
+    if head
+      return @GetBonePosition head
+    else
+      return @EyePos!
+
+  BecomeRagdoll: (dmginfo, corpse) =>
+    rag = @GetRagdoll!
+    body = @Body
+    if rag and rag\IsValid!
+      body = rag.Body
+    rag\Remove! if rag and rag\IsValid!
+
+    for thing in *{@Wielding!, @WieldingOffhand!, ...@BeltItems!}
+      @Release thing if IsValid thing
+
+    @DropObject!
+
+    @SetIsRagdoll true
+
+    vel = @GetVelocity!
+
+    with rag = ents.Create'prop_ragdoll'
+      \SetPos @GetPos!
+      \SetAngles @GetAngles!
+      \SetModel @GetModel!
+      \SetSkin @GetSkin!
+      for i=0, 20
+        \SetBodygroup i, @GetBodygroup(i)
+        \SetSubMaterial i, @GetSubMaterial(i)
+      \Spawn!
+      \Activate!
+      --\SetCollisionGroup COLLISION_GROUP_WEAPON
+      if SERVER
+        -- move bonemerges
+        .Body = {}
+        for k, v in pairs body
+          .Body[k] = v
+          v\SetParent rag
+          v.RenderGroup = RENDERGROUP_BOTH
+        @Body = nil
+      -- make sure that we move the bonemerges back when we stand up
+      \SetNWEntity 'Player', @
+      @SetRagdoll rag
+      for i=0, \GetPhysicsObjectCount! - 1
+        bone_idx = \TranslatePhysBoneToBone i
+        phys_obj = \GetPhysicsObjectNum i
+        if IsValid phys_obj
+          pos, ang = @GetBonePosition bone_idx
+          phys_obj\SetPos pos
+          phys_obj\SetAngles ang
+          phys_obj\SetVelocity vel
+      if SERVER
+        @SetNotSolid true
+        if not rag.corpse -- corpses don't need this functionality
+          \CallOnRemove "TransportPlayer", (ent) ->
+            ply = ent\GetNWEntity'Player'
+            if IsValid ply
+              ply\SetIsRagdoll false if ply.SetIsRagdoll
+              ply\SetPos ent\GetPos!
+              ply\SetNotSolid false
+              if ent.Body
+                ply.Body or= {}
+                for k, v in pairs ent.Body
+                  ply.Body[k] = v
+                  v\SetParent @
+                  v.RenderGroup = RENDERGROUP_OTHER
+
+    rag[k] = @[k] for k in *{'GetHeadPos', 'CanHear', 'GetHitBone', 'GetHitBox', 'HeadBlownApart', 'RemoveHead'}
+    rag.SetKnockback = (vel, force) =>
+      head_idx = @LookupBone"ValveBiped.Bip01_Head1"
+      for i=0, @GetPhysicsObjectCount! - 1
+        bone_idx = @TranslatePhysBoneToBone i
+        phys_obj = @GetPhysicsObjectNum i
+        if IsValid phys_obj
+          if bone_idx == head_idx
+            phys_obj\SetVelocity vel * 1.5
+          else
+            phys_obj\SetVelocity vel
+          if force
+            if bone_idx == head_idx
+              phys_obj\ApplyForceCenter force * 1.5
+            else
+              phys_obj\ApplyForceCenter force
+    rag.GetPlayer = => @
+    rag.Corpsify = =>
+      @corpse = true
+      @SetNWEntity 'Player', NULL
+      @cuts_of_meat = BUTCHER_CUTS_OF_MEAT
+      @decay_stage = DECAYSTAGE_FRESH
+      @SetNWInt 'decay_stage', DECAYSTAGE_FRESH
+      @decay_points = 0
+      @decay_start = CurTime!
+      @decay_end = @decay_start + DECAY_TIME
+    -- local force
+    -- force = dmginfo\GetDamageForce! if dmginfo
+    -- rag\SetKnockback vel, force
+    rag\SetVelocity vel
+    rag\SetBodygroup 0, 3 if @GetNWBool "headless", false
+    return rag
+
+  RestoreFromRagdoll: =>
+    rag = @GetRagdoll!
+    return unless rag and rag\IsValid!
+    for i=0,20
+      @SetBodygroup i, rag\GetBodygroup i
+      @SetSubMaterial i, rag\GetSubMaterial i
+    if rag.Body
+      @Body or= {}
+      for k, v in pairs rag.Body
+        @Body[k] = v
+        v\SetParent @
+        v.RenderGroup = RENDERGROUP_OTHER
+    else
+      @InitializeBody!
+    rag\Remove!
+}
+
+class Fall_Over extends SOUND
+  sound: ["physics/body/body_medium_impact_soft#{i}.wav" for i=1,7]
+  level: SNDLVL_60dB
+
+BIND "fall_over", KEY_T,
+  Press: (ply) =>
+    if SERVER
+      return unless ply\Alive! and not ply\GetIsRagdoll!
+      rag = ply\GetRagdoll!
+      return if rag and rag\IsValid!
+      ply\BecomeRagdoll!
+
+class Ragdoll extends MODULE
+  PlayerTick: (ply) =>
+    return unless ply.GetRagdoll
+    rag = ply\GetRagdoll!
+    return unless rag and rag\IsValid!
+    ply\SetPos rag\GetPos!
+    if rag.DraggedBy
+      unless (IsValid(rag.DraggedBy) and rag\IsPlayerHolding! and rag.DraggedBy\GetDragging! == rag)
+        rag.DraggedBy = nil
+        return
+    return
+
+  PlayerFootstep: (ply) =>
+    rag = ply\GetRagdoll!
+    return true if rag and rag\IsValid!
+
+  PlayerDeath: (ply, attacker, dmg) =>
+    rag = ply\GetRagdoll!
+    if (not rag) or (not rag\IsValid!)
+      rag = ply\BecomeRagdoll dmg, true
+    rag\Corpsify!
+    return
+
+  PlayerSpawn: (ply) => -- to allow for the player to be solid after dying
+    ply\SetIsRagdoll false
+    ply\SetRagdoll nil -- remove the ragdoll entity
+    ply\SetNoDraw false
+    ply\SetNotSolid false
+    return
+
+  PlayerDisconnected: (ply) =>
+    --[[
+    if ply\IsRagdoll!
+     rag = @GetRagdoll!
+     rag\SetNWEntity 'Player' NULL--]]
+    ply\Kill!
+
+  EntityTakeDamage: (ent, dmginfo) => -- to allow for the player to be solid after dying
+    return unless IsValid(ent) and ent\GetClass! == "prop_ragdoll"
+
+    if ent.corpse and dmginfo\GetDamageType! == DMG_BLAST
+      @Gib ent, dmginfo
+
+    return unless ent\GetNWEntity'Player'
+    ply = ent\GetNWEntity'Player'
+    return unless ply and ply\IsValid! and ply\GetIsRagdoll! and ply\Alive!
+    attacker = dmginfo\GetAttacker!
+    return if attacker and attacker\IsValid! and attacker\GetClass! == "prop_ragdoll" -- ragdolling and touching a corpse would cause massive damage otherwise
+
+    dmginfo\ScaleDamage 0.5 if dmginfo\GetDamageType! == DMG_CRUSH
+    ply\TakeDamageInfo dmginfo
+
+  Gib: (rag, dmginfo) =>
+    return if rag.removing
+    rag.removing = true
+    rag\SetNWEntity "Player", NULL
+    rag\EmitSound 'physics/flesh/flesh_bloody_break.wav'
+
+    ENTITY\create 'thing/food/meat/gore', rag\GetPos!
+    rag\Remove!
+    return
+
+  PreDrawTranslucentRenderables: (bDepth, bSkybox) =>
+    return if bDepth
+    for corpse in *ents.FindByClass"prop_ragdoll"
+      for piece in*corpse\GetChildren!
+        piece\DrawModel! if piece\GetClass! == "bonemerge"
+    return
+
+  OnEntityCreated: (rag) =>
+    if CLIENT and rag\IsRagdoll!
+      timer.Simple 0.1, ->
+        return unless rag\IsValid! and rag\IsRagdoll!
+        ply = rag\GetNWEntity'Player'
+        if ply\IsValid!
+          -- only copy any decals if this ragdoll was recently created
+          rag\SnatchModelInstance ply if rag\GetCreationTime! > CurTime! - 1
+          rag.GetPlayer = -> ply
+          rag.GetPlayerColor = =>
+            ply = @GetPlayer!
+            return ply\GetPlayerColor! if IsValid(ply)
+    return

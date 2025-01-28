@@ -1,0 +1,100 @@
+INVENTORY_LAYOUT_BODY = table.FlipKeyValues {
+  SLOT_HAND
+  SLOT_OFFHAND
+  SLOT_OUTFIT
+  SLOT_BELT_L
+  SLOT_BELT_R
+  SLOT_BACK
+  SLOT_POCKET1
+  SLOT_POCKET2
+  SLOT_POCKET3
+  SLOT_POCKET4
+}
+
+BIND 'release_left',
+  KEY_Z, {
+    Press: (ply) =>
+      if CLIENT
+        item = ply\WieldingOffhand!
+        return unless IsValid item
+        tr = ply\TraceItem item, ply\GetInteractTrace!.HitPos
+        ang = Angle(0, ply\GetAngles!.y, 0) + item.PlaceAngle
+        💾.GhostEntity\MakeGhostEntity item\GetModel!, tr.HitPos, ang
+    Release: (ply) =>
+      item = ply\WieldingOffhand!
+      return unless item
+      ply\Do ACT.DROP, item unless ply\StateIs(STATE.PRIMED)
+      if CLIENT
+        💾.GhostEntity\ReleaseGhostEntity!
+  }
+
+BIND 'release_right',
+  KEY_X, {
+    Press: (ply) =>
+      if CLIENT
+        item = ply\Wielding!
+        return unless IsValid item
+        tr = ply\TraceItem item, ply\GetInteractTrace!.HitPos
+        ang = Angle(0, ply\GetAngles!.y, 0) + item.PlaceAngle
+        💾.GhostEntity\MakeGhostEntity item\GetModel!, tr.HitPos, ang
+    Release: (ply) =>
+      item = ply\Wielding!
+      return unless item
+      ply\Do ACT.DROP, item unless ply\StateIs(STATE.PRIMED)
+      if CLIENT
+        💾.GhostEntity\ReleaseGhostEntity!
+  }
+
+BIND 'reload',
+  KEY_R, {
+    Release: (ply) =>
+      act = if ply\StateIs STATE.PRIMED
+        ACT.UNLOAD
+      else
+        ACT.SWITCH_HAND
+      ply\Do act
+  }
+
+BIND 'item_use',
+  MOUSE_MIDDLE, {
+    Press: (ply) =>
+      item = ply\Wielding!
+      item\Used(ply) if IsValid(item) and item.Used
+  }
+
+BIND 'item_combine',
+  KEY_C, {
+    Press: (ply) =>
+      wielding, wielding_off = ply\Wielding!, ply\WieldingOffhand!
+      ply\Do ACT.COMBINE if IsValid(wielding) and IsValid(wielding_off)
+  }
+
+meta = FindMetaTable'Player'
+meta[k] = v for k, v in pairs {
+  GetInventoryLayout: => INVENTORY_LAYOUT_BODY
+
+  GetInventoryPosition: (slot) =>
+    attaches =
+      [SLOT_HAND]:    'anim_attachment_RH'
+      [SLOT_OFFHAND]: 'anim_attachment_LH'
+      [SLOT_BELT_L]:  'waist_l'
+      [SLOT_BELT_R]:  'waist_r'
+      [SLOT_POCKET1]: 'waist'
+      [SLOT_POCKET2]: 'waist'
+      [SLOT_POCKET3]: 'waist'
+      [SLOT_POCKET4]: 'waist'
+    index = @LookupAttachment attaches[slot]
+    if att := @GetAttachment index
+      return att.Pos, att.Ang
+
+  IsHolding: (ent) => return ent in {@Wielding!, @WieldingOffhand!}
+}
+
+class Inventory extends MODULE
+  PlayerTick: (ply) =>
+    return unless SERVER
+    dragging = ply\GetDragging!
+    if dragging and IsValid dragging
+      if (not dragging.DraggedBy) or (dragging.DraggedBy ~= ply) or (not dragging\IsPlayerHolding!)
+        ply\SetDragging NULL
+    return

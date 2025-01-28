@@ -1,0 +1,68 @@
+PRES_MASCULINE    = 1
+PRES_FEMININE     = 2
+PRES_ANDROGYNOUS  = 3
+
+DESC_LOOKS = 1
+DESC_SOUNDS = 2
+DESC_SMELLS = 3
+
+ATTRIBUTE_COLD = 1
+ATTRIBUTE_FUCKED_UP = 2
+ATTRIBUTE_MEAN = 3
+ATTRIBUTE_RELENTLESS = 4
+
+class Character extends MODULE
+
+  caste: CASTE_SCUM
+  fate:
+  desc:
+    [DESC_LOOKS]:   "stupid"
+    [DESC_SOUNDS]:  "boring"
+    [DESC_SMELLS]:  "bland"
+  presentation: PRES_ANDROGYNOUS
+ -- might affect voice pitch
+  atributes:
+    [ATTRIBUTE_COLD]:        1
+    [ATTRIBUTE_FUCKED_UP]:  1
+    [ATTRIBUTE_MEAN]:       1
+    [ATTRIBUTE_RELENTLESS]: 1
+  skills: [] -- things like 'swimmer'
+  motive: "fear"-- entered on charcreate by the user. doesn't determine anything codewise, but players should be occasionally reminded what their motive is. observant characters might know someone's motive at roundstart. "WHAT DOES HE LIVE FOR?"
+
+  PlayerSpawn: (ply) =>
+    -- caste = table.Random CASTES
+    -- fate_idx = table.Random caste.fates
+    caste = CASTES[CASTE_SANITAR]
+    fate_idx = table.Random caste.fates
+    ply\InitializeBody!
+    ply\SetCaste caste.index
+    ply\SetFate fate_idx
+    fate = ply\FateTable!
+    if fate.bodygroups
+      scalp = fate.bodygroups.scalp or 0
+      scalp = table.Random scalp if istable scalp
+      ply\SetBodygroup 1, scalp
+      mouth = fate.bodygroups.mouth or 0
+      mouth = table.Random mouth if istable mouth
+      ply\SetBodygroup 3, mouth
+      mask = fate.bodygroups.fullmask or 0
+      mask = table.Random mask if istable mask
+      ply\SetBodygroup 4, mask
+      eyes = fate.bodygroups.eyes or 0
+      eyes = table.Random eyes if istable eyes
+      ply\SetBodygroup 6, eyes
+      hands = fate.bodygroups.hands or 1
+      hands = table.Random hands if istable hands
+      ply\SetBodygroup 7, hands
+      torso = fate.bodygroups.torso or 0
+      torso = table.Random torso if istable torso
+      ply.Body.torso\SetBodygroup 0, torso
+      legs = fate.bodygroups.legs or 0
+      legs = table.Random legs if istable legs
+      ply.Body.legs\SetBodygroup 0, legs
+    if fate.submaterials
+      ply\SetSubMaterial SUBMAT_INDEX_HAT, fate.submaterials.scalp or SUBMAT_HATSCOMBINED_DEFAULT
+      ply.Body.torso\SetSubMaterial 0, fate.submaterials.torso or nil
+      ply.Body.legs\SetSubMaterial 0, fate.submaterials.legs or nil
+    fate\OnSpawn? ply
+    return

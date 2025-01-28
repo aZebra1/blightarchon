@@ -1,0 +1,146 @@
+SLOT_FIREARM_MAGAZINE = 1
+
+class Firearm extends THING
+  IName: "firearm"
+  Element: "metal/iron"
+  Durability: 100
+  Initialize: =>
+    super!
+    INVENTORY @ if SERVER
+
+  HolsterSequence: "weapon_holster_gesture"
+  UnholsterSequence: "UNHOLSTER_Pistol"
+
+  HasMagazine: => @GetInventory!\HasItem SLOT_FIREARM_MAGAZINE
+  GetMagazine: => @GetInventory!\GetItem SLOT_FIREARM_MAGAZINE
+  SetMagazine: (mag) => @GetInventory!\AddItem mag, SLOT_FIREARM_MAGAZINE
+
+  GetInventoryPosition: => @GetPos!, @GetAngles!
+
+  AttackAct: ACT.SHOOT
+
+  ImpactSound: "weapon.impacthard"
+
+  GetMuzzlePos: =>
+    pos, ang = @GetPos!, @GetAngles!
+    offset = @MuzzleOffset.Pos
+    pos = pos + (ang\Right! * offset.y)
+    pos = pos + (ang\Forward! * offset.x)
+    pos = pos + (ang\Up! * offset.z)
+    ang = ang + (@MuzzleOffset.Ang or Angle(0,0,0))
+    return pos, ang
+
+  FiringEffects: =>
+    -- return if CLIENT and (not IsFirstTimePredicted!)
+    edata = EffectData!
+    edata\SetEntity @
+    util.Effect "muzzleflash", edata
+
+  Shoot: =>
+    mag = @GetMagazine!
+    return unless IsValid(mag) and mag\GetRounds! > 0
+    @FiringEffects!
+    @EmitSound @AttackSound.Shoot if SERVER
+    mag\AddRounds -1
+    pos, ang = @GetMuzzlePos!
+    bullet =
+      Num: 1
+      Src: pos
+      Dir: ang\Forward!
+      Spread: 0.01
+      Damage: 40
+      Force: 4
+      Tracer: 1
+      TracerName: "bullettracer"
+    @FireBullets bullet
+    if SERVER
+      gun_burn = DamageInfo!
+      with gun_burn
+        \SetDamageType DMG_BURN
+        \SetDamage 1
+        \SetAttacker @
+      @TakeDamageInfo gun_burn
+      mag\TakeDamageInfo gun_burn
+
+  PhysicsCollide: (data) =>
+    super data
+    @Shoot! if data.Speed > 256
+
+class Pistol extends Firearm
+  AttackSequence: "range_pistol"
+  AttackDelay: 0.3
+
+class Pacifier extends Pistol
+  IName: "Pacifier"
+  Model: Model"models/weapons/act3/pistol_m9.mdl"
+
+  Animations:
+    prime: ANIMS.pistol_aim
+    throw: ANIMS.throwing
+
+  HandOffset:
+    Pos: Vector 1.64, -0.27, -2.18
+    Ang: Angle -4.651, 0, 0
+  BeltOffset:
+    Pos: Vector 0.22, -2.74, -0.56
+    Ang: Angle 180, 0, -90
+  MuzzleOffset:
+    Pos: Vector 11.482, 0, 6.936
+    Ang: Angle 0, 0, 0
+  MagazineOffset:
+    Pos: Vector 3, 0, 0
+    Ang: Angle 20, 0, 0
+
+  AttackSound:
+    Shoot: "Weapon_Elite.Single"
+
+  Manufacturer: "Blackheart"
+
+  AcceptableMagazines:
+    * "thing/magazine/pacifier15rd"
+
+class Reaper extends Pistol
+
+  Model: Model"models/weapons/act3/pistol_blackhawk.mdl"
+
+  Animations:
+    prime: ANIMS.pistol_aim
+    throw: ANIMS.throwing
+
+  HandOffset:
+    Pos: Vector -3, -2, -2
+    Ang: Angle -4.651, 0, 0
+  MuzzleOffset:
+    Pos: Vector 11.482, 0, 6.936
+    Ang: Angle 0, 0, 0
+  MagazineOffset:
+    Pos: Vector 3, 0, 0
+    Ang: Angle 20, 0, 0
+
+  AttackSound: "Weapon_357.Single"
+
+  IName: "Reaper"
+  IDesc: "A 5-shot revolver that is not for the weak-wristed or indecisive; The Reaper shoots first and asks questions never. This valuable antique is prized for its immense stopping power and intimidation factor, instantly executing even the meanest targets."
+
+  Manufacturer: "Boneyard Collective"
+
+class Rifle extends Firearm
+
+class Sg66 extends Rifle
+  Model: Model"models/weapons/act3/rifle_g3.mdl"
+
+  HandOffset:
+    Pos: Vector 10.44, -1.34, -3.69
+    Ang: Angle 0, 0, 0
+
+  Animations:
+    prime: ANIMS.rifle_aim
+    throw: ANIMS.throwing
+
+  IName: "Sanitargewehr-66"
+  IDesc: "A rare, but fearsome sight in the hands of Sanitars when the Kommandant declares martial law for any reason. Maybe it will be used by the state of Liver Failure to defend you or murder you."
+
+  AttackSound:
+    Shoot: "Weapon_G3SG1.Single"
+
+  Manufacturer: "Einhesna"

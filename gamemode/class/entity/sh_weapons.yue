@@ -1,0 +1,147 @@
+class Weapon extends THING
+  IName: 'weapon'
+  Spawnable: true
+  Model: Model'models/weapons/w_crowbar.mdl'
+  ImpactSound: Sound'physics/metal/metal_grenade_impact_soft1.wav'
+
+class Knife extends Weapon
+  IName: 'sharp metal'
+  Model: Model'models/props_debris/metal_panelshard01c.mdl'
+  Element: 'metal/scrap'
+
+  HandOffset:
+    Pos: Vector 7, -20, 8
+    Ang: Angle 0, 45, -9
+
+  AttackEnabled: true
+  AttackDamage: 15
+  AttackDamageType: DMG_SLASH
+  AttackDelay: 0.5
+  AttackRange: 70
+  AttackSound:
+    Swing: 'WeaponFrag.Throw'
+    Hit: Sound'physics/metal/metal_computer_impact_bullet1.wav'
+  AttackSequence:
+    * 'melee_1h_stab'
+
+  ThrowVelocity: 800
+
+  PlaceAngle: Angle 90, 0, 0
+
+class Long extends Knife
+  IName: 'long knife'
+  Model: Model'models/props_wasteland/prison_throwswitchlever001.mdl'
+  Element: 'metal/scrap'
+
+  HandOffset:
+    Pos: Vector 0, 0, 6
+    Ang: Angle 180, 0, 0
+
+  SizeClass: SIZE_LARGE
+
+  Animations:
+    prime: ANIMS.melee_2hand
+    throw: ANIMS.throwing
+
+  AttackSound:
+    Hit: Sound'ambient/machines/slicer4.wav'
+  AttackSequence:
+    * 'melee_2h_left'
+    * 'melee_2h_overhead'
+  AttackDamage: 30
+  AttackDelay: 1
+
+class Wrench extends Weapon
+  IName: 'wrench'
+  Model: Model'models/props_c17/tools_wrench01a.mdl'
+  Element: 'metal/scrap'
+
+  HandOffset:
+    Pos: Vector 0, 0, 0
+    Ang: Angle 0, -90, 90
+
+  HandOffset:
+    Pos: Vector 7, -20, 8
+    Ang: Angle 0, 45, -9
+
+  AttackEnabled: true
+  AttackDamage: 15
+  AttackDamageType: DMG_CLUB
+  AttackDelay: 1
+  AttackRange: 70
+  AttackSound:
+    Swing: 'WeaponFrag.Throw'
+    Hit: Sound'physics/metal/metal_computer_impact_bullet1.wav'
+  AttackSequence:
+    * 'melee_1h_overhead'
+    * 'melee_1h_left'
+
+  ThrowVelocity: 800
+
+  PlaceAngle: Angle 0, 0, 0
+
+class Pliers extends Wrench
+  IName: 'pliers'
+  Model: Model'models/props_c17/tools_pliers01a.mdl'
+
+class Shovel extends Weapon
+  IName: 'shovel'
+  Model: Model'models/props_junk/Shovel01a.mdl'
+  Element: 'metal/scrap'
+
+  HandOffset:
+    Pos: Vector 0, 0, 12
+    Ang: Angle 180, 0, -0
+
+  ImpactSound: Sound'physics/metal/metal_grenade_impact_soft1.wav'
+
+  SizeClass: SIZE_LARGE
+
+  Animations:
+    prime: ANIMS.melee_2hand
+    throw: ANIMS.throwing
+
+  AttackEnabled: true
+  AttackDamage: 35
+  AttackDamageType: DMG_CLUB
+  AttackDelay: 1.5
+  AttackRange: 70
+  AttackSound:
+    Swing: 'WeaponFrag.Throw'
+    Hit: Sound'physics/metal/metal_computer_impact_bullet1.wav'
+  AttackSequence:
+    * 'melee_2h_left'
+    * 'melee_2h_overhead'
+
+  ThrowVelocity: 200
+
+  PlaceAngle: Angle -90, 0, 0
+
+class Spear extends Weapon
+  IName: 'spear'
+  Model: Model'models/props_junk/harpoon002a.mdl'
+  Element: 'metal/iron'
+
+  ImpactSound: Sound'physics/concrete/concrete_block_impact_hard1.wav'
+
+  SizeClass: SIZE_LARGE
+
+  Animations:
+    prime: ANIMS.shotgun
+    throw: ANIMS.throwing
+
+  AttackEnabled: true
+  AttackDamage: 30
+  AttackDamageType: DMG_SLASH
+  AttackDelay: 1.5
+  AttackRange: 80
+  AttackSound:
+    Swing: 'WeaponFrag.Throw'
+    Hit: Sound'physics/concrete/concrete_block_impact_hard1.wav'
+  AttackSequence:
+    * 'melee_2h_left'
+    * 'melee_2h_overhead'
+
+  ThrowVelocity: 300
+
+  PlaceAngle: Angle 90, 0, 0

@@ -1,0 +1,110 @@
+global DOOR_STATE_CLOSED  = 0
+global DOOR_STATE_OPENING = 1
+global DOOR_STATE_OPEN    = 2
+global DOOR_STATE_CLOSING = 3
+
+class DoorKicked extends SOUND
+  sound: ["physics/wood/wood_crate_impact_hard#{i}.wav" for i in *{1,4,5}]
+
+class DoorBustedIn extends SOUND
+  sound: ["physics/wood/wood_crate_break#{i}.wav" for i in *{1,3,4,5}]
+  level: 90
+
+emeta = FindMetaTable'Entity'
+emeta[k] = v for k, v in pairs {
+  DoorLocked: => return @GetInternalVariable"m_bLocked" if @IsDoor!
+
+  DoorOpen: =>
+    if @IsDoor!
+      switch @GetClass!
+        when "func_door", "func_door_rotating"
+          return @GetInternalVariable"m_toggle_state" == 0
+        when "prop_door_rotating"
+          return @GetInternalVariable"m_eDoorState" ~= 0
+        else
+          return false
+
+  DoorOpenUp: (who) =>
+    if @DoorOpen!
+      if @GetClass! == "prop_dynamic"
+        @Fire "SetAnimation", "close"
+      else
+        @Fire "close"
+      return true
+    switch @GetClass!
+      when "prop_door_rotating"
+        target = ents.Create"info_target"
+        with target
+          \SetName tostring target
+          \SetPos who\EyePos!
+          \Spawn!
+        @Fire "OpenAwayFrom", tostring(target), 0
+        timer.Simple 1, -> target\Remove! if IsValid target
+      when "prop_dynamic"
+        @Fire "SetAnimation", "open"
+      else
+        @Fire"Open"
+    return true
+
+  DoorKicked: (burglar, hitpos) =>
+    if @IsDoor! and @GetClass! == "prop_door_rotating"
+      @EmitSound"DoorKicked"
+    if math.random(1, 7) == 2
+      @DoorBustedIn burglar, hitpos
+      return true, true
+    else
+      rc, rm = unpack 💾.Chatter.audible_ranges.yelling
+      rf = burglar\GetRF rc, rm, true
+      net.Start"nDoorKicked"
+      net.WriteVector hitpos
+      net.Send rf
+      return true, false
+
+  DoorBustedIn: (burglar, hitpos) =>
+    if @IsDoor! and not @DoorOpen! and @GetClass! == "prop_door_rotating"
+      @EmitSound"DoorBustedIn"
+      @Fire "SetSpeed", 500, 0
+      timer.Simple 1, -> @Fire "SetSpeed", 100, 0 if IsValid @
+      @Fire"Unlock"
+      @DoorOpenUp burglar
+      rc, rm = unpack 💾.Chatter.audible_ranges.yelling
+      rf = burglar\GetRF rc, rm, true
+      net.Start"nDoorBustedIn"
+      net.WriteVector hitpos
+      net.Send rf
+
+  InteractDoorHandle: (who) =>
+    return unless @IsDoor!
+    @DoorOpenUp who
+    return nil, nil
+}
+
+if SERVER
+  util.AddNetworkString"nDoorKicked"
+  util.AddNetworkString"nDoorBustedIn"
+else
+  net.Receive "nDoorKicked", (len) ->
+    pos = net.ReadVector!
+    pos = pos + Vector(0, 0, 10)
+    texts = { "THUD", "WHAM" }
+    BUBBLE {
+      text: "*#{texts[math.random 1, #texts]}*"
+      font: "spleen_chat"
+      text_color: COLOR_RED
+      color: COLOR_BLACK
+      :pos
+      clingy: true
+      lifespan: 1
+    }
+  net.Receive "nDoorBustedIn", (len) ->
+    pos = net.ReadVector!
+    pos = pos + Vector(0, 0, 10)
+    texts = { "CRASH" }
+    BUBBLE {
+      text: "*#{texts[math.random 1, #texts]}*"
+      font: "spleen_chat"
+      text_color: COLOR_RED
+      :pos
+      clingy: true
+      lifespan: 2
+    }

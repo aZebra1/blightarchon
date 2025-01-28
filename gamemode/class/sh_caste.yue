@@ -1,0 +1,16 @@
+global CASTES = {}
+global class CASTE
+  @__inherited: (child) =>
+    CASTES[] = child
+    child.index = #CASTES
+
+  name: ""
+  desc: "A collective group of people with a common culture, tradition, and history."
+  color: Color(150, 150, 0)
+  fates: {}
+
+meta = FindMetaTable'Player'
+meta[k] = v for k, v in pairs {
+  Caste: => @GetCaste!
+  CasteTable: => CASTES[@Caste!]
+}

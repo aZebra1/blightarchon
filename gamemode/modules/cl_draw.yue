@@ -1,0 +1,67 @@
+draw.DrawTextShadow = (text, font, x, y, col1=Color(200, 200, 200, 255), col2=Color(0, 0, 0, 255), align=0) ->
+  unless align == 0
+    -- Less efficient than surface, so we only
+    -- use this if we need special alignment stuff
+    draw.DrawText text, font, x + (3 * math.sin(CurTime!)) + math.Rand(0.666,-0.666), y + (3 * math.cos(CurTime!)) + math.Rand(0.666,-0.666), col2, align
+    draw.DrawText text, font, x, y, col1, align
+  else
+    with surface
+      .SetFont font
+      .SetTextColor col2
+      .SetTextPos x + 1, y + 1
+      .DrawText text
+      .SetTextColor col1
+      .SetTextPos x, y
+      .DrawText text
+
+surface.DrawTexturedRectRotatedPoint = (x, y, w, h, rot, x0, y0) ->
+  c = math.cos math.rad(rot)
+  s = math.sin math.rad(rot)
+  newx = y0 * s - x0 * c
+  newy = y0 * c + x0 * s
+  surface.DrawTexturedRectRotated( x + newx, y + newy, w, h, rot )
+
+util.FormatLine = (str="", font, size) ->
+  if string.len(str) == 1
+    surface.SetFont font
+    w, h = surface.GetTextSize str
+    return str, 0, w, h
+  start = 1
+  c = 1
+  surface.SetFont font
+  endstr = ""
+  n = 1
+  last_space = 0
+  last_space_made = 0
+  w, h = 0, 0
+  while string.len( str ) > c
+    sub = string.sub str, start, c
+    last_space = c if string.sub( str, c, c ) == " "
+    sw, sh = surface.GetTextSize sub
+    h = sh
+    if ( sw >= size ) and last_space ~= last_space_made
+      local sub2
+      if last_space == 0
+        last_space = c
+        last_space_made = c
+      if last_space > 1
+        sub2 = string.sub str, start, last_space - 1
+        c = last_space
+      else
+        sub2 = string.sub str, start, c
+
+      endstr ..= "#{sub2}\n"
+      last_space = c + 1
+      last_space_made = last_space
+      start = c + 1
+      n += 1
+
+    c += 1
+
+    endstr ..= string.sub( str, start ) if start < string.len( str )
+
+    for v in *string.Explode "\n", endstr
+      w2 = surface.GetTextSize v
+      w = w2 if w2 > w
+
+    return endstr, n, w, h * n

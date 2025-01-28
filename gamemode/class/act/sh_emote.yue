@@ -1,0 +1,50 @@
+BIND "cough", KEY_K,
+  Press: (ply) =>
+    if SERVER
+      ply\Do ACT.COUGH
+
+class Cough extends SOUND
+  sound: ["ambient/voices/cough#{i}.wav" for i=1,4]
+  -- level: SNDLVL_60dB
+
+class COUGH extends ACT
+  Immobilizes: false
+  Do: (fromstate) =>
+    with @ply
+      return unless \StanceIs STANCE_RISEN
+      sequence = 'a_g_headinhds'
+      snd, cycle1 = "ambient/voices/cough" .. math.random(1, 4) .. ".wav", .43
+      if (CLIENT and IsFirstTimePredicted!) or SERVER
+        @Spasm :sequence
+      @CYCLE cycle1, =>
+        if IsFirstTimePredicted! and SERVER
+          bone = 'ValveBiped.Bip01_Head1'
+          \EmitSound'Cough'
+
+BIND "salute", KEY_L,
+  Press: (ply) =>
+    if SERVER
+      ply\Do ACT.SALUTE
+
+class SALUTE extends ACT
+  Immobilizes: false
+  Do: (fromstate) =>
+    with @ply
+      return unless \StanceIs STANCE_RISEN
+      sequence = 'gesture_salute'
+      if (CLIENT and IsFirstTimePredicted!) or SERVER
+        @Spasm :sequence
+
+BIND "hairbrush", KEY_P,
+  Press: (ply) =>
+    if SERVER
+      ply\Do ACT.HAIRBRUSH
+
+class HAIRBRUSH extends ACT
+  Immobilizes: false
+  Do: (fromstate) =>
+    with @ply
+      return unless \StanceIs STANCE_RISEN
+      sequence = 'a_hairbrush'
+      if (CLIENT and IsFirstTimePredicted!) or SERVER
+        @Spasm :sequence

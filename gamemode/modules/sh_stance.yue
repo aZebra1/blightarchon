@@ -1,0 +1,23 @@
+meta = FindMetaTable'Player'
+
+meta[k] = v for k, v in pairs{
+  StanceIs: (stance) => @GetStance! == stance
+}
+
+STATE.HandleSquat = (ply, vel, animset) =>
+  if ply\StanceIs STANCE_SQUAT
+    ply.CalcSeqOverride = ply\FindSequence(vel\Length2D! > .5 and animset.creep or animset.squat)
+    if ply\GetHoldingDown!
+      unless ply\DoingSomething! or BIND.controls['ctrl']\IsDown ply
+        ply\Do ACT.STANCE_RISEN
+    return true
+  return false
+
+STATE.HandleProne = (ply, vel, animset) =>
+  if ply\StanceIs STANCE_PRONE
+    ply.CalcSeqOverride = ply\FindSequence(vel\Length2D! > .5 and animset.crawl or animset.prone)
+    if ply\GetHoldingDown!
+      unless ply\DoingSomething! or BIND.controls['space']\IsDown ply
+        ply\Do ACT.STANCE_RISEN
+    return true
+  return false

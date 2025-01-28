@@ -1,0 +1,64 @@
+meta = FindMetaTable'Player'
+
+meta[k] = v for k, v in pairs{
+  Status: (enum) =>
+    status = STATUS.indices[enum]
+    import uniqueID from status
+    alias_name = "#{uniqueID\sub(1, 1)\upper!}#{uniqueID\sub 2}"
+    return @["Status#{alias_name}"] @
+
+  AddStatus: (enum, amount) =>
+    status = STATUS.indices[enum]
+    import uniqueID from status
+    import Clamp from math
+    alias_name = "#{uniqueID\sub(1, 1)\upper!}#{uniqueID\sub 2}"
+    old_val = @Status enum
+    new_val = Clamp old_val + amount, 0, status.maximum
+    @["SetStatus#{alias_name}"] @, new_val
+    status\Overflow @ if old_val == status.maximum and new_val == status.maximum
+    return @["Status#{alias_name}"] @
+
+  SetStatus: (enum, amount) =>
+    status = STATUS.indices[enum]
+    import uniqueID from status
+    import Clamp from math
+    alias_name = "#{uniqueID\sub(1, 1)\upper!}#{uniqueID\sub 2}"
+    old_val = @Status enum
+    new_val = Clamp amount, 0, status.maximum
+    @["SetStatus#{alias_name}"] @, new_val
+    status\Overflow @ if old_val == status.maximum and new_val == status.maximum
+    return @["Status#{alias_name}"] @
+}
+
+class Status extends MODULE
+  Think: =>
+    for ply in *player.GetAll!
+      status\Think ply for _, status in pairs STATUS.effects
+
+  PlayerSpawn: (ply) =>
+    for k, v in pairs STATUS.effects
+      fname = "Status#{v.uniqueID\sub(1, 1)\upper!}#{v.uniqueID\sub 2}"
+      ply["Set#{fname}"] ply, v.default
+
+  HUDPaint: =>
+    import sin, max, min from math
+    lply = LocalPlayer!
+    x = ScrW! - 80
+    y = ScrH! * 0.5
+    for k, v in pairs STATUS.effects
+      fname = "Status#{v.uniqueID\sub(1, 1)\upper!}#{v.uniqueID\sub 2}"
+      val = lply[fname] lply
+      continue if val < v.minimum_display
+      surface.SetMaterial v.icon
+      color = v.colors[val]
+      -- this is done so we don't overwrite the originals
+      color = Color color.r, color.g, color.b, 255
+      for c in *{'r', 'g', 'b'}
+        color[c] += sin( CurTime! ) * 20
+        color[c] = min color[c], 255
+        color[c] = max color[c], 0
+      surface.SetDrawColor color
+      x2 = x + (math.random -val, val)
+      y2 = y + (math.random -val, val)
+      surface.DrawTexturedRect x2, y2, 64, 64
+      y += 64

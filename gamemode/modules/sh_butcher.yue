@@ -1,0 +1,43 @@
+global BUTCHER_CUTS_OF_MEAT = 6
+global BUTCHER_DMG_TO_CUT = 30
+class Butcher extends MODULE
+  EntityTakeDamage: (ent, dmg) =>
+    return unless ent\GetClass! == "prop_ragdoll" and ent.corpse
+    return unless dmg\GetDamageType! == DMG_SLASH
+
+    stage = 💾.Decay.stages[ent.decay_stage]
+    pos = dmg\GetDamagePosition!
+    item = table.Random stage.yield
+    butcher = dmg\GetAttacker! or NULL
+    skill = 5 -- out of 10
+
+    edata = EffectData!
+    with edata
+      \SetOrigin pos
+      \SetScale dmg\GetDamage!
+      \SetStart ent\GetVelocity!
+    util.Effect "bloodspray", edata
+
+    return if math.random(1, 30) < dmg\GetDamage!
+    if butcher\IsValid! and butcher\IsPlayer! and butcher\Alive!
+      -- insert skill boosts for FUCKED UP and the Butcher skill
+
+    req_skill = math.random 1, 10
+    if skill < req_skill
+      item = ENTITY.registered[item].RuinedResult or item
+
+    thing = ENTITY\create item, pos
+    thing\Rot! if stage.yield_rotten and thing\Rot
+
+    ent.cuts_of_meat += -1
+
+    if ent.cuts_of_meat <= 0
+      if ent.decay_stage ~= DECAYSTAGE_REMAINS
+        💾.Decay.stages[DECAYSTAGE_REMAINS].on_set ent
+        ent.cuts_of_meat = BUTCHER_CUTS_OF_MEAT
+        ent.decay_stage = DECAYSTAGE_REMAINS
+        ent\SetNWInt "decay_stage", ent.decay_stage
+        ent\SetMaterial "models/skeleton/skeleton_bloody"
+        ent\SetColor Color( 255, 255, 255 )
+      else
+        ent\Remove!

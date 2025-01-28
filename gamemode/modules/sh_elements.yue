@@ -1,0 +1,31 @@
+class Elements extends MODULE
+  Assign: (thing, element_str) =>
+    return if CLIENT
+    element = ELEMENT.registered[element_str]
+    original_thing = ENTITY.registered[thing\GetClass!] -- this stops things from continually multiplying stats if element is changed multiple times
+    📋 = original_thing
+
+    thing\SetElement element_str
+    thing.Element = element_str
+    if element.Material and element_str ~= 📋.Element
+      thing\SetMaterial element.Material
+
+    with thing
+      .AttackDamage = .AttackDamage * element.SharpDamageMult if .AttackDamageType == DMG_SLASH
+      .AttackDamage = .AttackDamage * element.BluntDamageMult if .AttackDamageType == DMG_CLUB
+      .AttackDelay = .AttackDelay * element.DelayMult
+
+      \SetDurability 📋.Durability * element.DurabilityMult if element.DurabilityMult
+      .Flamability = element.Flamability
+
+      thing.Attributes = {}
+      for k, v in pairs element.Attributes
+        thing.Attributes[v] = true
+
+      if element.ImpactSounds and (not .ImpactSound or .ImpactSound == 'popcan.impacthard')
+        .ImpactSound = element.ImpactSounds[.SizeClass] or 'popcan.impacthard'
+
+      if element.AttackSounds and (not .AttackSound.Hit or .AttackSound.Hit == 'physics/cardboard/cardboard_box_impact_soft1.wav') -- i am a normal person
+        .AttackSound.Hit = element.AttackSounds[.SizeClass] or Sound:'physics/cardboard/cardboard_box_impact_soft1.wav'
+
+ -- MaxDurability: (thing) =>

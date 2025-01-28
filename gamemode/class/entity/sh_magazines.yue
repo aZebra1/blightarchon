@@ -1,0 +1,44 @@
+class Magazine extends THING
+  IName: 'magazine'
+  Element: 'metal/scrap'
+  SetupDataTables: =>
+    super!
+    @AddNetworkVar 'Int', 'Rounds'
+
+  GetAlignmentOffset: (holder) =>
+    cls = holder\GetClass!
+    if cls\starts'thing/firearm'
+      return holder.MagazineOffset.Pos, holder.MagazineOffset.Ang
+
+  AddRounds: (added) =>
+    new = math.min @GetRounds! + added, @Capacity
+    new = math.max 0, new
+    @SetRounds new
+
+  Capacity: 23
+
+  ProcessIName: (...) =>
+    text = super ...
+    text ..= ", #{@GetRounds!}/#{@Capacity}"
+    return text
+
+  UsedOnOther: (ply, ent) =>
+    -- return if super ply, ent
+    return if CLIENT
+    return unless ent.GetMagazine
+    return unless (ent.AcceptableMagazines and @GetClass! in ent.AcceptableMagazines)
+    return if IsValid(ent\GetMagazine!)
+    ply\Spasm sequence: 'gesture_item_give', SS: true
+    ply\GetInventory!\RemoveItem @
+    ent\SetMagazine @
+    return true
+
+class Pistol extends Magazine
+  IName: 'pistol magazine'
+
+class Pacifier15rd extends Magazine
+  IName: '15rd pacifier magazine'
+  Model: Model"models/weapons/act3/mag_m9_15.mdl"
+
+  Capacity: 15
+  Caliber: '9mmLiver'

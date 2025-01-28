@@ -1,0 +1,473 @@
+import Ellipses, Wrap, Draw from TEXT
+import SetFont, GetTextSize from surface
+import ceil, min, Clamp from math
+import MouseX, MouseY from gui
+
+local lp
+
+class ButtonHover extends SOUND
+    sound: 'eclipse/ui/button_rollover.ogg'
+
+class ButtonDown extends SOUND
+    sound: 'eclipse/ui/button_click.ogg'
+
+class ButtonUp extends SOUND
+    sound: 'eclipse/ui/button_clickrelease.ogg'
+
+class LButton extends VGUI
+  m_bBackground: true -- GOD DAMMIT GARRY
+     -- DON'T TOUCH THIS OR IT WON'T DRAW
+
+  Toggler: false
+  new: (...) =>
+    super ...
+    @Toggled = false
+    @SetMouseInputEnabled true
+    @SetCursor'hand'
+    sz = VGUI.Scale 32
+    @SetSize sz, sz
+  DoToggle: (...) =>
+    return unless @Toggler
+    @Toggled = not @Toggled
+    @OnToggled @Toggled, ...
+  OnMousePressed: (mouse_code) =>
+    return unless @IsEnabled!
+    lp = LocalPlayer! unless lp
+    if @IsSelectable! and mouse_code == MOUSE_LEFT and (input.IsShiftDown! or input.IsControlDown!) and not (
+      lp\KeyDown IN_FORWARD or
+      lp\KeyDown IN_BACK or
+      lp\KeyDown IN_MOVELEFT or
+      lp\KeyDown IN_MOVERIGHT)
+        return @StartBoxSelection!
+    @MouseCapture true
+    @Depressed = true
+    LocalPlayer!\EmitSound'ButtonDown'
+    @OnPressed mouse_code
+    @DragMousePress mouse_code
+  OnMouseReleased: (mouse_code) =>
+    @MouseCapture false
+    return unless @IsEnabled!
+    return if not @Depressed and dragndrop.m_DraggingMain != @
+    if @Depressed
+      @Depressed = nil
+      @OnReleased mouse_code
+    return if @DragMouseRelease mouse_code
+    if @IsSelectable! and mouse_code == MOUSE_LEFT
+      @GetSelectionCanvas\UnselectAll! if @GetSelectionCanvas!
+    return unless @Hovered
+    LocalPlayer!\EmitSound 'ButtonUp'
+    @Depressed = true
+    switch mouse_code
+      when MOUSE_LEFT
+        @DoClick!
+      when MOUSE_RIGHT
+        @DoRightClick!
+      when MOUSE_MIDDLE
+        @DoMiddleClick!
+    @Depressed = nil
+  Paint: (w, h) =>
+    derma.SkinHook 'Paint', 'Button', @, w, h
+    return false
+  IsDown: => @Depressed
+  OnPressed: (mouse_code) =>
+  OnReleased: (mouse_code) =>
+  OnToggled: (enabled) =>
+  DoClick: (...) => @DoToggle ...
+  DoRightClick: =>
+  DoMiddleClick: =>
+  Think: =>
+    unless @HoveredLast
+      if @Hovered
+        @HoveredLast = true
+        LocalPlayer!\EmitSound'ButtonHover'
+    elseif not @Hovered
+      @HoveredLast = false
+
+  -- added for compatibility with derma skins
+  GetToggle: => @Toggled
+  GetDisabled: => not @IsEnabled
+
+class LLabel extends VGUI
+  Text: 'Label'
+  Font: 'spleen_chat_small'
+  TextAlign: TEXT_ALIGN_LEFT
+  TextColor: color_white
+  Ellipses: false
+  AutoWidth: false
+  AutoHeight: false
+  AutoWrap: false
+  SetText: (@Text) => @OriginalText = @Text
+  CalculateSize: =>
+    SetFont @Font
+    GetTextSize @Text
+  PerformLayout: (w, h) =>
+    dw, dh = @CalculateSize!
+    @SetWide dw if @AutoWidth
+    @SetTall dh if @AutoHeight
+    @OriginalText = @Text unless @OriginalText
+    @Text = Wrap @OriginalText, w, @Font
+  Paint: (w, h) =>
+    align = @TextAlign
+    text = if @Ellipses
+      Ellipses @Text, w, @Font
+    else
+      @Text
+    switch align
+      when TEXT_ALIGN_CENTER
+        return Draw text, @Font, w/2, 0, @TextColor, align
+      when TEXT_ALIGN_RIGHT
+        return Draw text, @Font, w, 0, @TextColor, align
+      else
+        return Draw text, @Font, 0, 0, @TextColor
+
+class LLabelCompute extends LLabel
+  Think: =>
+    super!
+    txt = @Compute!
+    @SetText txt
+  Compute: => @GetText!
+
+class LNumSlider extends VGUI
+  Base: 'DNumSlider'
+  Height: 32
+
+class LListView extends VGUI
+  Base: 'DListView'
+
+size = VGUI.Scale 200
+
+class LFrame extends VGUI
+  Base: 'EditablePanel'
+
+  title: 'Window'
+
+  IsMenu: false
+  DeleteOnClose: true
+  Draggable: true
+  Sizable: false
+  MinWidth: size
+  MinHeight: size
+  ScreenLock: true
+  DeleteOnClose: true
+  BackgroundBlur: false
+  PaintShadow: true
+  new: (...) =>
+    super ...
+    @SetFocusTopLevel true
+    with @btnClose = LButton!
+      @Add @btnClose
+      \SetText ''
+      .DoClick = -> @Close!
+      .Paint = (panel, w, h) -> derma.SkinHook 'Paint', 'WindowCloseButton', panel, w, h
+
+    with @lblTitle = LLabel!
+      @Add @lblTitle
+      \SetMouseInputEnabled false
+      .UpdateColours = (label, skin) ->
+        color = skin.Colours.Window.TitleInactive
+        color = skin.Colours.Window.TitleActive if @IsActive!
+        .TextStyleColor = color
+      \SetText @title
+    @SetPaintBackgroundEnabled false
+    @SetPaintBorderEnabled false
+    @timeBirth = SysTime!
+    @DockPadding 5, 24 + 5, 5, 5
+  ShowCloseButton: (bShow) => @btnClose\SetVisible bShow
+  GetTitle: => @lblTitle\GetText!
+  SetTitle: (strTitle) => @lblTitle\SetText strTitle
+  Close: =>
+    @SetVisible false
+    @Remove! if @DeleteOnClose
+    @OnClose!
+  OnClose: =>
+  Center: =>
+    @InvalidateLayout true
+    @CenterVertical!
+    @CenterHorizontal!
+  IsActive: => true if @HasFocus! or vgui.FocusedHasParent @
+  SetIcon: (str) =>
+    return @imgIcon\Remove! if not str and IsValid @imgIcon
+    @imgIcon = LImage! unless IsValid(@imgIcon)
+    @imgIcon\SetMaterial Material str if IsValid @imgIcon
+  Think: =>
+    sW, sH = ScrW!, ScrH!
+    mX = Clamp MouseX!, 1, sW - 1
+    mY = Clamp MouseY!, 1, sH - 1
+    w, h = @GetWide!, @GetTall!
+    if @Dragging
+      x = mX - @Dragging[1]
+      y = mY - @Dragging[2]
+      if @ScreenLock
+        x = Clamp x, 0, sW - w
+        y = Clamp y, 0, sH - h
+      @SetPos x, y
+    if @Sizing
+      x = mX - @Sizing[1]
+      y = mY - @Sizing[2]
+      pX, pY = @GetPos!
+      if x < @MinWidth
+        x = @MinWidth
+      elseif x > sW - pX and @ScreenLock
+        x = sW - pX
+      if y < @MinHeight
+        y = @MinHeight
+      elseif y > sH - pY and @ScreenLock
+        y = sH - pY
+      @SetSize x, y
+      return @SetCursor 'sizenwse'
+    sX, sY = @LocalToScreen 0, 0
+    if @Hovered and @Sizable and mX > (sX + w - 20) and mY > (sY + h - 20)
+      return @SetCursor 'sizenwse'
+    if @Hovered and @Draggable and mY < (sY + 24)
+      return @SetCursor 'sizeall'
+    @SetCursor 'arrow'
+    @SetPos @x, 0 if @y < 0
+  Paint: (w, h) =>
+    Derma_DrawBackgroundBlur @, @timeBirth if @BackgroundBlur
+    derma.SkinHook 'Paint', 'Frame', @, w, h
+    return true
+  OnMousePressed: =>
+    sX, sY = @LocalToScreen 0, 0
+    mX, mY = MouseX!, MouseY!
+    if @Sizable and mX > (sX + w - 20) and mY > (sY + h - 20)
+      @Sizing = {mX - w, mY - h}
+      return @MouseCapture true
+    if @Draggable and mY < (sY + 24)
+      @Dragging = {mX - @x, mY - @y}
+      return @MouseCapture true
+  OnMouseReleased: =>
+    @Dragging = nil
+    @Sizing = nil
+    @MouseCapture false
+  PerformLayout: =>
+    titlePush = 0
+    if IsValid @imgIcon
+      with @imgIcon
+        \SetPos 5, 5
+        \SetSize 16, 16
+        titlePush = 16
+    w = @GetWide!
+    with @btnClose
+      \SetPos w - 31 - 4, 0
+      \SetSize 31, 24
+    with @lblTitle
+      \SetPos 8 + titlePush, 2
+      \SetSize w - 25 - titlePush, 20
+
+class LPanel extends VGUI
+  Base: 'Panel'
+
+  PaintBackground: true
+  IsMenu: false
+  TabbingDisabled: false
+  Disabled: false
+  BackgroundColor: nil
+
+  new: (...) =>
+    super ...
+    @SetPaintBackgroundEnabled false
+    @SetPaintBorderEnabled false
+  Paint: (a, b, c, d) => derma.SkinHook 'Paint', 'Panel', @, a, b, c, d
+  ApplySchemeSettings: (a, b, c, d) => derma.SkinHook 'Scheme', 'Panel', @, a, b, c, d
+  PerformLayout: (a, b, c, d) => derma.SkinHook 'Layout', 'Panel', @, a, b, c, d
+  SetDisabled: (@Disabled) =>
+    if @Disabled
+      @SetAlpha 75
+      @SetMouseInputEnabled false
+    else
+      @SetAlpha 255
+      @SetMouseInputEnabled true
+  SetEnabled: (bool) => @SetDisabled not bool
+  IsEnabled: => not @Disabled
+  OnMousePressed: (mouse_code) =>
+    return @StartBoxSelection! if @IsSelectionCanvas! and not dragndrop.IsDragging!
+    if @IsDraggable!
+      @MouseCapture true
+      @DragMousePress mouse_code
+  OnMouseReleased: (mouse_code) =>
+    return if @EndBoxSelection!
+    @MouseCapture false
+    return if @DragMouseRelease mouse_code
+  UpdateColours: =>
+
+
+class LTextEntry extends VGUI
+  Base: 'DTextEntry'
+
+  EnterAllowed: true
+  UpdateOnType: false
+  Numeric: false
+  HistoryEnabled: false
+  PlaceholderText: '...'
+  Disabled: false
+  Colors:
+    Text: nil
+    Placeholder: nil
+    Highlight: nil
+    Cursor: nil
+
+  new: (...) =>
+    super ...
+    @History = {}
+    @HistoryPos = 0
+    @SetPaintBorderEnabled false
+    @SetPaintBackgroundEnabled false
+    @SetAllowNonAsciiCharacters true
+    @SetTall VGUI.Scale 34
+    @m_bBackground = true --fucking awful variable names thanks garry
+    @m_bLoseFocusOnClickAway = true --fucking awful variable names thanks garry
+    @SetCursor 'beam'
+    @SetFontInternal 'ChatFont'
+    @SetText @PlaceholderText
+  OnFocusChanged: (focus) => print focus
+  IsEditing: => @ == vgui.GetKeyboardFocus!
+  --FFS GARRY
+  GetDisabled: => @Disabled
+  GetTextColor: => @Colors.Text or @GetSkin!.colTextEntryText
+  GetPlaceholderColor: => @Colors.Placeholder or @GetSkin!.colTextEntryTextPlaceholder
+  GetHighlightColor: => @Colors.Highlight or @GetSkin!.colTextEntryTextHighlight
+  GetCursorColor: => @Colors.Cursor or @GetSkin!.colTextEntryTextCursor
+  --FFS GARRY END
+  OnKeyCodeTyped: (code) =>
+    @OnKeyCode code
+    switch code
+      when KEY_ENTER
+        if @EnterAllowed and not @IsMultiline!
+          @Menu\Remove! if IsValid @Menu
+          @FocusNext!
+          @OnEnter!
+          @HistoryPos = 0
+      when KEY_UP
+        if @HistoryEnabled or @Menu
+          @HistoryPos -= 1
+          @UpdateFromHistory!
+      when KEY_DOWN, KEY_TAB
+        if @HistoryEnabled or @Menu
+          @HistoryPos += 1
+          @UpdateFromHistory!
+      when KEY_BACKSPACE
+        txt = @GetText!
+        txt = txt\sub 1, -1
+        @SetText txt
+        @SetCaretPos txt\len!
+      when KEY_LWIN, KEY_RWIN, KEY_LALT, KEY_RALT, KEY_LCONTROL, KEY_RCONTROL, KEY_LSHIFT, KEY_RSHIFT, KEY_CAPSLOCK
+        -- do nothing
+        -- FIXME there's gotta be a better way to do this.
+      else
+        glyph = input.GetKeyName code
+        if glyph
+          txt = @GetText!
+          txt ..= glyph
+          @SetText txt
+          @SetCaretPos txt\len!
+  OnKeyCode: (code) =>
+    return unless @GetParent!
+    parent = @GetParent!
+    parent\OnKeyCode code if parent.OnKeyCode
+  UpdateFromHistory: =>
+    return @UpdateFromMenu! if IsValid @Menu
+    pos = @HistoryPos
+    pos = #@History if pos < 0
+    pos = 0 if pos > #@History
+    txt = @History[pos]
+    txt or= ''
+    @SetText txt
+    @SetCaretPos txt\len!
+    @OnTextChanged!
+    @HistoryPos = pos
+  UpdateFromMenu: =>
+    pos = @HistoryPos
+    num = @Menu\ChildCount!
+    @Menu\ClearHighlights!
+    pos = num if pos < 0
+    pos = 0 if pos > num
+    if child := @Menu\GetChild pos
+      @Menu\HighlightItem child
+      txt = child\GetText!
+      @SetText txt
+      @SetCaretPos txt\len!
+      @OnTextChanged true
+    else
+      @SetText ''
+    @HistoryPos = pos
+  OnTextChanged: (preserveMenu) =>
+    @HistoryPos = 0
+    if @UpdateOnType
+      --@UpdateConvarValue!
+      @OnValueChange @GetText!
+    @Menu\Remove! if IsValid @Menu and not preserveMenu
+    if tab := @GetAutoComplete @GetText!
+      @OpenAutoComplete tab
+    @OnChange!
+  OnChange: =>
+    parent = @GetParent!
+    parent\OnChange! if parent and parent.OnChange
+  OpenAutoComplete: (tab) =>
+    return unless tab
+    return if #tab == 0
+    @Menu = DermaMenu!
+    for option in *tab
+      @Menu\AddOption option, ->
+        @SetText option
+        @SetCaretPos option\len!
+        @RequestFocus!
+    x, y = @LocalToScreen 0, @GetTall!
+    with @Menu
+      \SetMinimumWidth @GetWide!
+      \Open x, y, true, @
+      \SetPos x, y
+      \SetMaxHeight (ScrH! - y) - 10
+  --Think: => @ConVarStringThink!
+  OnEnter: =>
+    --@UpdateConvarValue!
+    @OnValueChange @GetText!
+    parent = @GetParent!
+    parent\OnEnter! if parent and parent.OnEnter
+  --UpdateConvarValue: => @ConVarChanged @GetValue!
+  Paint: (w, h) =>
+    derma.SkinHook 'Paint', 'TextEntry', @, w, h
+    false
+  PerformLayout: => derma.SkinHook 'Layout', 'TextEntry', @
+  SetValue: (value) =>
+    return if @IsEditing!
+    @SetText value
+    @OnValueChange value
+    @SetCaretPos @GetCaretPos!
+  OnValueChange: (value) =>
+    parent = @GetParent!
+    parent\OnValueChange value
+  CheckNumeric: (value) =>
+    return false unless @Numeric
+    return true unless string.find numerics, values, 1, true
+    false
+  AllowInput: (value) =>
+    return true if @CheckNumeric
+    parent = @GetParent!
+    parent\AllowInput value if parent and parent.AllowInput
+  SetEditable: (enabled) =>
+    @SetKeyboardInputEnabled enabled
+    @SetMouseInputEnabled enabled
+  OnGetFocus: =>
+    hook.Run 'OnTextEntryGetFocus', @
+    parent = @GetParent!
+    parent\OnGetFocus! if parent and parent.OnGetFocus
+    @SetText '' if @GetText! == @PlaceholderText
+  OnLoseFocus: =>
+    --@UpdateConvarValue!
+    hook.Call 'OnTextEntryLoseFocus', nil, @
+    parent\OnLoseFocus! if parent and parent.OnLoseFocus
+    @SetText @PlaceholderText if @GetText!\len! == 0
+  OnMousePressed: (mcode) =>
+    @OnGetFocus!
+  AddHistory: (txt) =>
+    return if txt == '' or not txt
+    table.RemoveByValue @History, txt
+    table.insert @History, txt
+  GetAutoComplete: (txt) =>
+    parent = @GetParent!
+    parent\GetAutoComplete txt if parent and parent.GetAutoComplete
+  GetInt: =>
+    num = tonumber @GetText!
+    return unless num
+    math.floor num + .5
+  GetFloat: => tonumber @GetText!

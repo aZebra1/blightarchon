@@ -1,0 +1,87 @@
+global FATE_SANITAR_SCRUB, FATE_SANITAR_SENTRY, FATE_SANITAR_SAVIOR, FATE_SANITAR_SEEKER, FATE_SANITAR_SUPERIOR
+class SANITAR extends FATE
+  caste: CASTE_SANITAR
+  submaterials:
+    scalp: SUBMAT_HATSCOMBINED_GREY
+    torso: "models/IN/clothes/male_soldier1"
+    legs: "models/IN/clothes/male_soldier1"
+  OnSpawn: (ply) => ply\SetPlayerColor Vector(0, 1, 0)
+
+class Scrub extends SANITAR
+  name: "Sanitar Scrub"
+  desc: [[The lowest organism in the Sanitar food chain.
+Not trusted with a gun, only a beating stick and a scrubber.
+How does it feel to be the one cleaning all this up?]]
+  bodygroups:
+    scalp: BGROUP_SCALP_SKULLCAP
+    mouth: BGROUP_MOUTH_RESPIRATOR_DUAL
+    torso: BGROUP_TORSO_SANITAR
+    eyes: BGROUP_EYES_GOGGLES_BIKER
+    hands: BGROUP_HANDS_GLOVES_FULL
+
+FATE_SANITAR_SCRUB = Scrub.index
+
+class Sentry extends SANITAR
+  name: "Sanitar Sentry"
+  desc: [[The guy who beats your ass and gets away with it.
+You can expect a modicum of respect and a gun that might work.
+At least you're not a scrub anymore.]]
+  bodygroups:
+    scalp: BGROUP_SCALP_SANITAR
+    fullmask:
+      * BGROUP_FULLMASK_GAS_PPM88
+      * BGROUP_FULLMASK_GAS_CSS
+      * BGROUP_FULLMASK_GAS_PBF
+      * BGROUP_FULLMASK_GAS_XM40
+      * BGROUP_FULLMASK_GAS_GP
+    torso: BGROUP_TORSO_SANITAR
+    hands: BGROUP_HANDS_GLOVES_FULL
+
+FATE_SANITAR_SENTRY = Sentry.index
+
+class Savior extends SANITAR
+  name: "Sanitar Savior"
+  desc: [[Adept at cutting people up, and sometimes saving lives.
+Not totally incapable of combat, but less armed than the rest.
+Ensure Liver Failure gets its taxes worth out of your fellow Sanitars.]]
+  bodygroups:
+    scalp: BGROUP_SCALP_SKULLCAP
+    fullmask: BGROUP_FULLMASK_BALACLAVA
+    torso: BGROUP_TORSO_SANITAR_SAVIOR
+    eyes: BGROUP_EYES_GOGGLES_BIKER
+    hands: BGROUP_HANDS_GLOVES_FULL
+  submaterials:
+    scalp: SUBMAT_HATSCOMBINED_WHITE
+    torso: "models/IN/clothes/male_soldier1"
+    legs: "models/IN/clothes/male_soldier1"
+
+FATE_SANITAR_SAVIOR = Savior.index
+
+class Seeker extends SANITAR
+  name: "Sanitar Seeker"
+  desc: [[Adept in sneaking, seeking, and sanitation.
+He's seen more than your average Sanitar, that's for sure.
+Rarely witnessed without their dangerous, deafening revolvers.]]
+  bodygroups:
+    scalp: BGROUP_SCALP_SKULLCAP
+    fullmask: BGROUP_FULLMASK_BALACLAVA
+    torso: BGROUP_TORSO_SANITAR_LIGHT
+    eyes: BGROUP_EYES_GOGGLES_BIKER
+    hands: BGROUP_HANDS_GLOVES_FULL
+
+FATE_SANITAR_SEEKER = Seeker.index
+
+class Superior extends SANITAR
+  name: "Sanitar Superior"
+  desc: [[Very important men with very big guns.
+Only the most Sanitary Sanitars achieve the rank of Superior.
+Consider yourself lucky, and in for a hell of a lot of work.]]
+  bodygroups:
+    scalp: BGROUP_SCALP_KAPITAN
+    torso: BGROUP_TORSO_SANITAR
+    eyes: BGROUP_EYES_GOGGLES_BIKER
+    hands: BGROUP_HANDS_GLOVES_FULL
+
+FATE_SANITAR_SUPERIOR = Superior.index
+
+CASTES[CASTE_SANITAR].fates = {FATE_SANITAR_SCRUB, FATE_SANITAR_SENTRY, FATE_SANITAR_SAVIOR, FATE_SANITAR_SEEKER, FATE_SANITAR_SUPERIOR}

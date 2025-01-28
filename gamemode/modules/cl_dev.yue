@@ -1,0 +1,63 @@
+BIND 'dev_cursor',
+  KEY_F4, {
+    Press: (ply) =>
+      return unless ply\IsAdmin!
+      return unless CLIENT
+      toggled = vgui.CursorVisible!
+      gui.EnableScreenClicker not toggled
+  }
+
+BIND 'dev_camera',
+  KEY_F3, {
+    Press: (ply) =>
+      return unless ply\IsAdmin!
+      return unless CLIENT
+      if DEVCAM
+        global DEVCAM = nil
+      else
+        global DEVCAM = { pos: ply\EyePos!, ang: ply\EyeAngles! }
+  }
+
+-- FIXME this repetition of concommand.Add is DISGUSTING
+concommand.Add 'twkr', ->
+  with VGUI.registered.TweakerHand!
+    \SetSize 320, 200
+    \Center!
+    .item = LocalPlayer!\Wielding!
+
+concommand.Add 'twkr_off', ->
+  with VGUI.registered.TweakerOffhand!
+    \SetSize 320, 200
+    \Center!
+    .item = LocalPlayer!\WieldingOffhand!
+
+concommand.Add 'twkr_beltL', ->
+  with VGUI.registered.TweakerBeltL!
+    \SetSize 320, 200
+    \Center!
+    .item = LocalPlayer!\GetInventory!\GetSlot(SLOT_BELT_L)
+
+concommand.Add 'twkr_beltR', ->
+  with VGUI.registered.TweakerBeltR!
+    \SetSize 320, 200
+    \Center!
+    .item = LocalPlayer!\GetInventory!\GetSlot(SLOT_BELT_R)
+
+concommand.Add 'sqv', ->
+  with VGUI.registered.Seqview!
+    \SetSize 320, 200
+    \Center!
+
+class Dev extends MODULE
+  PreDrawHalos: =>
+    return unless IsValid vgui.GetHoveredPanel!
+    ent = properties.GetHovered( EyePos!, gui.ScreenToVector gui.MousePos! )
+    return unless IsValid ent
+    c = Color( 255, 255, 255, 255 )
+    c.r = 200 + math.sin( RealTime! * 50 ) * 55
+    c.g = 200 + math.sin( RealTime! * 20 ) * 55
+    c.b = 200 + math.cos( RealTime! * 60 ) * 55
+
+    t = { ent }
+    t[] = ent\GetActiveWeapon! if ( ent.GetActiveWeapon and IsValid ent\GetActiveWeapon! )
+    halo.Add( t, c, 2, 2, 2, true, false )

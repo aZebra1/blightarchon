@@ -1,0 +1,22 @@
+class Ammo extends THING.STACK
+  IName: 'bullets'
+  UsedOnOther: (ply, ent) =>
+    pass = super ply, ent
+    return pass if pass
+    return if CLIENT
+    return unless ent.Caliber == @Caliber
+    rds_in_mag = ent\GetRounds!
+    return if rds_in_mag >= ent.Capacity
+    unless ply\IsHolding(@) and ply\IsHolding(ent)
+      ply\Spasm sequence: 'gesture_item_give', SS: true
+    @AddAmount -1
+    ent\AddRounds 1
+    return true
+
+class Pistol extends Ammo
+  Maximum: 72
+
+class Liver9mm extends Pistol
+  IName: '9mm Liver'
+  Model: Model"models/spec45as/stalker/ammo/ammo_9x19_fmj.mdl"
+  Caliber: '9mmLiver'

@@ -1,0 +1,74 @@
+-- https://github.com/MrGrim48/gmod_unstuck
+meta = FindMetaTable'Player'
+meta[k] = v for k, v in pairs {
+  Stuck: =>
+    pos = @GetPos!
+    tr = util.TraceEntity {
+      start: pos
+      endpos: pos
+      filter: @
+      mask: MASK_PLAYERSOLID
+    }, @
+    return tr.StartSolid
+
+  WouldNotGetStuckIn: (tile, mins, maxs) =>
+    unless mins and maxs
+      mins, maxs = @GetHull!
+    tr = util.TraceHull {
+      start: tile
+      endpos: tile
+      filter: @
+      mask: MASK_PLAYERSOLID
+      :mins
+      :maxs
+    }
+    return (not tr.StartSolid) or (not tr.AllSolid)
+
+  GetClearPaths: (tiles) =>
+    pos = @GetPos!
+    clear_paths = {}
+    -- trace to the positions to ensure we don't start getting out of the map
+    filter = player.GetAll!
+    classes =
+      * 'prop_physics'
+      * 'prop_physics_multiplayer'
+      * 'prop_door_rotating'
+      * 'func_door'
+      * 'func_door_rotating'
+    for cls in *classes
+      filter[] = ent for ent in *ents.FindByClass cls
+    for tile in *tiles
+      tr = util.TraceLine {
+        start: pos
+        endpos: tile
+        :filter
+        mask: MASK_PLAYERSOLID
+      }
+      clear_paths[] = tile if not tr.Hit and util.IsInWorld tile
+    return clear_paths
+
+  GetSurroundingTiles: (range) =>
+    pos = @GetPos!
+    tiles = {}
+    min_bound, max_bound = @GetHull!
+    check_range = math.max range, max_bound.x, max_bound.y
+    coords = {0, -1, 1}
+    for z in *coords
+      for y in *coords
+        for x in *coords
+          test_tile = Vector x, y, z
+          test_tile\Mul check_range
+          tiles[] = pos + test_tile
+    return tiles
+
+  Unstuck: =>
+    ranges = { 16, 32, 64, 72 }
+    for range in *ranges
+      surrounding = @GetSurroundingTiles range
+      clear_paths = @GetClearPaths surrounding
+      min_bound, max_bound = @GetHull!
+      for tile in *clear_paths
+        if @WouldNotGetStuckIn tile, min_bound, max_bound
+          @SetPos tile
+          return true
+}

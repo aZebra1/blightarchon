@@ -1,0 +1,141 @@
+global class BUBBLE
+  @bubbles: {}
+  @index: 0
+
+  new: (spec={}) =>
+    @[k] = v for k, v in pairs spec
+    @id = @@index
+    @birth_time = CurTime!
+    @@index += 1
+    @@bubbles[@id] = @
+
+  text: ""
+  font: "spleen_chat"
+  confont: "spleen_chat_small"
+  color: Color 0, 0, 0, 228 -- was 128
+  max_alpha: 168
+  text_color: Color 128, 128, 0
+  text_max_alpha: 255
+  margin: 4
+  growth: 0
+  -- how long the bubble lasts in seconds
+  lifespan: 25
+  -- whether the bubble can leave the screen fully
+    -- when you turn away from it
+  clingy: false
+  -- while alive it will grow until growth hits 1
+    -- while not alive it'll start animating
+      -- towards removal as its 'death'
+  alive: true
+  -- whether or not this bubbler represents something
+    -- you would hear as opposed to seeing or
+      -- intrinsically knowing
+    -- auditory bubbles are removed by tinnitus
+  auditory: true
+  vol: 1
+  sndlvl: 66
+  speed: 2.5 -- formerly 1.25
+  -- how fast the bubble moves and in which direction
+  move: Vector 0, 0, 0.025
+  char: NULL
+
+  Kill: =>
+    -- begin animation towards death
+      -- actually kill once we're out of action
+    @death_time = CurTime!
+    @alive = false
+
+  -- actually get rid of the bubble now
+  Remove: => BUBBLE.bubbles[@id] = nil if BUBBLE.bubbles[@id] and BUBBLE.bubbles[@id] == @
+
+  -- must we die?
+  Update: =>
+    ply = LocalPlayer!
+    if ply.tinnitus_until and @auditory
+      @Remove! if CurTime! < ply.tinnitus_until
+    @pos = @pos + @move if @move
+    if @alive
+      @growth = Lerp 0.2 * @speed * FrameTime! * 3, @growth, 1
+      @color.a = @max_alpha * @growth
+      @text_color.a = @text_max_alpha * @growth
+      if CurTime! >= ( @birth_time + @lifespan ) and ( @growth >= 0.95 ) and (not @death_time)
+        @Kill!
+    else
+      @growth = Lerp 0.1 * @speed * FrameTime! * 4, @growth, 0 -- FIXME seems to reach 1 in about 1 second
+      @color.a = @max_alpha * @growth
+      @text_color.a = @text_max_alpha * @growth
+      @Remove! if @growth < 0.01
+
+  @Draw: =>
+    sin = math.sin CurTime!
+    valids = {}
+    for id, b in pairs @bubbles
+      b\Update!
+      xwave = (1 - ( b.growth ) ) * ( math.sin( CurTime! * 3 ) * 30 ) * 2
+
+      unless b.glyph_count
+        b.glyph_count = 0
+        b.next_glyph = 0
+      b.next_glyph = math.Approach b.next_glyph, #b.text, 0.12 * b.speed
+      if( math.floor( b.next_glyph ) ~= b.glyph_count )
+        b.glyph_count = math.floor b.next_glyph
+        glyph = string.sub( b.text, b.glyph_count, b.glyph_count )
+        if ( not b.sndlvl or b.sndlvl > 0 ) and glyph ~= "\"" and b.char and ( b.glyph_count % 4 == 0 ) and b.char\IsValid! --b.Speech --and b.char\Role!
+          b.char\EmitSound"Speech_Liverish_Deadwood"
+      text = string.sub( b.text, 0, b.glyph_count )
+      text or= " "
+      text, lines, bw, bh = util.FormatLine text, b.font, ScrW! * 0.2
+      text = string.stutter text, b.stutters, b.stutter_chance
+      bw or= 0
+      bh or= 0
+
+      bx, by = 0, 0
+      local toscreen
+      b.who = b.char unless b.who or IsValid(b.who)
+      our_text = b.who == LocalPlayer!
+      b.y or= 0
+      b.y -= 0.25
+      if our_text
+        b.clingy = false
+        b.color = COLOR_DGRAY
+        toscreen =
+          x: ScrW!/2
+          y: ScrH!/3 + b.y
+          visible: true
+      else
+        if b.who and IsValid(b.who)
+          toscreen = if b.who\IsPlayer!
+            b.who\EyePos! + Vector 0, 0, 16
+          else
+            b.who\GetPos! + Vector 0, 0, 8
+        else
+          toscreen = b.pos
+
+        toscreen = toscreen\ToScreen!
+        toscreen.y += b.y
+
+      unless b.clingy
+        -- Just let it follow the on-screen position, regardless of if it is actually fully on screen.
+        if toscreen.visible
+          bx, by = toscreen.x, toscreen.y
+        else
+          bx, by = ScrW!, ScrH!
+      else
+        -- Try to keep it on the screen.
+        if toscreen.x + ( bx - bw/2 ) > ScrW! * 0.9
+          bx = ScrW! * 0.9 - bw/2
+        elseif toscreen.x < ScrW! * 0.1
+          bx = bw/2 + ScrW! * 0.1
+        else
+          bx = toscreen.x
+
+        if toscreen.y + bh > ScrH! * 0.9
+          by = ScrH! * 0.9 - bh
+        elseif toscreen.y < ScrH! * 0.1
+          by = ScrH! * 0.1
+        else
+          by = toscreen.y
+
+      draw.RoundedBox 8, bx - bw/2, by, bw, bh, b.color
+      if text and string.len( text ) > 0
+        draw.DrawTextShadow text, b.font, bx + xwave, by, b.text_color, Color( 0, 0, 0, b.text_color.a ), TEXT_ALIGN_CENTER

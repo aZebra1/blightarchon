@@ -1,0 +1,5 @@
+"blightarchon"
+{
+  "base"  "base"
+  "title" "blight.archon"
+}

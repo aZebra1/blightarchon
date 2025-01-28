@@ -1,0 +1,64 @@
+import random, Rand from math
+import Play from sound
+import insert, remove from table
+import TraceHull, GetSurfaceData from util
+
+class SWING extends ACT
+  new: (@ply, @weapon) => super @ply
+  Immobilizes: false
+  Impossible: => true unless IsValid(@weapon) and @ply\Wielding! == @weapon and @weapon.AttackEnabled
+  Do: (fromstate) =>
+    anim, snd, cycle_swing_sound, cycle_to_hit = @weapon.AttackSequence, nil, .1, .25
+    if @weapon.AttackSound and @weapon.AttackSound.Swing
+      snd = @weapon.AttackSound.Swing
+    if (CLIENT and IsFirstTimePredicted!) or SERVER
+      anim = anim[random #anim] if istable anim
+      @Spasm sequence: anim
+    if snd
+      @CYCLE cycle_swing_sound, =>
+        @weapon\EmitSound snd if IsFirstTimePredicted! and SERVER
+    @CYCLE cycle_to_hit, =>
+      if IsFirstTimePredicted! and SERVER
+        targets = @ply\GetTargets @ply\GetAimVector!, @weapon.AttackRange
+        for tr in *targets
+          if tr.Entity and IsValid(tr.Entity) and tr.HitPos
+            victim = tr.Entity
+            -- Deal damage.
+            dmg = DamageInfo!
+            with dmg
+              \SetDamagePosition tr.HitPos
+              \SetDamageType @weapon.AttackDamageType
+              \SetDamage @weapon.AttackDamage
+              \SetAttacker @ply
+              \SetInflictor @weapon
+            SuppressHostEvents NULL
+            victim\TakeDamageInfo dmg
+            SuppressHostEvents @ply
+            -- Play sounds.
+            if @weapon.AttackSound and @weapon.AttackSound.Hit
+              @weapon\EmitSound @weapon.AttackSound.Hit
+            surfprop = GetSurfaceData tr.SurfaceProps
+            unless surfprop
+              surfprop = GetSurfaceData 0
+            snd = surfprop.impactHardSound
+            if snd
+               Play snd, tr.HitPos, 65, random(90,110)
+            -- Apply force.
+            phys = victim\GetPhysicsObject!
+            physbone = victim\GetPhysicsObjectNum tr.PhysicsBone
+            aimvector = @ply\GetAimVector!
+            aimvector.z = 0
+            force = aimvector*(victim\IsPlayer! and 768 or 5400)
+            dir = (tr.HitPos - tr.StartPos)\GetNormalized!
+            dir = (victim\GetPos! - @weapon\GetPos!)\GetNormalized! if dir\Length! == 0
+            dam = random 10,25
+            force = dir * (dam*23)
+            if victim\IsPlayer! and IsValid victim\GetRagdollEntity!
+              victim = victim\GetRagdollEntity!
+            if victim\IsRagdoll!
+              force *= 4
+              physbone\ApplyForceCenter(force, tr.HitPos)
+            elseif IsValid(victim) and IsValid(phys)
+              phys\ApplyForceOffset(force, tr.HitPos)
+            victim\SetVelocity force
+

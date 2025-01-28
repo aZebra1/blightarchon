@@ -1,0 +1,25 @@
+symbols_of_great_power =
+  * '@'
+  * '#'
+  * '!'
+  * '$'
+  * '%'
+  * '&'
+  * '*'
+
+string[k] = v for k, v in pairs {
+  stutter: (text, types={'upper'}, chance=5) ->
+    text_tab = string.split text, ""
+    effects =
+      upper: (text) -> string.upper text
+      scramble: (text) -> symbols_of_great_power[🎲(#symbols_of_great_power)]
+    new_text = ""
+    for t in *text_tab
+      if 🎲(1, 100) <= chance
+        key = types[🎲(#types)]
+        t = effects[key] t
+
+      new_text ..= t
+
+    return new_text
+}

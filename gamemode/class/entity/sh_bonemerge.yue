@@ -1,0 +1,18 @@
+import bor from bit
+class Bonemerge extends ENTITY
+  Type: "anim"
+  Base: "base_anim"
+
+  RenderGroup: RENDERGROUP_OTHER -- don't draw by default
+
+  AutomaticFrameAdvance: true
+
+  Initialize: =>
+    @AddEffects bor EF_BONEMERGE, EF_BONEMERGE_FASTCULL
+    @SetSolid SOLID_NONE
+    @SetNotSolid true
+    @SetMoveType MOVETYPE_NONE
+    @SetCollisionBounds Vector(0, 0, 0), Vector(0, 0, 0)
+
+  OnTakeDamage: =>
+  PhysicsCollide: =>

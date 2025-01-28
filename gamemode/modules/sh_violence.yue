@@ -1,0 +1,12 @@
+class Violence extends MODULE
+  EntityTakeDamage: (ent, dmg) =>
+    if ent\IsPlayer! or (ent\GetClass! == "prop_ragdoll" and IsValid(ent\GetNWEntity'Player'))
+      return if ent.no_bleed
+      return if dmg\GetDamageType! == DMG_CRUSH
+      pos = dmg\GetDamagePosition!
+      edata = EffectData!
+      with edata
+        \SetOrigin pos
+        \SetScale dmg\GetDamage!
+        \SetStart ent\GetVelocity!
+      util.Effect "bloodspray", edata

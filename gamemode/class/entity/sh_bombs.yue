@@ -1,0 +1,93 @@
+import GetSurfaceData, TraceLine from util
+import Trim from string
+class Bomb extends THING
+  IName: 'bomb'
+  Model: Model'models/weapons/w_grenade.mdl'
+  Spawnable: true
+
+  SetupDataTables: =>
+    super!
+    @AddNetworkVar 'Bool', 'Armed'
+
+  Damage: 175
+  Radius: 250
+  ImpactThreshold: 128
+  UseSound: 'weapons/crossbow/hit1.wav'
+
+  Detonate: =>
+    pos = @WorldSpaceCenter!
+    util.ScreenShake pos, 25, 150, 1, @Radius
+    with ents.Create 'env_explosion'
+      \SetOwner @GetOwner!
+      \SetPos pos
+      \SetKeyValue 'iMagnitude', @Damage
+      \SetKeyValue 'iRadiusOverride', @Radius
+      \Spawn!
+      \Activate!
+      \Fire 'Explode'
+    @Remove!
+
+  Used: (ply) =>
+    return if CLIENT
+    return if @GetArmed!
+    @SetArmed true
+    @EmitSound @UseSound
+
+class Impact extends Bomb
+  IName: 'impact grenade'
+  PhysicsCollide: (data) =>
+    super data
+    return if CLIENT
+    @Detonate! if @GetArmed! and data.Speed > @ImpactThreshold
+
+class Fire extends Impact
+  IName: 'kommissar kocktail'
+  Model: Model'models/props_junk/GlassBottle01a.mdl'
+  Damage: 40
+  Radius: 128
+
+  UseSound: 'ambient/fire/ignite.wav'
+
+  Used: (ply) =>
+    super!
+    return if CLIENT
+    @Ignite 30
+
+  Detonate: =>
+    fireEnt = ents.Create 'env_fire'
+    fireEnt\SetPos @GetPos!
+    fireEnt\SetKeyValue 'spawnflags', "1"
+    fireEnt\SetKeyValue 'attack', "10"
+    fireEnt\SetKeyValue 'firesize', "100"
+
+    fireEnt\Spawn!
+    fireEnt\Activate!
+    fireEnt\Fire 'Enable', '', 0
+    fireEnt\Fire 'StartFire', '', 0
+    SafeRemoveEntityDelayed fireEnt, 30
+
+    super!
+
+class Timed extends Bomb
+  IName: 'timed grenade'
+  Timer: 3
+  BlowUpTime: 0
+
+  ImpactThreshold: math.huge
+
+  Used: (ply) =>
+    super!
+    return if CLIENT
+    return if @GetArmed!
+    @BlowUpTime = CurTime! + @Timer
+
+  Think: =>
+    super!
+    return if CLIENT
+    return if not @GetArmed!
+    @Detonate! if CurTime! > @BlowUpTime
+
+class Popper extends Impact
+  IName: 'popper grenade'
+  Damage: 30
+  Radius: 64

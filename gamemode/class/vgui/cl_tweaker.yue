@@ -1,0 +1,104 @@
+import LFrame, LButton, LLabel, LNumSlider from VGUI.registered
+import round from math
+class Tweaker extends LFrame
+  Title: 'Tweaker'
+  Width: 320
+  Height: 280
+  IsMenu: true
+
+  GetItem: =>
+  item_offset: 'HandOffset'
+
+  new: (x, y) =>
+    super x, y
+    if @@instance
+      @@instance\Remove! if IsValid @@instance
+      @@instance = nil
+    @@instance = @
+    timer.Simple 0.05, -> @SetSize @Width, @Height
+    @item = @GetItem!
+    offset = @item[@item_offset]
+    @controls = {}
+    -- create a slider for each axis
+      -- for the formation of a Vector
+    for axis in *{'x', 'y', 'z'}
+      with slider = LNumSlider!
+        @Add slider
+        \SetText axis
+        \SetMinMax -23, 23
+        \SetDecimals 2
+        \SetValue (@item and offset) and offset.Pos[axis] or 0
+        .OnValueChanged = (val) =>
+          parent = @GetParent!
+          import item, item_offset from parent
+          oset = item[item_offset]
+          oset.Pos[axis] = val
+        \DockMargin 48, 0, 0, 0
+        @controls[] = slider
+        \Dock TOP
+        with slider.resetButton = LButton!
+          @Add slider.resetButton
+          .DoClick = => slider\SetValue 0
+    -- create a slider for each point of rotation
+      -- for the formation of an Angle
+    for raxis in *{'p', 'y', 'r'}
+      with slider = LNumSlider!
+        @Add slider
+        \SetText raxis
+        \SetMinMax -180, 180
+        \SetDecimals 2
+        \SetValue (@item and offset) and offset.Ang[raxis] or 0
+        .OnValueChanged = (val) =>
+          parent = @GetParent!
+          import item, item_offset from parent
+          oset = item[item_offset]
+          oset.Ang[raxis] = val
+        \DockMargin 48, 0, 0, 0
+        @controls[] = slider
+        \Dock TOP
+        with slider.resetButton = LButton!
+          @Add slider.resetButton
+          .DoClick = => slider\SetValue 0
+    with outputButton = LButton!
+      @Add outputButton
+      wide = @GetWide!/3
+      \DockMargin wide, 0, wide, 10
+      .DoClick = =>
+        item = @GetParent!.item
+        return unless item and IsValid item
+        offp = offset.Pos
+        offa = offset.Ang
+        vectxt = "Pos: Vector #{round offp.x, 2}, #{round offp.y, 2}, #{round offp.z, 2}"
+        angtxt = "Ang: Angle #{round offa.x, 2}, #{round offa.y, 2}, #{round offa.z, 2}"
+        SetClipboardText "#{vectxt}\n#{angtxt}"
+        print item\GetModel!, "\n#{vectxt}", "\n#{angtxt}"
+      \Dock BOTTOM
+    @MakePopup!
+  Think: =>
+    super!
+    if @item
+      if (not IsValid @item) or @GetItem! ~= @item
+        return @Remove!
+    else
+      return @Remove!
+  PerformLayout: =>
+    super!
+    for slider in *@controls
+      slider\SetWide @GetWide!*4/15
+      slider.resetButton\SetPos 16, slider\GetY!
+
+class TweakerHand extends Tweaker
+  GetItem: => LocalPlayer!\Wielding!
+  item_offset: 'HandOffset'
+
+class TweakerOffhand extends Tweaker
+  GetItem: => LocalPlayer!\WieldingOffhand!
+  item_offset: 'HandOffset'
+
+class TweakerBeltL extends Tweaker
+  GetItem: => LocalPlayer!\GetInventory!\GetSlot(SLOT_BELT_L)
+  item_offset: 'BeltLeftOffset'
+
+class TweakerBeltR extends Tweaker
+  GetItem: => LocalPlayer!\GetInventory!\GetSlot(SLOT_BELT_R)
+  item_offset: 'BeltRightOffset'

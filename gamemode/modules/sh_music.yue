@@ -1,0 +1,91 @@
+global AMBIENCE, AMBIENCE_COOLDOWN
+AMBIENCE_COOLDOWN or= 0
+
+class Music extends MODULE
+  songs: {
+    living: {
+      {
+        name: "apostate"
+        artist: "spring lake"
+        path: "dysphoria/music/idle/springlake/apostate.ogg"
+        duration: 551
+      }
+      {
+        name: "enoch"
+        artist: "spring lake"
+        path: "dysphoria/music/idle/springlake/enoch.ogg"
+        duration: 421
+      }
+      {
+        name: "execrate"
+        artist: "spring lake"
+        path: "dysphoria/music/idle/springlake/execrate.ogg"
+        duration: 751
+      }
+      {
+        name: "junk"
+        artist: "spring lake"
+        path: "dysphoria/music/idle/springlake/junk.ogg"
+        duration: 841
+      }
+      {
+        name: "macerator"
+        artist: "spring lake"
+        path: "dysphoria/music/idle/springlake/macerator.ogg"
+        duration: 631
+      }
+      {
+        name: "sick"
+        artist: "spring lake"
+        path: "dysphoria/music/idle/springlake/sick.ogg"
+        duration: 916
+      }
+      {
+        name: "tachycardia"
+        artist: "spring lake"
+        path: "dysphoria/music/idle/springlake/tachycardia.ogg"
+        duration: 741
+      }
+    }
+    dead: {
+      {
+        name: "Demon Engine"
+        artist: "Ouroboros"
+        path: "dysphoria/music/idle/springlake/tachycardia.ogg"
+        duration: 481
+      }
+    }
+  }
+
+  CreateAmbient: =>
+    vol = 0.666
+    songs = @songs.living
+    song = songs[math.random(1, #songs)]
+    import path, duration from song
+    sound.PlayFile "sound/#{song.path}", "noblock", (amb) ->
+      if IsValid amb
+        AMBIENCE\Stop! if IsValid AMBIENCE
+
+        amb\SetVolume vol
+        amb\Play!
+        AMBIENCE = amb
+
+        MsgC Color(150,150,150), "Now playing ", Color(150,220,0), song.name, Color(150,150,150), ", by ", Color(150,0,150), song.artist, Color(150,150,150), "...\n"
+
+        AMBIENCE_COOLDOWN = CurTime! + duration + 3
+
+  PlayerSpawn: (ply) =>
+    NETMSG_MUSIC\Send ply
+
+global class NETMSG_MUSIC extends NETMSG
+  @Write: =>
+  @Read: =>
+  @Callback: (ply) =>
+    unless timer.Exists"mAmbientMusicChecker"
+      timer.Create "mAmbientMusicChecker", 5, 0, ->
+        return if AMBIENCE_COOLDOWN > CurTime!
+        hook.Run 'CreateAmbient'
+
+if CLIENT
+  unless table.IsEmpty Music.songs
+    util.PrecacheSound data.path for data in *Music.songs

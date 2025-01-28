@@ -1,0 +1,18 @@
+class Hunger extends STATUS
+  desc: "Life eats away."
+  icon: Material"skeleton/icons/status/hunger.png"
+  interval: 360
+  increase: 1
+
+  Overflow: (ply) => ply\Kill!
+
+  Think: (ply) =>
+    return unless SERVER
+    return unless ply\Alive!
+    ply.StatusTicks or= {}
+    ply.StatusTicks[@index] = CurTime! + @interval unless ply.StatusTicks[@index]
+    if CurTime! >= ply.StatusTicks[@index]
+      ply.StatusTicks[@index] = CurTime! + @interval
+      ply\AddStatus @index, @increase
+
+global STATUS_HUNGER = Hunger.index

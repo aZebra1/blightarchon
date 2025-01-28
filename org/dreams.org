@@ -1,0 +1,1031 @@
+#+title: Eclipse Dreams
+#+STARTUP: overview
+
+Things we hope we can put in the game, someday.
+
+* The Round
+The Eclipse does not last forever. Each round of the game is planned to last roughly 4 hours, depending on the competence of the players and any extenuating circumstances.
+** Lobby
+*** The Contract
+"How pleasant, some fresh meat for the feast."
+"Take this paper and read it over, sign at the bottom."
+
+~TERMS OF ENTRY~
+
+Nobody under the age of 18 should be playing this game under any circumstances. The Eclipse is considered unsafe for those who suffer from epileptic seizures or who are otherwise sensitive to bright, flashing lights.
+
+You would also be wise to avoid The Eclipse if you are sensitive to the following: Jumpscares, graphic violence and gore, Satanic and occult themes, racism, fascism, narcotics, drugging, nonconsensual surgery, or the command line.
+
+Immersion is the most important part of The Eclipse, and it is the responsibility of all who participate (INCLUDING YOU) to maintain it. Avoid referring to ingame mechanics as written, and instead consider them from the perspective of the character in the world; Similarly, don't look too closely at what's mechanically beneficial or not, and instead consider your character's internal motives and logic.
+
+Do not simply perform actions because they are "optimal". This is not a game to be picked through for the most efficient way of achieving a certain result, and then beaten into the ground with "meta strategies". Take risks, make mistakes, and behave irrationally; It's more fun that way for everyone.
+
+Though concepts from our world may be included in the Nightmare, this universe is, for all other intents and purposes, entirely distinct from our own. Do not refer to things that do not exist here, such as real-life social constructs (gender, race, sex, religion, politics), people, and events. Your memes aren't funny, either.
+
+There are no set rules to this game outside of what has already been stated here, and you will never have to justify your in-character actions to a server administrator; Of course, the same applies to every other player as well. Killed by a random scumbag at roundstart just because he wanted to know what human meat tastes like? Better luck next round, you could have done the same to him.
+
+Respect your fellow players and remember the person on the other side of the screen. You are just as much of an actor as a participant, here to enrich others' experiences just as much as you enjoy your own. Remember this. While you are technically permitted to do whatever you want, think about how your actions impact others' time playing the game. Just because it won't get you banned doesn't mean it isn't a dick move.
+
+By signing this contract, you agree to all of its provisions and understand that violating the word or spirit of this text may result in divine intervention against you or expulsion from the Eclipse, regardless of whether or not you waste your money on us.
+
+SIGNED, ~STEAMID~
+
+"Now you're mine, and you will never be the same again."
+*** Character Forge
+**** Interrogation
+Begins automatically if the player has no living characters.
+
+Let's make a puppet. I'll do the heavy lifting, you just give me some ideas.
+
+- What's its name?
+  - Enter from predetermined list or enter manually.
+- Who are its kin?
+  - The Boots
+  - The Scum
+  - The Lords
+- Where is it from?
+  - Liver Failure
+    - Resna
+    - Deadwood
+      A dead swamp full of bones.
+    - Lumnyy
+  - Kidneystan
+    - Skull City
+    - Renalgrad (Darkhand)
+  - Cardiac States
+- What does it know?
+  - Where to hide a body (+1 ~COLD~)
+  - Who's behind it (+1 ~FUCKED UP~)
+  - How to throw a punch (+1 ~MEAN~)
+  - How to bottle everything up (+1 ~RELENTLESS~)
+- Does it like hurting other people?
+  - Yes
+  - No, never!
+  - Only the right ones
+- Would you consider it "normal"?
+  - Yes
+  - No, it's a freak!
+- What is it afraid of?
+  - Worms
+    I'll never work on a farm, they're everywhere...
+  - Water
+    What could be hiding in it?!
+  - Ghosts
+    Please don't haunt me! I won't ever touch a computer again!
+  - Faces
+    Don't look at me! DON'T LOOK AT ME!
+  - Loneliness
+    Please don't leave. I'll cry.
+  - Alien folk
+    Immigrants are going to invade my house and defile my country!
+  - Death
+    I don't wanna die! Don't move on without me, world!
+  - Insects
+    They bug me!
+  - Sotla
+    It's always watching me!
+  - Nudity
+    It burns my chaste and innocent eyes!
+  - Women
+    They're going to drain me of my precious bodily fluids!
+  - Blood
+    It's not supposed to be outside of you!
+  - Elevators
+    OH GOD IT'S MOVING.
+  - Stairs
+    I was warned about these!
+**** Interface
+Questions from the puppetmaker are shown as large moving yellow text. The player answers one question at a time with a menu underneath.
+
+Beneath or beside this menu are notes about the selected answer. (e.g. When a fear is selected, it will print that fear's description)
+*** Cheat Codes
+Cheat Codes are 3-character strings that provide some kind of advantage to the player in the coming round.
+They are bought with ~GUILT~, which is acquired by doing well in the game and earning the favor of Sotla. Much like stem cells or chromosomes.
+
+You can only input 2 cheat codes per round.
+
+Cheat codes that improve fighting ability should be expensive.
+**** Skills & Traits
+- ABC
+  - Costs 2 guilt.
+  - You will know how to read.
+- DOS
+  - Costs 3 guilt.
+  - You will know how to command terminals.
+- YUM
+  - Costs 5 guilt.
+  - You will know how to butcher and cook creatures.
+- GRO
+  - Costs 5 guilt.
+  - You will know how to farm plants and fungi.
+- TIN
+  - Costs 7 guilt.
+  - You will know how to forge and work metal.
+**** Fates
+- XOM
+  - Costs 20 guilt.
+  - Enter a priority queue for Overlords.
+- COG
+  - Costs 5 guilt.
+  - Enter a priority queue for Scum.
+- HOG/DOG
+  - Costs 12 guilt.
+  - Enter a priority queue for Sanitar Squad.
+- EVL
+  - Costs 20 guilt
+  - Enter a priority queue for Antagonist.
+**** Buffs
+- FUR
+  - Costs 4 guilt.
+  - You will be more resistant to cold.
+- CQC
+  - Costs 10 guilt.
+  - Your melee attacks will hit harder.
+- SHH
+  - Costs 6 guilt.
+  - You will be quieter.
+- BRD
+  - Costs 15 guilt.
+  - You will know the art of Armstrong Style.
+**** Items
+- CUT
+  - Costs 7 guilt.
+  - You will spawn with a rusty knife.
+- AAA
+  - Costs 5 guilt. (Scum Only)
+  - You will spawn with a Sanitar Screamer.
+-
+**** Meta
+- END
+  - Costs 666 guilt.
+  - The server will shut down after the Totality.
+  - This shutdown will last several days at least.
+  - The perpetrator will be named at time of death.
+- NEW
+  - Costs 100 guilt.
+  - The server will change games after the Totality.
+  - (Once we start making other games with this thing.)
+- RES
+  - Costs 777 guilt.
+  - Resets GUILT for all players.
+- BFF
+  - Costs 20 guilt.
+  - Two random characters from two online players are chosen to become friends.
+  - The players who are bonded will be notified which characters are now friends, but will not know the benefactor.
+**** Antagonist Selection
+If two players input Antagonist cheat codes, the players will be prompted to RAISE or FOLD. It takes 5 guilt to RAISE, the first to FOLD or run out of guilt will lose.
+- EXE
+  - Costs 50 guilt.
+  - The antagonist will be Netcultists.
+- ICK
+  - Costs 50 guilt.
+  - The antagonist will be Bacterians.
+- DEM
+  - Costs 50 guilt.
+  - The antagonist will be Demokrats.
+- RIP
+  - Costs 50 guilt.
+  - The antagonist will be The Ripper.
+** Music
+- Morgue Ode
+- spring lake - bulwark
+- Les Rallizes Denudes
+- Original Amytune
+** Phases of the Eclipse
+*** Lobby
+Before and after a round, players exist in the LOBBY without control of a character. The lobby is a GUI where players can select and create a character for the upcoming round, see the headcount and maximum occupation of FATES, and talk to other players out of character.
+*** Prelude
+The first several minutes of a round are calm, with the workers locked in communal housing and forced to fraternize with eachother while the Sanitar Squad is briefed on their duties. The Prelude is considered to end when the Sanitars open the bunkhouse doors.
+*** Penumbra
+The vast majority of the rest of the round. The game operates as normal, and the ~TROUBLE~ slowly inches forward.
+*** Contact
+While things have gotten progressively worse over the course of the Penumbra, Contact is where the worst begins. ~TROUBLE~ will make itself apparent, and it's up to the playerbase to make the best of waning normalcy in order to see themselves through the Totality.
+*** Totality
+The climax of the round. All normality breaks down, and players will likely spend the majority of this phase running, screaming, fighting, or hiding.
+*** THE END
+The victor of the day is decided: The Nightmare, or The City?
+** Advance Conditions
+Things that cause the Phase to advance.
+** Win Conditions
+- Liver Failure Forever!
+  The Kommandant and a sizable portion of Liver Failure has survived!
+  The Kommandant and at least 6 other Scum and Sanitars have survived.
+- Liver Failure has Fallen.
+    The City could not escape annihilation, but the Kommandant did!
+  The Kommandant has survived and left the city.
+** Loss Conditions
+- DEATH!
+  The city is dead, and the Kommandant spent too long mourning. Now he's dead, too.
+- daemon
+  Netcultists have successfully summoned daemon.exe. This reality is lost.
+** Antagonists
+*** Netcultists
+(we should probably create some method of hacking that all players can use for their own ends, rather than building it around the antagonists -danku)
+
+These phreaks hijack terminals and turn the city against itself through lies, blackmail, and malicious public services! They hide in the general populace, acting as normal workers, while living second lives as the most insidious threat to Liver Failure.
+
+Netcultists have a 5 ~COLD~ attribute and are the most talented hackers in the nightmare.
+
+Their goal is to spread daemon.exe to as many computers as possible, and eventually summon it to mortal reality.
+**** Abilities
+ Their brain's wireless connection to daemon allows them to install a variety of malicious applications without having to find them on a floppy disk.
+ These allow them to:
+- Connect, one by one, to every SNAIL cerial number, saving terminals found. Takes a long time.
+- Remotely connect to and control a terminal.
+- Connect to radios and hijack the reports.
+- Produce a ghost key
+ - A ghost key remains on the screen until a ghost collects it. The ghost can carry it to another terminal to infect it for a reward of PLASM.
+- Infect a terminal with daemon, turning its background red and text black.
+- Teleport between infected terminals.
+- Eventually summon daemon through ritual.
+**** Abilities (2)
+As the hands of feet of daemon, you have numerous tools at your disposal that let you work on a higher plane than mortal hackers. Your most important possession is The Cradle, the resting place of daemon's seed.
+***** Baptism
+A computer is baptized simply by running ~daemon.exe~. Nothing will appear to happen when the program is run, but the computer will never be the same again.
+
+A baptized computer opens up numerous hidden commands
+***** Sorcery
+*** Demokrats
+The final adherents to Democracy, the Great Demoness.
+Preach your word to the people of Liver Failure and install as many copies of voting software as you can. Force the Kommandant to hold an election, or take him out of the picture and hold it yourself.
+*** Bacterians
+Wasteland warriors from the steppes of Bacteria have set their sights on Liver Failure as their new home, and plan to make way for the migration of their people. Weaken the city with biological and sewer warfare before the horde of migrants arrive at Contact.
+*** The Ripper
+A mad stalker with piercing eyes who watches and follows his victims from afar, poisoning them and stealing their blood for use in rituals. The poison makes their blood hospitable to you- though you can only use it while your victim is alive.
+
+Killing your victims forever cuts you off from their blood, but gives you great pleasure (and a body to scare the other little sheep with).
+
+The Ripper gradually improves his ability to kill and stalk throughout the course of the round, juggling more and more thralls and strategically executing them to prevent his own capture or depressive suicide.
+**** Rituals
+- Bloodsight
+  You can see your thralls wherever they go.
+- Fatigue
+  Your thralls will be weak and slow.
+- Seizures
+  Your thralls will be struck with a non-fatal seizure.
+- Permanence
+  No witchdoctor can remove your curse now.
+- Terminal
+  Offer a phrase, and all of your thralls will die upon your saying that phrase.
+* Roleplay & Immersion
+** DONE [#A] Music
+The game needs ambient and uncomfortable music to be immersive.
+*** TODO ~H:M:S~ Parser
+Inputting audio duration is too annoying.
+It should be possible to get, say, ~666~ from ~'11:06'~.
+*** TODO Unused Music
+Not all of the music made for us is implemented.
+It should be.
+** Character
+*** TODO Attributes
+Each caste of society should have different names for these attributes, but are entirely cosmetic.
+#+begin_quote
+i don't kill puppies for satan but sometimes i yell at my dog
+#+end_quote
+**** =COLD=
+"this is how heartless and calculating a motherfucker
+you are. make cold rolls whenever you do something that
+requires exactness, patience, knowledge, or great care,
+like disarming a security system or reading a book. cold corresponds to intelligence in a normal game. a regular
+person has a cold of 1, and hannibal lecter has a cold of 5."
+
+=COLD= represents a corpse's practical intelligence, be it interfacing with a terminal effectively, diagnosing and fixing a broken machine or printing a circuit board.
+The foreman has a =COLD= of 4.
+With a =COLD= of 0, you are illiterate and cannot read or write. This means you can't use terminals. Or big words.
+**** =FUCKED UP=
+"this is how devious, deviant and weird a
+motherfucker you are. make fucked up rolls whenever you do something that requires paranoia, edginess, quick wits, or sneakiness, like hiding under a bridge or noticing
+that somebody’s disturbed your freezer unit. fucked up
+corresponds to perception and stealth in a normal game. a regular person has a fucked up of 1, and that guy from se7en
+has a fucked up of 5"
+
+For our uses, =FUCKED UP= represents street smarts, social perception and being a trickster that can uncover your secrets from a seemingly-ordinary conversation.
+You can steal without being noticed, keep things hidden on your person. You might known others peoples' phobias and motives.
+=FUCKED UP= affects how hard you hit with sharp weapons.
+Those with high =FUCKED UP= can hear conversations from longer distances. This is more apparent with whispering. For eavesdropping.
+We may also used =FUCKED UP= as dexterity.
+Misfits have a =FUCKED UP= of 4-5.
+**** =MEAN=
+"this is how violent and ruthless a motherfucker you
+are. make mean rolls whenever you do something that requires strength, viciousness, rage, or brutality, like pulling a trigger or snapping handcuffs. mean corresponds to strength and skill in a normal game. a regular person has a mean of 1, and mickey and mallory from natural born killers have a mean of 5."
+
+=MEAN= is equivilent to brute strength. It affects how hard you hit with blunt weapons.
+That's all there is to it, but who needs to be fancy when you can hit like a truck?
+Sanitars have a =MEAN= of 3-5, depending on their rank and thus, training.
+**** =RELENTLESS=
+"this is how gutsy and powerful a
+motherfucker you are. make relentless rolls whenever you do something that requires endurance, discipline, tenacity, or the will to carry on, like swimming underwater or chewing through leather straps. relentless corresponds to stamina in a normal game. a regular person has a relentless of 1, and jason has a relentless of 5."
+
+=RELENTLESS= is equivalent to endurance, it affects how much pain you feel, how long you can go without getting tired. To a lesser extent, it has a scaling chance for you to completely negate small injuries. Thick skin.
+It also considerably reduces how much you get hurt by being thrown around when tumbled.
+The Sekretar has a =RELENTLESS= of 1.
+Sanitars have a =RELENTLESS= of 2-4.
+The proletariat has a =RELENTLESS= of 2-3, but the rare seasoned worker can have 4-5.
+
+*** TODO [#B] Character sheets
+This is where a player defines for a character their:
+- Name
+- Adjectives
+  ...as a replacement for the traditional 'character description'.
+  - How he looks
+  - How he sounds
+  - How he smells
+- Nationality
+  - Liverish
+  - Kidneystani
+  - Arrhythmian
+- Caste
+  The choice of a caste is permanent and defines a character.
+*** DONE [#A] Castes
+Ways of organising groups of characters.
+Won't do much right now, but it could be useful to set bodygroups before we get clothing.
+Eventually will set starting stats, skills, etc.
+**** DONE [#B] Fates
+This time, if castes are like classes, fates are like subclasses.
+***** DONE Scum
+Scum constitutes everyone beneath the state. This includes the working class and illegal alien corpses.
+Probably the majority of the classes in the game will be scum.
+
+He appears in communal housing with 2-4 roommates, who he is familiar with.
+- Factory workers
+  Like the Proletariat from the old days.
+- Shopkeepers
+  These lucky bastards manifest with wealth, property, and a license to access city stocks.
+- Stitchers
+  The rare few who stuck around during their W.A.S.P. First Aid lessons instead of squeezing in more work.
+- Deadbeats
+  The chaff of the crop, lacking in money, body parts, and mental faculties. One of few fates spawnable mid-round.
+- Psychers
+  Freaks who get their kicks growing, synthesizing, and selling drugs. Sometimes even medically relevant ones!
+- Foremen
+  Lucky proles deemed meritous enough to lead their peers in work. Carries a megaphone and a Sanitar Screamer.
+***** DONE Sanitar Squad
+You know exactly what Sanitar Squad is.
+- Sanitar Scrub
+  The default Sanitar available to players.
+  Scrubs the filth off the concrete.
+- Sanitar Sentry
+  The Scrub got a promotion.
+  Now he can carry a gun.
+- Sanitar Savior
+  Medically trained.
+  Disinfects.
+- Sanitar Seeker
+  #+begin_quote
+  I'm a cosmic investigator,
+  secret agent solving a crime.
+  #+end_quote
+  (Carries a snubnose revolver)
+- Sanitar Superior
+  The Superior Sanitar.
+  Far in the future, the Sanitar Squad would be led by a single Kapitan.
+  (Carries a Sanitar Saber and a Big Fucking Gun)
+***** DONE Overlords
+At least one Overlord must be readied for the game to start. At least one Overlord will be the Kommandant.
+- Sekretar
+  The Kommandant's pencil pusher and keypresser. Sysadmin of all red-circuited Liverish computers.
+- Adjutant
+  The Kommandant's paranoia manifest.
+  Does not suffer from standard human burdens or needs.
+- *Kommandant*
+  Liver Failure Forever!
+  Does not suffer from standard human burdens or needs.
+  - Has access to XOMBOKOM, the Liverish public announcement system.
+***** NO Wild Card
+Wild Cards constitute nontraditional fates, usually those who exist primarily to antagonize other players.
+- Migrant
+  If we use rp_slumtown, we can have mirant groups that attempt to make their way into the city and die horribly on the way.
+  This could be a once-availible way for players to rejoin the game as Scum, if they survive.
+*** TODO Ghosts
+***** Plasm
+Similar to Angst in Lifeweb.
+****** Possession
+Ghosts can possess computers, slowing the terminal down considerably and granting 1 plasm for each command entered by a living user. Possession is managed through 'apt', or the Agonizing Possession Tool. A computer can only be possessed by one ghost at a time.
+
+Possessions can be exorcised by living players using drugs, religious artefacts, etc. If a ghost's possession is removed by exorcism, that ghost will lose all of its plasm.
+****** Gaming
+Ghosts can earn plasm by solving puzzles and playing simple minigames. These require no input from living players, and thus are done by the ghost in complete isolation. This should be the slowest method of earning plasm, to encourage riskier and more interactive paranormality.
+****** Anguish
+Like we had in IN3. Being near people who die or get hurt grants plasm, considerably more than gaming or possession.
+****** Hauntings
+Ghosts can use PLASM to haunt players and objects.
+- Slam Door
+  - Costs 3 PLASM.
+- Commune
+  - Costs 5 PLASM.
+  - Say one word to the living.
+***** snudo
+`snudo` or 'supernatural user do' identifies the user as a ghost and grants them access to ghostly commands.
+****** apt
+Standing for `Agonizing Possession Tool`, apt is how ghosts manage the possession status of a terminal.
+- `possess`
+  Possesses the computer if not blocked by another ghost. Adding -i (for 'incognito') slows the computer down less, but only has a 50% chance of returning plasm per command.
+- `purge`
+  Purges possessions from the computer after 20-30 seconds loading. This can be used to supplant a foreign ghost's possession, or to remove your own possession from a terminal in anticipation of an exorcism.
+- `trap`
+  Costs 10 plasm. The next use of the purge command causes the user to lose all of ther plasm. The trap does not discriminate between targets, meaning that the possessor of a trapped computer cannot unpossess it. Offers protection from ghost competitors at the cost of leaving yourself vulnerable to exorcism.
+****** print
+Prints one of several ascii images to the terminal. Costs 4 plasm.
+- `troll`
+  Prints an ascii trollface to the screen.
+- `skull`
+  Prints an ascii skull to the screen.
+- `emblem`
+  Prints the emblem of Liver Failure.
+- `sotla`
+  Prints sotla's eye and then shuts the terminal down.
+****** wormsay
+Prints a simple ascii worm and a custom message not exceeding 40 characters. Costs 8 plasm.
+***** Rebirth
+Ghosts respawn by cashing in their plasm with a terminal, earning a better respawn the more plasm they have. Ghosts can only ever respawn as Deadbeats or Wild Card fates. Your remaining plasm is converted into Bones.
+- 10 plasm lets you respawn with 2 missing body parts and 1 permanent injury.
+- 20 plasm lets you respawn with 1 missing body part and 1 permanent injury, or as a weak Wild Card.
+- 30 plasm lets you respawn with 1 permanent injury.
+- 35 plasm lets you respawn with 1 missing body part, or as a strong Wild Card.
+- 50 plasm lets you respawn miraculously unscathed.
+** Personal Resources
+- STAMINA
+- HUNGER
+- THIRST
+- DESPAIR
+- PAIN
+  Controls incapacitation and visual effects from being injured.
+** Pain
+Pain is what makes the Nightmare. This game aims to discourage the meaningless violence and constant deaths of previous iterations, in favor of more meaningful exchanges in longer lives. To this end, fighting in itself (not just dying) should be heavily discouraged.
+
+A player should only be risking a fight if they feel they are strong or intimidating enough to finish it without much trouble, of if they are desperate enough to risk permanent injury and audiovisual torture.
+*** Audiovisual Torture
+More about the feeling of pain rather than the damage being done to the flesh.
+**** My eyes!
+- Being shot puts a giant bullethole in your vision. It should take up at least 1/6 of the monitor.
+  - Similarly, being hit with a bladed weapon causes your vision to get slashed up with searing red cuts.
+- Being hit causes a bright red flash of varying intensity and length based on the strength of the hit.
+- Death causes the screen to immediately turn completely black.
+- When knocked out by physical trauma, the screen flashes bright white before fading to black.
+- Sustained, continuing pain should be indicated with constant blurring and flashing, and occasional searing spikes of pain that blind the player.
+**** My ears!
+- "Lobotomy" SFX accompanies being hurt really bad
+*** "I ain't dead yet!"
+**** Criteria
+Still figuring out how this is gonna work.
+- Rather than going from fully functional to instantly dead, the character should become less capable with more injuries.
+- A character should be made unable to retaliate far before they die.
+- Blunt injuries should be largely superficial and heal with relative ease. You should be able to get up and shake hands with someone after a fist fight.
+*** Injuries
+Injuries are designed conditions applied to the player by chance and depending on the severity of their wounds and the character's ~RELENTLESS~.
+
+Some injuries are temporary and healable, and some may follow your character for the rest of their miserable life.
+**** Permanent
+- Cyclops
+  You can only see out of one side of your screen.
+  Received from massive trauma.
+- Brain Damage
+  HPPD is always set to maximum. You are prone to occasional seizures and tinnitus.
+  Received by fainting from blunt trauma.
+- Chronic Pain
+  Be tortured with pain flareups at low stamina, or randomly throughout your life.
+  Received from moderate trauma.
+- Limping
+  Your legs don't work right. You use more stamina to move and can't run as fast. Received from large blunt trauma.
+- Collapsed Lung
+  Your stamina recovery and lung capacity is halved.
+  Received from massive blunt trauma.
+- Sickly
+  Your flesh became ill and your immune system never recovered. Diseases progress twice as quickly.
+  Received by having a disease and blade/bullet wound simultaneously.
+- Crushed Chords
+  Talking is hard for you.
+  Speech takes longer to form, and even your kin have trouble understanding you.
+*** "Recovery"
+Blunt trauma can usually be recovered from with simple rest, unless you have a concussion or a broken bone. Minor cuts and scrapes can be healed with disinfectant and bandages.
+
+More major injuries, like broken bones, gunshot wounds, or sliced veins, will require the hands of a "trained" doctor.
+** Justice
+Rather than criminality being a baked-in game mechanic like in IN3, the laws of Liver Failure are constructed in-character directly from the word of the Kommandant, and enforced manually by His Sanitar Squad. This way, Sanitars actually have to be on the lookout for crimes and question witnesses rather than relying on arbitrary game mechanics.
+
+Laws are hashed out in the beginning of the round while the Sanitars are briefed and before the scum are released from their housing. The Kommandant can codify these laws in the Kommand Konsole.
+*** Seekers
+Of particular importance in this new system are the Sanitar Seekers, those trained to track down fugitives, trace contact during an outbreak, and solve criminal cases.
+
+They are assisted in this aim by use of a Surface Scanner, which can identify trace amounts of DNA on the surfaces of things and entities. It is then their job to deduce perpetrators from evidence and present their findings to the rest of the Sanitar Squad.
+*** Crime & Punishment
+At this time, Liver Failure did not have the resources or spare manpower to maintain an endless cycle of execution and emergence, nor the technology to turn corpses into Soylent.
+
+Instead, less permanent means of discouraging crime and instilling dread must be used, at the discretion of the Kommandant and His Sanitars. Sanitars are encouraged to get creative and improvise based on available resources and the crime being punished.
+
+Wrongful or overzealous execution should be strictly punished.
+** Memory
+Every character has a memory of who they were before the player took control of them. This is displayed as narration at the beginning of the round, and can be displayed with ~KEY_M~.
+*** ROUGH SCRIPT
+My name is [NAME], I am a/an [OCCUPATION/FATE]
+from [NATION]. I know how to [SKILL1], [SKILL2], and [SKILL3]. I'm afraid of [FEAR].
+
+[TRAIT DESCRIPTION(S)]
+
+I love my best friend(s) [FRIEND1] (and [FRIEND2]).
+
+I will destroy my enemy, [NAME].
+
+[DRAMA]
+*** Friends
+Perform a special ritual and bond your soul with someone else's, forever. If the two characters are of compatible fates, they will become friends. Friends may also be assigned manually by Necromancers, or created randomly among players with the BFF cheat code.
+*** Enemies
+If you hurt/kill one specific character enough times, your rivalry will be immortalized by Sotla Eirself. Enemies can also be assigned manually by Necromancers.
+** Skills
+Skills can be learned, and vary widely depending on fate. They unlock some mechanic for a character to make use of.
+*** Hands
+**** Husbandry
+Animals are aggressive towards unqualified ranchers who don't know how to behave.
+**** Botany
+Trained botanists can understand Plant Cant, the language of flora, and hear their children crying for water and sunlight.
+**** Butchering
+The precise art of cutting up a creature to avoid the bones, sinew, and poisonous bits.
+
+Untrained hands can only cut dead things into gore, which may technically be edible according to Liverish statutes, but is certainly not palatable.
+
+Trained butchers can not only avoid inedible parts of the creature, but create recognizable cuts that are more easily eaten and can be turned into a variety of recipes.
+**** Metalworking
+**** Chemistry
+A butcher may be able to cut someone open and rip out the bad parts, but it's a tossup whether they wake up after they faint from the overwhelming pain.
+
+Trained chemists know how to use the scarce resources of the Nightmare to create chemicals, including (but not limited to) antibiotics, disinfectants, and anesthetics.
+**** Cooking
+Everyone has to eat, and raw food can only get you so far before you start spewing out of both ends and die. To avoid this fate, some food must be cooked.
+
+The untrained may be able to stick gore over a fire and roast it to a nearly-edible consistency, but this meager food can't keep a sane man alive for long- and forget trying to feed your friends too.
+
+Those trained in the culinary arts can use kitchenware to make more efficient use of ingredients and produce vast quantities of surprisingly palatable food
+*** Brain
+**** Literacy
+One of the most basic skills of modern society, Liver Failure possesses a 100% literacy rate according to all government reports, but most Livermen would disagree in private.
+
+The illiterate may be able to look at books and terminals, but all text is displayed to them in a font that kitbashes words together into a barely-recognizable mess, or as meaningless symbols, depending on how much effort we want to put in.
+**** Commanding
+The Kommandant persecuted computer witches and wizards for their dangerous abilties, and now only mundane skill in commanding terminals remains. As it is necessary to much regular life in developed society, computer literacy is not uncommon, but still an obstacle.
+
+Computers will laugh at those who can't use them.
+**** Empathy
+The ability to understand the expressions and emotions of other people.
+
+Trained empaths are able to see an overview of another character's physical and mental conditions.
+** Traits
+Traits are inherent to a character, and cannot be gained nor removed through normal means.
+All characters can choose 1 trait, but Abnormal characters get an extra trait randomly assigned to them every round.
+
+Traits include mental disorders, disabilities, talents, and compulsions.
+*** Physical
+- Phlegmy
+  You can't stop coughing up slime.
+*** Mental
+*** Fears
+These are traits that cause a loss of sanity when confronted.
+- Worms
+  Seeing wormlike creatures or dig/tilling soil.
+- Water
+  Lose sanity when you
+  - Ghosts
+    Please don't haunt me! I won't ever touch a computer again!
+  - Faces
+    Don't look at me! DON'T LOOK AT ME!
+  - Loneliness
+    Please don't leave. I'll cry.
+  - Alien folk
+    Immigrants are going to invade my house and defile my country!
+  - Death
+    I don't wanna die! Don't move on without me, world!
+  - Insects
+    They bug me!
+  - Sotla
+    It's always watching me!
+  - Nudity
+    It burns my chaste and innocent eyes!
+  - Women
+    They're going to drain me of my precious bodily fluids!
+  - Blood
+    It's not supposed to be outside of you!
+*** Emotional
+** Thing Descriptions
+Shows upon BEHOLDing. A short blurb about the thing and the character's knowledge of it. Descriptions should be able to be changed dynamically based on the state of the item and the observer's traits, skills, and afflictions.
+** Narration
+One (or more) small text boxes under/around the crosshair, that show the character's thoughts, player alerts (like earning points or currency), or hints for the player.
+*** Injury
+- MY [BODY PART]!
+- IT FEELS LIKE MY GUTS/BRAINS ARE GOING TO FALL OUT
+- I WANT TO CUT OFF MY [APPENDAGE]
+*** Fear
+- Fear of bugs
+  "NOT THE BEES!"
+  "DON'T CRAWL ON ME!"
+  "THOSE DEAD EYES..."
+  "OH GOD, KILL IT!"
+- Fear of faces
+  "DON'T LOOK AT ME!"
+  "THEY'RE ALL STARING!"
+- Fear of foreigners
+  "OH GOD, FOREIGNERS!"
+* Items
+** Drugs
+*** Varieties
+**** Procedural Generation?
+**** Chosen Ones
+** Devices
+*** Water scanner
+Used on a liquid container.
+Informs the player if the contained liquid is safe to drink.
+** Weapons
+*** Melee
+For the minimum viable product game, melee weapons should be limited to:
+- Tools that actually have uses.
+- Debris/household things.
+- Sanitar sticks.
+We should not be giving them machetes or chainsaws.
+*** Guns
+** Structures
+** Machines
+*** Shredder
+Recycles things.
+If a thing has an element, the element is produced.
+*** Autosmith
+Creates things, mostly tools. Thing to produce is set by voice.
+Simply creates its selected thing from given elements.
+
+* Food
+** Utensils
+** Cooking
+*** Music
+Playing music near cooking food can improve it, the preferred genre depending on the cooking vessel, food type, or ingredients.
+
+Soup likes sludge, stoner metal, and disco.
+Roasted food likes organs and pianos.
+*** Soup
+Soup varieties are generated procedurally based on the properties of the ingredients.
+Kind of like how BoTW does food with status effects.
+
+These attributes are organized in order of priority. If there are multiple ingredients attempting to influence the title, it will select the one that is highest on the appropriate list.
+(i.e, Hearty Red Slop, Gristle Gruel)
+**** Title 1
+- Crunchy
+  - Bones
+  - Metal
+  - Rocks
+- Meaty
+  - Rat Meat
+  - Human Meat
+  - Stinger Meat
+- Hearty
+  - Any Root/Tuber
+- Delightful
+  - Skinseed
+**** Title 2
+- Red
+  - Blood
+  - Bloodberries
+- Green
+  - Leaves
+  - Vines
+  - Gill Slime
+- Gristle
+  - Gore
+- Bug
+  - Bullcrab Meat
+  - Roach
+**** Title 3
+- Slop
+  - Amoebal Slime
+- Gruel
+  - Earthnuts
+  - Bone Meal
+  - Dirt
+- Soup
+  - Any Liquid
+- Mess
+  - No other Title 3 ingredients.
+** Ingredients
+*** From the Soil
+The building blocks of all other foods.
+**** Of Animals
+- Rat Milk
+  Made by rats in order to feed their spawn, and co-opted by humans into a liquid meal.
+  Nutritious and delicious, but it spoils fast!
+  - Can be fermented into Kumis or mixed with Bloodberries to make Red Cheese.
+**** Of Plants
+- Bloodberries
+  - LEARNED DESCRIPTION
+    A tart red berry that grows from a green bush. Good for seasoning foods, but deadly poisonous when uncooked.
+  - FOOL'S DESCRIPTION
+    A little red berry. Looks yummy!
+- Green Leaves
+  - LEARNED DESCRIPTION
+    The leaves of a bloodberry bush. Not very nutritious or tasty, but technically edible. Eating them raw can cause digestive trouble in the weak-of-body.
+  - FOOL's DESCRIPTION
+    A handful of green leaves. I guess I could eat these?
+- Skinfruit
+  The seeds explode!
+* Farming
+** Fauna
+*** Rats
+Biomatter recycler that turns garbage into milk and meat. Can be eaten whole once the biohazardous giblets are removed.
+*** Bullcrabs
+Hulking creatures that graze on assorted flora, and are slaughtered for their abundant meat and shell plates. They can and will deal mortal wounds if not handled with extreme care in absolute silence. It takes one shot from a big gun to put them down safely.
+*** Grubs
+Once the larval stage of a terrible wasteland beast, these neotenous spawn are renowned for their tender raw flesh and medicinal intestines. Their fragile digestive systems are designed to parasitize living trees and starve them of their saps, but amoeba slime soup is a workable subsitute.
+*** Stingers
+Blind animals with black skin and potent toxin.
+*** Amoebas
+A native inhabitant of the Wetlands that has been ranched for eons. Grows feral across most of the continent and eats dust and pollutants out of the air. Inedible raw, and only barely edible once cooked.
+** Flora
+*** Bloodberry Bushes
+A small bush that produces a little red berry and green leaves.
+*** Skintrees
+These incredibly protective trees are the leading cause of death for Liverish farmers.
+They can be safely cut down for skin and wood, or you can risk stealing the valuable fruit,
+*** Ribroot
+Midnight black sprouts grow from a tuber encased in rib bones. The ribs must be smashed off to release the firm, starchy flesh. The bones can be used for fertilizer while the flesh is cooked.
+*** Earthnuts
+These small legumes grow from the roots of tangled vines. They can be boiled whole into a porridge or shelled with one's hands and eaten raw.
+* Terminals
+Terminals will be the primary method by which machines are
+manipulated, information is accessed and exchanged, games and music
+are played, and religious ceremonies are carried out.
+** History
+Millennia ago, the first humanoid child of Sotla touched down on
+Nightmarish soil. This Kommander, as He was known, founded a
+totalitarian labor facility known as Kamp Kommander. Its interned
+revolted after decades of cruel treatment, led by a mysterious figure
+called The Sorcerer.
+
+After this apocalyptic uprising, dubbed the War of the Sorcerer, much
+of the area had been made bare. From this scarcity and barrenness, the
+victorious slaves named themselves Death Town. The Sorcerer invented
+the first known computers, and wrote their source code into their very
+essence with his magicks; His teachings birthed the Terminal Order as
+it has existed since then.
+
+The practice of computation has been a massive part of the Nightmare's
+history, of Liver Failure and Kidneystan, and before the birth of
+Kapitalism, the ci.
+
+In the early days of Liver Failure, they similarly made extensive use
+of terminals. After centuries of use and abuse, most computers
+available to Livermen had forgotten their source code, and were
+basically useless.
+** Inbuilt Features
+The technology to build new computer parts was lost long ago, and all
+the motherboards that remain are hardcoded to use the SNAIL operating
+system, which is physically impossible to remove. All SNAIL OS
+computers assembled in Liver Failure possess a number of inbuilt
+commands considered essential to operating the terminal.
+*** lfsp
+Commands beneath ~lfsp~ (Liver Failure Shell Protocol) must not prefix
+themselves with ~lfsp~.
+**** st
+~st~ (secure transfer) concerns the transferring of files already on
+the computer.
+- ~push~
+Sends a file directly to
+another computer terminal, identified by TIN.
+#+begin_example
+st push enoch.aud to 666666
+#+end_example
+- ~host~
+Hosts a file on the computer, which can be
+pulled by others at their leisure.
+#+begin_example
+st host enoch.aud
+#+end_example
+- ~behold~
+Shows all files currently hosted by a specified
+computer.
+#+begin_example
+st behold 666666
+#+end_example
+- ~pull~
+Downloads a file that is hosted by
+another specified computer.
+#+begin_example
+st pull enoch.aud from 666666
+#+end_example
+**** vim
+~vim~ (virtual instant messenger) concerns the transmission of text
+for use in instant communication over vast distances.
+- ~punch~
+Get the attention of another operator by playing a sound over their
+speakers. Do it too fast, and your computer might /explode/.
+#+begin_example
+vim punch 666666
+#+end_example
+- ~tell~
+Send a single message to another computer.
+#+begin_example
+vim tell 666666 "You're a loser!"
+#+end_example
+***** room
+Chatrooms serve as places for extended conversations with one or more
+people. Each room has a unique, randomly generated 3 digit ID number.
+
+While inside of a room, text is automatically entered as messages to
+the room. Commands must be prefixed with : inside rooms.
+- ~create~
+Creates a room and prints its ID. Can be given a password.
+#+begin_example
+vim create dracula
+#+end_example
+- ~connect~
+#+begin_example
+vim connect 666 dracula
+#+end_example
+Connect to a room.
+- ~:exit~
+#+begin_example
+:exit
+#+end_example
+Leave the current room.
+**** lfps
+lfps (Low FPS) is a command designed to cause pain in those who
+misspell lfsp. It limits the framerate of the game to 15 until the
+command is disabled by pressing C-c, or typing quit/exit.
+*** law
+Displays the Kommandant's Kommandments.
+*** tax
+Grants read-only access to the tax code.
+** Networking
+Networking between computers takes place through the Liver Failure
+Skull Protocol, or LFSP. This program allows computers to connect to
+each other without wires, transferring plaintext in a 'chat' dialog or
+data files of any kind.
+*** TIN
+A Terminal Identification Number is a unique random 6 digit number
+used to identify a specific computer terminal, generated when the
+SNAIL OS is installed.
+** Peripherals
+Peripherals are endeared to a computer by sharing physical touch. One
+touch is enough to connect a computer to a peripheral, but any
+subsequent touches with other computers will change the peripheral's
+allegiance.
+*** Audio
+**** Headphones
+Listen in luxurious privacy.  You should probably disinfect them
+first.
+**** Speakers
+Have the potential to be dangerous if used maliciously by ghosts or
+hackers to make extremely loud noises. Can be stolen from Livervoice
+radios.
+*** Keyboard
+Ghosts do not require a keyboard to interface with a terminal.
+*** Antenna
+Allows a computer to communicate with its kin over the latent
+DeathWeb. Its range is long enough to justify not coding in a range.
+*** Disks
+**** Where do they come from?
+In Sepsis Town, floppy disks rain from the sky on rare occasions. Some
+are empty, some contain files, including music, computer software,
+forbidden knowledge, and computer games. Over the millennia, they've
+been traded around and abandoned and rediscovered countless
+times. They can be found regularly scattered about anywhere someone
+might have called home.
+**** How do you use them?
+Simply insert the floppy disk into the slot on your disk drive. It's
+so simple.
+**** What's on them?
+***** Music
+******* Special
+- Sunday Morning - The Velvet Underground
+- My Marie (Space Funeral)
+- Sexual Polyrhythmia (that one LRD keyboard instrumental)
+- Every available version of Les Rallizes Denudes' 'White Waking'
+******* Eclipse OST
+******* Metal
+- *Black Magick SS*
+  Permission would be impossible to get, but denying
+  permission would risk their mask slipping off. It's not likely
+  they'd do anything about it if they haven't already, for the
+  previous game(s).
+- Every other magick musician that'll give Amy permission
+  *In The Circle* literally named a song /Ode to Sotla/.
+- *Psychrilege*
+  Because Psychrilege is also the main creator of the game.
+***** Software
+******* Kommand Kontrol
+Turns an ordinary computer into a Kommand Konsole as long as the disk
+is in the drive. Granted to the Kommandant upon coming into being.
+- ~kom [text]~
+  Sends a message to XOMBOKOM.
+- ~law~
+  When written by itself, the Kommandments print to stdout.
+  + ~law new~
+    Adds a new Kommandment.
+  + ~law rm #~
+    Removes a Kommandment.
+  + ~law edit #~
+    Edits a Kommandment.
+  All terminals connected to the othernet are immediately notified of
+  changes to the law in Liver Failure.
+******* Skeleton Key
+Grants administrator access to Liver Failure's utilities. Given to the
+Kommandant and Sekretar at spawn.
+- ~vs~
+  View surplus.  Shows a list of every item currently in the city
+  stock.
+******* XOMBOCOM
+Horrific digital furnace which spews advertisements and hatred without
+end. It can also be used as a search engine, sometimes.
+***** Computer Games
+- ~worm~
+  It's Snake.
+- ~sanitar-says~
+  Key-pressing memory game.
+- ~scout~
+  Infinite runner a la Chrome dinosaur game.
+- ~maze~
+  Rudimentary maze game inspired by Adventure (1980) and
+  Roguetest.
+- ~fort~
+  Short text based RPG where you play as a soldier in the
+  doomed invasion of the Evil Fortress.
+***** Forbidden Knowledge
+Disks of Forbidden Knowledge give players more intimate knowledge
+about the game world and its mechanics.
+***** T-Books
+Readable files! Some can even give you skills you didn't have before.
+****** Lore
+******* The Kidneystani Manifesto
+******* What is SNAIL?
+Comes preinstalled on every computer infected with SNAIL OS.
+******* THE WORLD IS ROTTING
+Ravings of a madman.
+****** Cookbooks
+******* not starving for dummies
+Crude instructions on how to gather and cook simple food.  Digging for
+roots, roasting gore, etc.
+******* The Misfit's Cookbook
+Amateur notes on creating improvised weapons simple, gross
+food. WRITTEN IN ALL CAPS BY SOMEONE WHO DOESN'T KNOW HOW TO USE A
+COMPUTER.
+******* Culinary Craft of the Wetlands
+This is a guide to advanced cooking written prior to the Night of the
+Long Pipes.  Grants knowledge of COOKING.
+****** Manuals
+******* The Fine Art of Murder
+A flowry, fanciful guide on every possible way to kill a man. Blunt
+trauma blood loss, poison, explosives, the whole kit and kaboodle.
+******* Rats are our friends, actually
+A bookabout the charm, usefulness, and tastiness of rats. Written by
+someon with a psuedoreligious fixation on rats.
+******* Sanitation Specifications
+The duties, responsibilities, and furnishings of the Sanitar Squad.
+Everything an inexperienced Scrub (or papersniffing Sekretar) might
+need to know.
+***** Unfriendly faces
+****** XOM
+*XOM* flips through realities like a TV channel surfer, not paying
+attention to any one until soneone within it gets their attention.
+~xom submit~ submits the user to XOM's whimsy. Anything could happen
+next.
+****** daemon.exe
+Running this executable immediently infects the terminal with the
+daemon. Black text on a red background.  It is a sentient computer
+virus that attempts to spread through spam mail messages.  An infected
+computer infects floppy drives with the virus, erasing everything
+else.  Attempting to use an infected terminal is dangerous. You might
+find yourself unable to look away. It will show you horrible things
+and drive you to terror.
+* City Stock
+The belly of Liver Failure. Keeps items in stasis to be used for the betterment of Liver Failure.
+** Access
+*** Titherizer
+Devours the result of proletarian labor.
+If you don't put the products in it, nobody gets paid, and the Sanitar Squad will probably beat your head in for industrial obstruction.
+*** Keeper's Kontraptions
+Grants limited stock access to the Shopkeepers, but demands payment.
+*** Kommand Konsole
+The Kommand Konsole can request any item from city stock for free, to be delivered to the Kommandant's office.
+*** Supply Station
+* Divine Intervention
+** PROJ Curses
+*** Allsight
+- "SOTLA HAS UNLEASHED THE HORRORS OF OMNISCIENCE ON PROUD WORKER!"
+- Permanent cotardism.
+- Characters played by Necromancers scare this player even more than ghosts.
+- Character names are replaced with the corresponding player's SteamID64.
+- Items' INames are replaced with their path (thing/bomb/impact)
+*** Glass Bones & Paper Skin
+- "SOTLA HAS CURSED PROUD WORKER WITH GLASS BONES & PAPER SKIN!"
+- Any damage dealt to this player will mutilate them and require immediate medical attention.
+- Bones created from this player will have the element 'glass'.
+*** Silence
+- "SOTLA HAS SHOWN PROUD WORKER THE TRUE MEANING OF SILENCE!"
+- All audio is disabled.
+- You cannot see any speech.
+*** Impotence
+- "SOTLA HAS MADE PROUD WORKER IMPOTENT AND DEFENSELESS!"
+- You cannot deal damage to other players.
+- All hit sounds are replaced with squeaky toys.
+*** Hated by Nature
+- "SOTLA HAS TURNED NATURE AGAINST PROUD WORKER!"
+- All animals will ravenously attack you on sight. Plants will fill you with thorns.
+*** Ego Death
+- "SOTLA HAS KILLED THE VERY IDEA OF PROUD WORKER!"
+- Permanently deletes a character and forbids a character with that name from ever being created again.
+*** Two Left Feet
+- "SOTLA HAS CURSED PROUD WORKER TO HAVE TWO LEFT FEET!"
+- You will tumble every 2-5 minutes.

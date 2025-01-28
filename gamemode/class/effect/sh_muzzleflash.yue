@@ -1,0 +1,91 @@
+import random, Rand from math
+
+images_muzzle = ["effects/muzzleflash#{i}" for i=1,4]
+images_distort = {"sprites/heatwave"}
+images_smoke = ["particle/smokesprites_000#{i}" for i=1,9]
+images_smoke[] = "particle/smokesprites_00#{i}" for i=10,16
+
+class MuzzleFlash extends FX
+  Init: (data) =>
+    quality = 3
+    return if quality == 0
+
+    wpn = data\GetEntity!
+    return unless IsValid wpn
+    ply = wpn\GetHolder!
+    return unless IsValid ply
+
+    pos, dir = wpn\GetMuzzlePos!
+    dir = dir\Forward!
+
+    addvel = ply\GetVelocity!
+
+    emitter = ParticleEmitter pos
+
+    if (not wpn.Suppressed) and (not wpn.FlashHidden)
+      particle = emitter\Add images_muzzle[random #images_muzzle], pos
+      if particle
+        with particle
+          \SetVelocity addvel
+          \SetLifeTime 0
+          \SetDieTime Rand 0.05, 0.1
+          \SetStartAlpha 255
+          \SetEndAlpha 0
+          \SetStartSize Rand 15, 20
+          \SetEndSize Rand 25, 30
+          \SetLighting false
+          \SetRoll random 0, 360
+          \SetColor 255, 255, 255
+
+    for i=1, quality
+      particle = emitter\Add images_smoke[random #images_smoke], pos
+      if particle
+        with particle
+          \SetVelocity VectorRand! * 10 + (dir * i * Rand(12, 24)) + addvel
+          \SetLifeTime 0
+          \SetDieTime Rand(0.75, 1.5)
+          \SetStartAlpha Rand(5, 10) * quality
+          \SetEndAlpha 0
+          \SetStartSize Rand 8, 12
+          \SetEndSize Rand 24, 30
+          \SetRoll math.rad(Rand 0, 360)
+          \SetRollDelta Rand -1, 1
+          \SetLighting true
+          \SetAirResistance 96
+          \SetGravity Vector -7, 3, 60
+          \SetColor 255, 255, 255
+
+    if quality >= 3
+      particle = emitter\Add images_distort[random #images_distort], pos
+      if particle
+        with particle
+          \SetVelocity (dir * 25) + 1.05 * addvel
+          \SetLifeTime 0
+          \SetDieTime Rand 0.1, 0.2
+          \SetStartAlpha 255
+          \SetEndAlpha 0
+          \SetStartSize Rand 5, 8
+          \SetEndSize 0
+          \SetRoll Rand 0, 360
+          \SetRollDelta Rand -2, 2
+          \SetAirResistance 5
+          \SetGravity Vector 0, 0, 40
+          \SetColor 255, 255, 255
+
+    unless wpn.Suppressed
+      light = DynamicLight @EntIndex!
+      if light
+        with light
+          .Pos = pos
+          .r = 244
+          .g = 209
+          .b = 66
+          .Brightness = 6
+          .Decay = 2500
+          .Size = 256
+          .DieTime = CurTime! + 0.1
+
+    emitter\Finish!
+
+  Think: => false
+  Render: => false

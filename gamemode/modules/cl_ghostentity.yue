@@ -1,0 +1,87 @@
+-- most of the below is stolen from gmod_tool/ghostentity.lua
+  -- which is from gamemodes/sandbox
+-- as this gamemode is never intended to be run singleplayer,
+  -- we only preserve that logic which applies to multiplayer
+    -- therefore this is a client only module.
+class GhostEntity extends MODULE
+  ghost_entity: NULL
+
+  Think: =>
+    @UpdateGhostEntity!
+    return
+
+  MakeGhostEntity: (model, pos, angle) =>
+    util.PrecacheModel model
+
+    -- can't exactly understand the reason for this but it was in the original
+    return unless IsFirstTimePredicted!
+
+    -- release the old ghost entity
+    @ReleaseGhostEntity!
+
+    -- don't allow ragdolls/effects to be ghosts
+    return unless util.IsValidProp model
+
+    @ghost_entity = ents.CreateClientProp model
+
+    -- if there's too many entities we might not spawn
+    unless IsValid @ghost_entity
+      @ghost_entity = nil
+      return
+
+    with @ghost_entity
+      \SetModel model
+      \SetPos pos
+      \SetAngles angle
+      \Spawn!
+      -- we do not want physics at all
+      \PhysicsDestroy!
+      \SetMoveType MOVETYPE_NONE
+      \SetNotSolid true
+      \SetRenderMode RENDERMODE_TRANSCOLOR
+      \SetColor Color( 255, 255, 255, 150 )
+
+  -- starts up the ghost entity
+  -- the most important part of this is making sure it gets deleted properly
+  StartGhostEntity: (ent) => @MakeGhostEntity( ent\GetModel!, ent\GetPos!, ent\GetAngles! )
+
+  -- releases the ghost entity
+  ReleaseGhostEntity: =>
+    if @ghost_entity
+      unless IsValid @ghost_entity
+        @ghost_entity = nil
+        return
+      @ghost_entity\Remove!
+      @ghost_entity = nil
+
+    -- this is unused.
+      -- TODO maybe we can change that?
+    if @ghost_entities
+      for k, v in pairs @ghost_entities
+        v\Remove! if IsValid v
+        @ghost_entities[k] = nil
+      @ghost_entities = nil
+
+    -- this is unused.
+      -- TODO maybe we can change that?
+    if @ghost_offset
+      @ghost_offset[k] = nil for k, v in pairs @ghost_offset
+
+  -- update the ghost entity
+  UpdateGhostEntity: =>
+    return if @ghost_entity == nil
+    unless IsValid @ghost_entity
+      @ghost_entity = nil
+      return
+
+    ply = LocalPlayer!
+    item = ply\Wielding!
+    item = ply\WieldingOffhand! unless IsValid item
+    return unless IsValid item
+    tr = ply\TraceItem item, ply\GetInteractTrace!.HitPos
+    -- return unless tr.Hit
+
+    ang = Angle(0, ply\GetAngles!.y, 0) + item.PlaceAngle
+    with @ghost_entity
+      \SetPos tr.HitPos
+      \SetAngles ang
