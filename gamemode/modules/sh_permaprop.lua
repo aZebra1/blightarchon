@@ -48,6 +48,8 @@ if SERVER then
                     local modelFleshGrinder = "models/props_wasteland/laundry_dryer002.mdl"
                     local modelRotPurifier = "models/props_wasteland/laundry_washer003.mdl"
                     local modelRotStove = "models/props_wasteland/kitchen_stove001a.mdl"
+                    local modelRotRockWash = "models/props_wasteland/laundry_washer001a.mdl"
+                    local modelRotOreRefinery = "models/props_c17/furniturewashingmachine001a.mdl"
 
                     if data.model == modelFleshGrinder then
                         ent = ents.Create("nonpickup/flesh.grinder")
@@ -55,6 +57,10 @@ if SERVER then
                         ent = ents.Create("nonpickup/rot.purifier")
                     elseif data.model == modelRotStove then
                         ent = ents.Create("nonpickup/rot.stove")
+                    elseif data.model == modelRotRockWash then
+                        ent = ents.Create("nonpickup/rot.rockwash")
+                    elseif data.model == modelRotOreRefinery then
+                        ent = ents.Create("nonpickup/rot.orerefinery")
                     else
                         print("Invalid ENT. contact chris.")
                         return
@@ -122,7 +128,7 @@ if SERVER then
         local tr = ply:GetEyeTrace()
         local ent = tr.Entity
 
-        if IsValid(ent) and ent:GetClass() == "nonpickup/flesh.grinder" or "nonpickup/rot.purifier" or "nonpickup/rot.stove" then
+        if IsValid(ent) and ent:GetClass() == "nonpickup/flesh.grinder" or "nonpickup/rot.purifier" or "nonpickup/rot.stove" or "nonpickup/rot.rockwash" or "nonpickup/rot.orerefinery" then
             SaveEntityData(ent)
         else
             ply:PrintMessage(HUD_PRINTTALK, "You must be looking at a valid prop!")
@@ -139,7 +145,7 @@ if SERVER then
         local tr = ply:GetEyeTrace()
         local ent = tr.Entity
 
-        if IsValid(ent) and ent:GetClass() == "nonpickup/flesh.grinder" or "nonpickup/rot.purifier" or "nonpickup/rot.stove" then
+        if IsValid(ent) and ent:GetClass() == "nonpickup/flesh.grinder" or "nonpickup/rot.purifier" or "nonpickup/rot.stove" or "nonpickup/rot.rockwash" or "nonpickup/rot.orerefinery" then
             RemoveEntityData(ent)
         else
             ply:PrintMessage(HUD_PRINTTALK, "You must be looking at a valid prop to remove it!")

@@ -702,6 +702,282 @@ do
 	end
 	RotStove = _class_0
 end
+
+local RockWash
+do
+	local _class_0
+	local _parent_0 = NONPICKUP
+	local _base_0 = {
+		IName = 'rot.rockwash - a fucking rock washer',
+		Model = 'models/props_wasteland/laundry_washer001a.mdl',
+		Spawnable = true,
+		SizeClass = SIZE_IMMOBILE,
+		Durability = 200,
+		Radius = 2048,
+		Damage = 666,
+		Detonate = function(self)
+			local pos = self:WorldSpaceCenter()
+			util.ScreenShake(pos, 25, 150, 1, self.Radius)
+			do
+				local _with_0 = ents.Create('env_explosion')
+				_with_0:SetOwner(self:GetOwner())
+				_with_0:SetPos(pos)
+				_with_0:SetKeyValue('iMagnitude', self.Damage)
+				_with_0:SetKeyValue('iRadiusOverride', self.Radius)
+				_with_0:Spawn()
+				_with_0:Activate()
+				_with_0:Fire('Explode')
+			end
+			return self:Remove()
+		end,
+		OnTakeDamage = function(self, dmg)
+			if dmg:IsDamageType(DMG_CRUSH) then
+				return
+			end
+			self.Durability = self.Durability - dmg:GetDamage()
+			self.Durability = max(self.Durability, 0)
+			if self.Durability <= 0 then
+				return self:Detonate()
+			end
+		end,
+		
+
+		Touch = function(self, other)
+			if self.isBusy then
+				return -- If busy, ignore any new entities
+			end
+		
+			-- List of allowed entities
+			local RockEnts = {
+				"thing/junk/rock"
+			}
+		
+			-- Check if the entity is in the allowed list
+			if not table.HasValue(RockEnts, other:GetClass()) then
+				return
+			end
+		
+			self.isBusy = true
+			self:EmitSound("ambient/machines/sputter1.wav") -- Play sound when touched
+		
+			-- Remove the entity
+			other:Remove()
+		
+			-- Play the spin sound while processing
+			self:EmitSound("ambient/machines/engine4.wav", 75, 100, 1, CHAN_STATIC)
+		
+			-- Determine the resulting entity based on the class of the input entity
+			local spawnEntityClass
+			local spawnEntityClass2
+			if other:GetClass() == "thing/junk/rock" then
+				spawnEntityClass = "thing/junk/rock.ore" -- Purified Water → Distilled Vodka
+			--[[elseif other:GetClass() == "thing/food/meat/gore/char" or other:GetClass() == "thing/food/meat/gore" then
+				spawnEntityClass = "thing/food/meat" -- Human Meat → Rotten Meat
+			elseif other:GetClass() == "thing/food/dirty.water" then
+				spawnEntityClass = "thing/food/purified.water" -- Dirty Water → Purified Water
+			elseif other:GetClass() == "thing/food/meat/blood.clot" then
+				spawnEntityClass = "thing/food/dirty.water" -- Blood Clot → Dirty Water
+			elseif other:GetClass() == "thing/food/meat" then
+				spawnEntityClass = "thing/food/meat/human.sausage" -- Rotten Meat → Rotten Human Sausage]]--
+			end
+		
+			-- Spawn the resulting entity after a delay
+			if spawnEntityClass then
+				timer.Create("SpawnEntityTimer_" .. self:EntIndex(), 15, 1, function()
+					local spawnEntity = ents.Create(spawnEntityClass)
+					if IsValid(spawnEntity) then
+						spawnEntity:SetPos(self:GetPos() + self:GetRight() * 50)
+						spawnEntity:Spawn()
+					end
+		
+					-- Stop the spin sound and reset the busy state
+					self:StopSound("ambient/machines/engine4.wav")
+					self.isBusy = false
+				end)
+			end
+		end		
+		
+	}
+	for _key_0, _val_0 in pairs(_parent_0.__base) do
+		if _base_0[_key_0] == nil and _key_0:match("^__") and not (_key_0 == "__index" and _val_0 == _parent_0.__base) then
+			_base_0[_key_0] = _val_0
+		end
+	end
+	if _base_0.__index == nil then
+		_base_0.__index = _base_0
+	end
+	setmetatable(_base_0, _parent_0.__base)
+	_class_0 = setmetatable({
+		__init = function(self, ...)
+
+			return _class_0.__parent.__init(self, ...)
+		end,
+		__base = _base_0,
+		__name = "rot.rockwash",
+		__parent = _parent_0
+	}, {
+		__index = function(cls, name)
+			local val = rawget(_base_0, name)
+			if val == nil then
+				local parent = rawget(cls, "__parent")
+				if parent then
+					return parent[name]
+				end
+			else
+				return val
+			end
+		end,
+		__call = function(cls, ...)
+
+			local _self_0 = setmetatable({ }, _base_0)
+			cls.__init(_self_0, ...)
+			return _self_0
+		end
+	})
+	_base_0.__class = _class_0
+	if _parent_0.__inherited then
+		_parent_0.__inherited(_parent_0, _class_0)
+	end
+	RockWash = _class_0
+end
+
+local OreRefiner
+do
+	local _class_0
+	local _parent_0 = NONPICKUP
+	local _base_0 = {
+		IName = 'rot.orerefinery - a fucking ore refinery',
+		Model = 'models/props_c17/FurnitureWashingmachine001a.mdl',
+		Spawnable = true,
+		SizeClass = SIZE_IMMOBILE,
+		Durability = 200,
+		Radius = 2048,
+		Damage = 666,
+		Detonate = function(self)
+			local pos = self:WorldSpaceCenter()
+			util.ScreenShake(pos, 25, 150, 1, self.Radius)
+			do
+				local _with_0 = ents.Create('env_explosion')
+				_with_0:SetOwner(self:GetOwner())
+				_with_0:SetPos(pos)
+				_with_0:SetKeyValue('iMagnitude', self.Damage)
+				_with_0:SetKeyValue('iRadiusOverride', self.Radius)
+				_with_0:Spawn()
+				_with_0:Activate()
+				_with_0:Fire('Explode')
+			end
+			return self:Remove()
+		end,
+		OnTakeDamage = function(self, dmg)
+			if dmg:IsDamageType(DMG_CRUSH) then
+				return
+			end
+			self.Durability = self.Durability - dmg:GetDamage()
+			self.Durability = max(self.Durability, 0)
+			if self.Durability <= 0 then
+				return self:Detonate()
+			end
+		end,
+		
+
+		Touch = function(self, other)
+			if self.isBusy then
+				return -- If busy, ignore any new entities
+			end
+		
+			-- List of allowed entities
+			local RockEnts = {
+				"thing/junk/rock.ore"
+			}
+		
+			-- Check if the entity is in the allowed list
+			if not table.HasValue(RockEnts, other:GetClass()) then
+				return
+			end
+		
+			self.isBusy = true
+			self:EmitSound("ambient/machines/sputter1.wav") -- Play sound when touched
+		
+			-- Remove the entity
+			other:Remove()
+		
+			-- Play the spin sound while processing
+			self:EmitSound("ambient/machines/engine1.wav", 75, 100, 1, CHAN_STATIC)
+		
+			-- Determine the resulting entity based on the class of the input entity
+			local spawnEntityClass
+			local spawnEntityClass2
+			if other:GetClass() == "thing/junk/rock.ore" then
+				spawnEntityClass = "thing/junk/scrap.metal" -- Purified Water → Distilled Vodka
+			--[[elseif other:GetClass() == "thing/food/meat/gore/char" or other:GetClass() == "thing/food/meat/gore" then
+				spawnEntityClass = "thing/food/meat" -- Human Meat → Rotten Meat
+			elseif other:GetClass() == "thing/food/dirty.water" then
+				spawnEntityClass = "thing/food/purified.water" -- Dirty Water → Purified Water
+			elseif other:GetClass() == "thing/food/meat/blood.clot" then
+				spawnEntityClass = "thing/food/dirty.water" -- Blood Clot → Dirty Water
+			elseif other:GetClass() == "thing/food/meat" then
+				spawnEntityClass = "thing/food/meat/human.sausage" -- Rotten Meat → Rotten Human Sausage]]--
+			end
+		
+			-- Spawn the resulting entity after a delay
+			if spawnEntityClass then
+				timer.Create("SpawnEntityTimer_" .. self:EntIndex(), 20, 1, function()
+					local spawnEntity = ents.Create(spawnEntityClass)
+					if IsValid(spawnEntity) then
+						spawnEntity:SetPos(self:GetPos() + self:GetForward() * 50)
+						spawnEntity:Spawn()
+					end
+		
+					-- Stop the spin sound and reset the busy state
+					self:StopSound("ambient/machines/engine1.wav")
+					self.isBusy = false
+				end)
+			end
+		end		
+		
+	}
+	for _key_0, _val_0 in pairs(_parent_0.__base) do
+		if _base_0[_key_0] == nil and _key_0:match("^__") and not (_key_0 == "__index" and _val_0 == _parent_0.__base) then
+			_base_0[_key_0] = _val_0
+		end
+	end
+	if _base_0.__index == nil then
+		_base_0.__index = _base_0
+	end
+	setmetatable(_base_0, _parent_0.__base)
+	_class_0 = setmetatable({
+		__init = function(self, ...)
+
+			return _class_0.__parent.__init(self, ...)
+		end,
+		__base = _base_0,
+		__name = "rot.orerefinery",
+		__parent = _parent_0
+	}, {
+		__index = function(cls, name)
+			local val = rawget(_base_0, name)
+			if val == nil then
+				local parent = rawget(cls, "__parent")
+				if parent then
+					return parent[name]
+				end
+			else
+				return val
+			end
+		end,
+		__call = function(cls, ...)
+
+			local _self_0 = setmetatable({ }, _base_0)
+			cls.__init(_self_0, ...)
+			return _self_0
+		end
+	})
+	_base_0.__class = _class_0
+	if _parent_0.__inherited then
+		_parent_0.__inherited(_parent_0, _class_0)
+	end
+	OreRefiner = _class_0
+end
 -- end ----------------------------------------------------------------------------------------------------------------------
 local Radio
 local _class_0
