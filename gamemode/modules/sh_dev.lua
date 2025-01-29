@@ -16,6 +16,7 @@ if SERVER then
 		end
 		local barcode = net.ReadString()
 		local cls = ENTITY.registered[barcode]
+		print(ENTITY.registered[barcode])
 		if not (cls and cls.Spawnable) then
 			return
 		end
@@ -66,6 +67,7 @@ spawn_callback = function(ply, cmd, args, argstr)
 			return
 		end
 		local cls = ENTITY.registered[argstr]
+		print(argstr)
 		if not cls then
 			if CLIENT then
 				MsgC(Color(200, 0, 0), "No ENTITY class registered named " .. tostring(argstr) .. ".\n")
@@ -78,6 +80,7 @@ spawn_callback = function(ply, cmd, args, argstr)
 			return
 		end
 		net.Start("dev_sp")
+		print(argstr)
 		net.WriteString(argstr)
 		return net.SendToServer()
 	end

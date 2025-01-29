@@ -30,12 +30,14 @@ local _base_0 = {
 	skills = { },
 	motive = "fear",
 	PlayerSpawn = function(self, ply)
-		local caste = CASTES[CASTE_SANITAR]
+		local caste = CASTES[CASTE_SCUM]
 		local fate_idx = table.Random(caste.fates)
 		ply:InitializeBody()
 		ply:SetCaste(caste.index)
-		ply:SetFate(fate_idx)
+		ply:SetFate(12)
+		PrintTable(caste.fates)
 		local fate = ply:FateTable()
+		PrintTable(fate)
 		if fate.bodygroups then
 			local scalp = fate.bodygroups.scalp or 0
 			if istable(scalp) then

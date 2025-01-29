@@ -228,7 +228,11 @@ else
 		pos = pos + Vector(0, 0, 10)
 		local texts = {
 			"THUD",
-			"WHAM"
+			"WHAM",
+			"BANG",
+			"POOF",
+			"SMASH",
+			"CLOWN.PUSSY"
 		}
 		return BUBBLE({
 			text = "*" .. tostring(texts[math.random(1, #texts)]) .. "*",
@@ -244,7 +248,8 @@ else
 		local pos = net.ReadVector()
 		pos = pos + Vector(0, 0, 10)
 		local texts = {
-			"CRASH"
+			"CRASH",
+			"BWAM"
 		}
 		return BUBBLE({
 			text = "*" .. tostring(texts[math.random(1, #texts)]) .. "*",

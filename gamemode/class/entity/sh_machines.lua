@@ -269,13 +269,249 @@ do
 	end
 	Machine = _class_0
 end
+--Job Terminals
+local JobTerminal
+do
+    local _class_0
+    local _parent_0 = NONPICKUP
+    local _base_0 = {
+        IName = 'job.terminal.shepherd > get a job to teach some cunt fucks',
+        Model = 'models/props_combine/breenconsole.mdl',
+        Spawnable = true,
+        SizeClass = SIZE_IMMOBILE,
+        Durability = 200,
+        Radius = 2048,
+        Damage = 666,
+        InteractionState = {}, -- Track interaction state for players
+        
+        Detonate = function(self)
+            local pos = self:WorldSpaceCenter()
+            util.ScreenShake(pos, 25, 150, 1, self.Radius)
+            local _with_0 = ents.Create('env_explosion')
+            _with_0:SetOwner(self:GetOwner())
+            _with_0:SetPos(pos)
+            _with_0:SetKeyValue('iMagnitude', self.Damage)
+            _with_0:SetKeyValue('iRadiusOverride', self.Radius)
+            _with_0:Spawn()
+            _with_0:Activate()
+            _with_0:Fire('Explode')
+            return self:Remove()
+        end,
+
+        OnTakeDamage = function(self, dmg)
+            if dmg:IsDamageType(DMG_CRUSH) then
+                return
+            end
+            self.Durability = self.Durability - dmg:GetDamage()
+            self.Durability = math.max(self.Durability, 0)
+            if self.Durability <= 0 then
+                return self:Detonate()
+            end
+        end,
+
+		
+
+        Use = function(self, ply)
+				local pos = self:GetPos()
+				local nearestPlayer = nil
+				local nearestDistance = math.huge
+		
+				for _, ply in ipairs(player.GetAll()) do
+					if IsValid(ply) and ply:Alive() then
+						local dist = pos:DistToSqr(ply:GetPos()) -- Use squared distance for efficiency
+						if dist < nearestDistance then
+							nearestDistance = dist
+							nearestPlayer = ply
+						end
+					end
+				end
+			if not ply:GetUserGroup("member") then
+				SendNotification(nearestPlayer, "> you think you have the chromosomes to teach people? fuck off.", Color(255, 0, 0))
+				return
+			else
+				if ply:GetFate() == 17 then
+					SendNotification(nearestPlayer, "> you are already a shepherd. fuck off.", Color(255, 0, 0))
+					self.InteractionState[ply] = nil
+					return
+				end
+					 -- Assuming you have a method to get the nearest player
+				if not self.InteractionState[ply] and ply:GetFate() != 17 then
+					SendNotification(nearestPlayer, "> a job terminal for a shepherd. Press <interact> to switch jobs", Color(0, 255, 0))
+					self.InteractionState[ply] = true -- Mark first interaction as done
+					return
+				end
+	
+					-- Second interaction: confirm and set fate
+				ply:SetFate(17)
+				SendNotification(ply, "> you are now a shepherd and must train new players on how to play blight.archon", Color(255, 0, 0)) -- Notify the player their fate has been set
+				self.InteractionState[ply] = nil -- Reset interaction state
+			end
+		end
+    }
+
+    for _key_0, _val_0 in pairs(_parent_0.__base) do
+        if _base_0[_key_0] == nil and _key_0:match("^__") and not (_key_0 == "__index" and _val_0 == _parent_0.__base) then
+            _base_0[_key_0] = _val_0
+        end
+    end
+    if _base_0.__index == nil then
+        _base_0.__index = _base_0
+    end
+    setmetatable(_base_0, _parent_0.__base)
+    _class_0 = setmetatable({
+        __init = function(self, ...)
+            return _class_0.__parent.__init(self, ...)
+        end,
+        __base = _base_0,
+        __name = "job.terminal",
+        __parent = _parent_0
+    }, {
+        __index = function(cls, name)
+            local val = rawget(_base_0, name)
+            if val == nil then
+                local parent = rawget(cls, "__parent")
+                if parent then
+                    return parent[name]
+                end
+            else
+                return val
+            end
+        end,
+        __call = function(cls, ...)
+            local _self_0 = setmetatable({}, _base_0)
+            cls.__init(_self_0, ...)
+            return _self_0
+        end
+    })
+    _base_0.__class = _class_0
+    if _parent_0.__inherited then
+        _parent_0.__inherited(_parent_0, _class_0)
+    end
+    JobTerminal = _class_0
+end
+
+local JobTerminalFucklet
+do
+    local _class_0
+    local _parent_0 = NONPICKUP
+    local _base_0 = {
+        IName = 'job.terminal.fucklet > dont like your job? well go back to being a basic fucklet.',
+        Model = 'models/props_combine/breenconsole.mdl',
+        Spawnable = true,
+        SizeClass = SIZE_IMMOBILE,
+        Durability = 200,
+        Radius = 2048,
+        Damage = 666,
+        InteractionState = {}, -- Track interaction state for players
+        
+        Detonate = function(self)
+            local pos = self:WorldSpaceCenter()
+            util.ScreenShake(pos, 25, 150, 1, self.Radius)
+            local _with_0 = ents.Create('env_explosion')
+            _with_0:SetOwner(self:GetOwner())
+            _with_0:SetPos(pos)
+            _with_0:SetKeyValue('iMagnitude', self.Damage)
+            _with_0:SetKeyValue('iRadiusOverride', self.Radius)
+            _with_0:Spawn()
+            _with_0:Activate()
+            _with_0:Fire('Explode')
+            return self:Remove()
+        end,
+
+        OnTakeDamage = function(self, dmg)
+            if dmg:IsDamageType(DMG_CRUSH) then
+                return
+            end
+            self.Durability = self.Durability - dmg:GetDamage()
+            self.Durability = math.max(self.Durability, 0)
+            if self.Durability <= 0 then
+                return self:Detonate()
+            end
+        end,
+
+		
+
+        Use = function(self, ply)
+				local pos = self:GetPos()
+				local nearestPlayer = nil
+				local nearestDistance = math.huge
+		
+				for _, ply in ipairs(player.GetAll()) do
+					if IsValid(ply) and ply:Alive() then
+						local dist = pos:DistToSqr(ply:GetPos()) -- Use squared distance for efficiency
+						if dist < nearestDistance then
+							nearestDistance = dist
+							nearestPlayer = ply
+						end
+					end
+				end
+			if ply:GetFate() == 17 then
+				SendNotification(nearestPlayer, "> you are already a fucklet. fuck off.", Color(255, 0, 0))
+				self.InteractionState[ply] = nil
+                return
+			end
+				 -- Assuming you have a method to get the nearest player
+            if not self.InteractionState[ply] and ply:GetFate() != 12 then
+                SendNotification(nearestPlayer, "> a job terminal for a fucklet. press <interact> to ruin your life.", Color(0, 255, 0))
+                self.InteractionState[ply] = true -- Mark first interaction as done
+				return
+            end
+
+            -- Second interaction: confirm and set fate
+            ply:SetFate(12)
+            SendNotification(ply, "> you are now a fucklet. the cream of the- nevermind your a piece of shit.", Color(255, 0, 0)) -- Notify the player their fate has been set
+            self.InteractionState[ply] = nil -- Reset interaction state
+        end
+    }
+
+    for _key_0, _val_0 in pairs(_parent_0.__base) do
+        if _base_0[_key_0] == nil and _key_0:match("^__") and not (_key_0 == "__index" and _val_0 == _parent_0.__base) then
+            _base_0[_key_0] = _val_0
+        end
+    end
+    if _base_0.__index == nil then
+        _base_0.__index = _base_0
+    end
+    setmetatable(_base_0, _parent_0.__base)
+    _class_0 = setmetatable({
+        __init = function(self, ...)
+            return _class_0.__parent.__init(self, ...)
+        end,
+        __base = _base_0,
+        __name = "job.terminal.fucklet",
+        __parent = _parent_0
+    }, {
+        __index = function(cls, name)
+            local val = rawget(_base_0, name)
+            if val == nil then
+                local parent = rawget(cls, "__parent")
+                if parent then
+                    return parent[name]
+                end
+            else
+                return val
+            end
+        end,
+        __call = function(cls, ...)
+            local _self_0 = setmetatable({}, _base_0)
+            cls.__init(_self_0, ...)
+            return _self_0
+        end
+    })
+    _base_0.__class = _class_0
+    if _parent_0.__inherited then
+        _parent_0.__inherited(_parent_0, _class_0)
+    end
+    JobTerminalFucklet = _class_0
+end
+-- JobTerminals End
 -- start ----------------------------------------------------------------------------------------------------------------------
 local FleshGrinder
 do
 	local _class_0
 	local _parent_0 = NONPICKUP
 	local _base_0 = {
-		IName = 'flesh.grinder - closest fucklet gets the flesh',
+		IName = 'flesh.grinder > this looks like it grinds fucklets',
 		Model = 'models/props_wasteland/laundry_dryer002.mdl',
 		Spawnable = true,
 		SizeClass = SIZE_IMMOBILE,
@@ -426,7 +662,7 @@ do
 	local _class_0
 	local _parent_0 = NONPICKUP
 	local _base_0 = {
-		IName = 'rot.purifier - fucklet purifier',
+		IName = 'rot.purifier > fucklet purifier',
 		Model = 'models/props_wasteland/laundry_washer003.mdl',
 		Spawnable = true,
 		SizeClass = SIZE_IMMOBILE,
@@ -569,7 +805,7 @@ do
 	local _class_0
 	local _parent_0 = NONPICKUP
 	local _base_0 = {
-		IName = 'rot.stove - fucklet cooker',
+		IName = 'rot.stove > fucklet cooker',
 		Model = 'models/props_wasteland/kitchen_stove001a.mdl',
 		Spawnable = true,
 		SizeClass = SIZE_IMMOBILE,
@@ -708,7 +944,7 @@ do
 	local _class_0
 	local _parent_0 = NONPICKUP
 	local _base_0 = {
-		IName = 'rot.rockwash - a fucking rock washer',
+		IName = 'rot.rockwash > a fucking rock washer',
 		Model = 'models/props_wasteland/laundry_washer001a.mdl',
 		Spawnable = true,
 		SizeClass = SIZE_IMMOBILE,
@@ -841,12 +1077,172 @@ do
 	RockWash = _class_0
 end
 
+local CraftingMachine
+do
+    local _class_0
+    local _parent_0 = NONPICKUP
+    local _base_0 = {
+        IName = 'blight.crafter > industrial cuntsembler', 
+        Model = 'models/props_wasteland/laundry_dryer001.mdl',
+        Spawnable = true,
+        SizeClass = SIZE_IMMOBILE,
+        Durability = 250,
+        Radius = 2048,
+        Damage = 500,
+        Items = {},
+        KnownRecipes = {
+            {"thing/junk/scrap.metal", "thing/junk/scrap.metal", "thing/weapon/knife/long"},
+            {"thing/metal_scrap", "thing/energy_core", "thing/charged_core"}
+        },
+        
+        Detonate = function(self)
+            local pos = self:WorldSpaceCenter()
+            util.ScreenShake(pos, 25, 150, 1, self.Radius)
+            do
+                local _with_0 = ents.Create('env_explosion')
+                _with_0:SetOwner(self:GetOwner())
+                _with_0:SetPos(pos)
+                _with_0:SetKeyValue('iMagnitude', self.Damage)
+                _with_0:SetKeyValue('iRadiusOverride', self.Radius)
+                _with_0:Spawn()
+                _with_0:Activate()
+                _with_0:Fire('Explode')
+            end
+            return
+        end,
+        
+        OnTakeDamage = function(self, dmg)
+            self.Durability = self.Durability - dmg:GetDamage()
+            if self.Durability <= 0 then
+                return self:Detonate()
+            end
+        end,
+        
+        Touch = function(self, other)
+            if not other:GetClass():find("thing/") then return end
+            if #self.Items < 2 then
+                print("Adding item to crafting machine: ", other:GetClass())  -- Debug
+                table.insert(self.Items, other:GetClass())
+                other:Remove()
+            end
+        end,
+        
+        FindRecipe = function(self)
+            if #self.Items < 2 then return nil end
+            for _, recipe in ipairs(self.KnownRecipes) do
+                if (recipe[1] == self.Items[1] and recipe[2] == self.Items[2]) or
+                   (recipe[1] == self.Items[2] and recipe[2] == self.Items[1]) then
+                    return recipe[3]
+                end
+            end
+            return nil
+        end,
+        
+        Use = function(self, activator)
+            if not activator:IsPlayer() then return end
+            
+            -- E Key Handling: Return Items or Craft
+            if activator:KeyDown(IN_USE) then
+                if #self.Items == 0 then
+                    -- Return items if there are no crafting items
+                    for _, class in ipairs(self.Items) do
+                        local item = ents.Create(class)
+                        if IsValid(item) then
+                            item:SetPos(self:GetPos() + self:GetForward() * 50)
+                            item:Spawn()
+                        end
+                    end
+                    self.Items = {} -- Clear items after returning
+                    print("Returned items to player")  -- Debug
+                else
+                    -- Craft if there are items to craft
+                    local result = self:FindRecipe()
+                    if result then
+                        local crafted = ents.Create(result)
+                        if IsValid(crafted) then
+                            crafted:SetPos(self:GetPos() + self:GetForward() * 50)
+                            crafted:Spawn()
+                            print("Crafted item: ", result)  -- Debug
+                        end
+                        self.Items = {} -- Clear items after crafting
+                    else
+                        print("No valid recipe found")  -- Debug
+						self:Detonate()
+						self.Items = {}
+                    end
+                end
+                return
+            end
+        end,
+        
+        HUDPaint = function(self)
+            -- Draw 3D2D HUD
+            local ang = self:GetAngles()
+            ang:RotateAroundAxis(ang:Up(), 90)
+            cam.Start3D2D(self:GetPos() + self:GetUp() * 10, ang, 0.1)
+            
+            -- Display appropriate message
+            local recipe = self:FindRecipe()
+            if #self.Items > 0 then
+                draw.SimpleText(recipe or "UNKNOWN", "DermaLarge", 0, 0, Color(255, 0, 0), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+                draw.SimpleText("[E] Craft | [E] Return", "DermaDefault", 0, 40, Color(255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+            else
+                draw.SimpleText("No Items", "DermaLarge", 0, 0, Color(255, 0, 0), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+                draw.SimpleText("[E] Return", "DermaDefault", 0, 40, Color(255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+            end
+            
+            cam.End3D2D()
+        end
+    }
+    
+    for _key_0, _val_0 in pairs(_parent_0.__base) do
+        if _base_0[_key_0] == nil then
+            _base_0[_key_0] = _val_0
+        end
+    end
+    
+    setmetatable(_base_0, _parent_0.__base)
+    _class_0 = setmetatable({
+        __init = function(self, ...)
+            return _class_0.__parent.__init(self, ...)
+        end,
+        __base = _base_0,
+        __name = "blight.crafter",
+        __parent = _parent_0
+    }, {
+        __index = function(cls, name)
+            local val = rawget(_base_0, name)
+            if val == nil then
+                local parent = rawget(cls, "__parent")
+                if parent then
+                    return parent[name]
+                end
+            else
+                return val
+            end
+        end,
+        __call = function(cls, ...)
+            local _self_0 = setmetatable({}, _base_0)
+            cls.__init(_self_0, ...)
+            return _self_0
+        end
+    })
+    
+    _base_0.__class = _class_0
+    if _parent_0.__inherited then
+        _parent_0.__inherited(_parent_0, _class_0)
+    end
+    
+    CraftingMachine = _class_0
+end
+
+
 local OreRefiner
 do
 	local _class_0
 	local _parent_0 = NONPICKUP
 	local _base_0 = {
-		IName = 'rot.orerefinery - a fucking ore refinery',
+		IName = 'rot.orerefinery > a fucking ore refinery',
 		Model = 'models/props_c17/FurnitureWashingmachine001a.mdl',
 		Spawnable = true,
 		SizeClass = SIZE_IMMOBILE,
@@ -984,7 +1380,7 @@ local _class_0
 local NextSpeak, Interval, IntervalRange
 local _parent_0 = Machine
 local _base_0 = {
-	IName = 'fucking radio',
+	IName = 'fucklet.radio > you can hear cunts talking',
 	Model = 'models/props_lab/citizenradio.mdl',
 	SetupDataTables = function(self)
 		_class_0.__parent.__base.SetupDataTables(self)
@@ -992,7 +1388,6 @@ local _base_0 = {
 	end,
 	Radius = 512,
 	Damage = 60,
-	Element = 'metal/copper',
 	TalkLines = {
 		"The Kommandant has created over 8000 jobs for the Liverish economy.",
 		'New SS initiatives have eradicated the red plague.',

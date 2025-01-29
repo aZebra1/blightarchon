@@ -248,7 +248,7 @@ do
 			return false
 		end,
 		PlayerInitialSpawn = function(self, ply)
-			player_manager.SetPlayerClass(ply, "victim")
+			player_manager.SetPlayerClass(ply, "fucklet")
 			return
 		end,
 		PlayerSpray = function(self)

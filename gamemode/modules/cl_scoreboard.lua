@@ -69,19 +69,19 @@ hook.Add("HUDPaint", "CustomScoreboard", function()
 
         -- Draw the player's title (if any)
         if ply:IsUserGroup("superadmin") then
-            draw.SimpleText("blight.archon.elder", "Trebuchet18", scoreboardX + 50, yOffset + 40, Color(163, 0, 0), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+            draw.SimpleText("> blight.archon.elder", "Trebuchet18", scoreboardX + 50, yOffset + 40, Color(163, 0, 0), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
         end
 
         if ply:IsUserGroup("admin") then
-            draw.SimpleText("blight.archon.disciple", "Trebuchet18", scoreboardX + 50, yOffset + 40, Color(200, 200, 50), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+            draw.SimpleText("> blight.archon.disciple", "Trebuchet18", scoreboardX + 50, yOffset + 40, Color(0, 195, 255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
         end
 
         if ply:IsUserGroup("member") then
-            draw.SimpleText("prime.fucklet", "Trebuchet18", scoreboardX + 50, yOffset + 40, Color(200, 200, 50), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+            draw.SimpleText("> prime.fucklet", "Trebuchet18", scoreboardX + 50, yOffset + 40, Color(0, 255, 55), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
         end
 
         if ply:IsUserGroup("user") then
-            draw.SimpleText("nasty.fucklet", "Trebuchet18", scoreboardX + 50, yOffset + 40, Color(200, 200, 50), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+            draw.SimpleText("> nasty.fucklet", "Trebuchet18", scoreboardX + 50, yOffset + 40, Color(200, 200, 50), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
         end
 
         -- Draw the player's ping

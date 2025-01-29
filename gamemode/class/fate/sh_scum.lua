@@ -50,7 +50,7 @@ do
 	local _class_0
 	local _parent_0 = SCUM
 	local _base_0 = {
-		name = "Laborer",
+		name = "Fucklet",
 		desc = [[The red blood cells of Liver Failure.
 Those responsible for heavy lifting, operation of industrial equipment, and general manual labor.
 They are the backbone of the operation, and the most numerous civilian.]]
@@ -69,7 +69,7 @@ They are the backbone of the operation, and the most numerous civilian.]]
 			return _class_0.__parent.__init(self, ...)
 		end,
 		__base = _base_0,
-		__name = "Laborer",
+		__name = "Fucklet",
 		__parent = _parent_0
 	}, {
 		__index = function(cls, name)
@@ -305,7 +305,7 @@ do
 	local _class_0
 	local _parent_0 = SCUM
 	local _base_0 = {
-		name = "Foreman",
+		name = "Shepherd",
 		desc = [[The overseer of the proletariat in Liver Failure.
 He supervises the laborers' work and keeps them coordinated and safe.
 Equipped with a screamer and a legal mandate to snitch.]]
@@ -324,7 +324,7 @@ Equipped with a screamer and a legal mandate to snitch.]]
 			return _class_0.__parent.__init(self, ...)
 		end,
 		__base = _base_0,
-		__name = "Foreman",
+		__name = "Shepherd",
 		__parent = _parent_0
 	}, {
 		__index = function(cls, name)
