@@ -29,7 +29,6 @@ local entityClasses = {
 local spawnedEntities = {}
 
 -- Function to spawn an entity at a specific location
--- Function to spawn an entity at a specific location
 local function SpawnEntity(index)
     local location = spawnLocations[index]
     local entityClass = entityClasses[index]
@@ -69,25 +68,30 @@ local function SpawnEntity(index)
     spawnedEntities[index] = ent
 end
 
-
--- Function to check if an entity has moved
-local function HasEntityMoved(index)
+-- Function to check if an entity has moved or been destroyed
+local function HasEntityMovedOrDestroyed(index)
     local ent = spawnedEntities[index]
-    if not IsValid(ent) then return true end
+    
+    -- If the entity doesn't exist, treat it as destroyed
+    if not IsValid(ent) then
+        return true
+    end
 
     local location = spawnLocations[index]
-    if not location then return true end
+    if not location then
+        return true
+    end
 
     -- Check if the entity's position has changed
     local currentPos = ent:GetPos()
-    return not currentPos:DistToSqr(location.pos) < 1 -- Using squared distance for performance
+    return currentPos:DistToSqr(location.pos) > 1 -- Using squared distance for performance
 end
 
 -- Timer to periodically check entities and respawn if necessary
 local function StartEntityCheckTimer()
     timer.Create("EntityCheckTimer", 300, 0, function()
         for i = 1, #spawnLocations do
-            if HasEntityMoved(i) then
+            if HasEntityMovedOrDestroyed(i) then
                 SpawnEntity(i)
             end
         end
